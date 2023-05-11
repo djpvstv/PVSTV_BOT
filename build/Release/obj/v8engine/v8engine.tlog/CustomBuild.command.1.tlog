@@ -1,0 +1,3 @@
+^C:\USERS\GARRE\DESKTOP\THEFOLDER\JS STANDALONE APP\SRC\SLIPPIDLL.DLL
+call mkdir "..\build\Release" 2>nul & set ERRORLEVEL=0 & copy /Y "..\src\SlippiDLL.dll" "..\build\Release\SlippiDLL.dll"
+if %errorlevel% neq 0 exit /b %errorlevel%
