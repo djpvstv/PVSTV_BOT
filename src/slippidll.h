@@ -26,6 +26,7 @@ extern "C" {
 			double addTwoNumbersIncorrectly(double a, double b);
 			std::string basicParseSlippiFromPath(std::string path, slip::AggregatePreAnalysis aggregatePrework);
 			std::string basicParseSlippiFromPaths(std::vector<std::string> paths);
+			std::string parseSlippiFromPaths(std::vector<std::string> paths, slip::TargetParams& t);
 		};
 	}
 }
