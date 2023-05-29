@@ -1,0 +1,19 @@
+.basic-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.accordion-button::after {
+    order: -1;
+    margin-left: 0;
+    margin-right:0.5em;
+    background-image: url("./Bootstrap/svg/hash.svg");
+    background-color: white;
+}
+
+.accordion-button:not(.collapsed)::after {
+    background-image: url("./Bootstrap/svg/hash.svg");
+    transform: var(--bs-accordion-btn-icon-transform);
+    background-color: rgb(207, 226, 255);
+}

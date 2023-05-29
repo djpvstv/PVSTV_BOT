@@ -1,0 +1,12 @@
+{
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+    "cmake.configureOnOpen": false,
+    "standard.enable": true,
+    "standard.validate": [
+        "javascript",
+        "javascriptreact",
+        "html"
+    ],
+    "standard.run":"onType",
+    "standard.workingDirectories": ["../view", "../controller", "../model"]
+}

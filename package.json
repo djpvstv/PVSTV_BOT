@@ -1,0 +1,27 @@
+{
+  "name": "js-standalone-app",
+  "version": "1.0.0",
+  "description": "The front end for clippi replacement",
+  "main": "main.js",
+  "type": "commonjs",
+  "target": "es6",
+  "scripts": {
+    "test": "test",
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.4",
+    "electron": "^24.1.2"
+  },
+  "dependencies": {
+    "git": "^0.1.5",
+    "nan": "^2.17.0",
+    "node-gyp": "^5.0.1"
+  },
+  "engines": {
+    "node": "^18.2.0"
+  },
+  "gypfile": true
+}
