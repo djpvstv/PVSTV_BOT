@@ -11,19 +11,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B4B0D5CE-B1D2-D212-52B9-DDA9FB7E79E7}</ProjectGuid>
+    <ProjectGuid>{4F405919-C176-6422-31FF-D4AFD227691F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>v8engine</RootNamespace>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
   <PropertyGroup Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Locals">
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
   <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props"/>
@@ -48,19 +48,20 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\include\node;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\src;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\openssl\config;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\openssl\openssl\include;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\uv\include;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\zlib;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\v8\include;..\src;C:\Program Files (x86)\boost_1_82_0;..\node_modules\nan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\include\node;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\src;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\openssl\config;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\openssl\openssl\include;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\uv\include;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\zlib;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\v8\include;..\src;..\src\headers;C:\Program Files (x86)\boost_1_82_0;C:\Users\garre\Desktop\TheFolder\JS Standalone App\PVSTV_BOT\node_modules\node-addon-api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:__cplusplus -std:c++17 %(AdditionalOptions)</AdditionalOptions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <BufferSecurityCheck>true</BufferSecurityCheck>
+      <CompileAsWinRT>false</CompileAsWinRT>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <DisableSpecificWarnings>4351;4355;4800;4251;4275;4244;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <MinimalRebuild>false</MinimalRebuild>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OmitFramePointers>false</OmitFramePointers>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PreprocessorDefinitions>NODE_GYP_MODULE_NAME=v8engine;USING_UV_SHARED=1;USING_V8_SHARED=1;V8_DEPRECATION_WARNINGS=1;V8_DEPRECATION_WARNINGS;V8_IMMINENT_DEPRECATION_WARNINGS;_GLIBCXX_USE_CXX11_ABI=1;ELECTRON_ENSURE_CONFIG_GYPI;USING_ELECTRON_CONFIG_GYPI;V8_COMPRESS_POINTERS;V8_COMPRESS_POINTERS_IN_SHARED_CAGE;V8_ENABLE_SANDBOX;V8_31BIT_SMIS_ON_64BIT_ARCH;WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_HAS_EXCEPTIONS=0;OPENSSL_NO_PINSHARED;OPENSSL_THREADS;OPENSSL_NO_ASM;BUILDING_NODE_EXTENSION;HOST_BINARY=&quot;node.exe&quot;;DEBUG;_DEBUG;V8_ENABLE_CHECKS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NODE_GYP_MODULE_NAME=v8engine;USING_UV_SHARED=1;USING_V8_SHARED=1;V8_DEPRECATION_WARNINGS=1;V8_DEPRECATION_WARNINGS;V8_IMMINENT_DEPRECATION_WARNINGS;_GLIBCXX_USE_CXX11_ABI=1;WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_HAS_EXCEPTIONS=0;OPENSSL_NO_PINSHARED;OPENSSL_THREADS;NAPI_DISABLE_CPP_EXCEPTIONS;_HAS_EXCEPTIONS=1;BUILDING_NODE_EXTENSION;HOST_BINARY=&quot;node.exe&quot;;DEBUG;_DEBUG;V8_ENABLE_CHECKS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <StringPooling>true</StringPooling>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -72,7 +73,7 @@
       <AdditionalOptions>/LTCG:INCREMENTAL %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;DelayImp.lib;&quot;C:\\Users\\garre\\AppData\\Local\\node-gyp\\Cache\\24.0.0\\x64\\node.lib&quot;;C:\Users\garre\Desktop\TheFolder\JS Standalone App\src\SlippiDLL.lib;C:\Users\garre\Desktop\TheFolder\JS Standalone App\src\FirstDLL.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;DelayImp.lib;&quot;C:\\Users\\garre\\AppData\\Local\\node-gyp\\Cache\\18.2.0\\x64\\node.lib&quot;;C:\Users\garre\Desktop\TheFolder\JS Standalone App\PVSTV_BOT\src\SlippiDLL.lib;C:\Users\garre\Desktop\TheFolder\JS Standalone App\PVSTV_BOT\src\FirstDLL.lib</AdditionalDependencies>
       <AdditionalOptions>/LTCG:INCREMENTAL /ignore:4199 %(AdditionalOptions)</AdditionalOptions>
       <DelayLoadDLLs>node.exe;%(DelayLoadDLLs)</DelayLoadDLLs>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -84,18 +85,19 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\include\node;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\src;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\openssl\config;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\openssl\openssl\include;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\uv\include;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\zlib;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\v8\include;..\src;C:\Program Files (x86)\boost_1_82_0;..\node_modules\nan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NODE_GYP_MODULE_NAME=v8engine;USING_UV_SHARED=1;USING_V8_SHARED=1;V8_DEPRECATION_WARNINGS=1;V8_DEPRECATION_WARNINGS;V8_IMMINENT_DEPRECATION_WARNINGS;_GLIBCXX_USE_CXX11_ABI=1;ELECTRON_ENSURE_CONFIG_GYPI;USING_ELECTRON_CONFIG_GYPI;V8_COMPRESS_POINTERS;V8_COMPRESS_POINTERS_IN_SHARED_CAGE;V8_ENABLE_SANDBOX;V8_31BIT_SMIS_ON_64BIT_ARCH;WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_HAS_EXCEPTIONS=0;OPENSSL_NO_PINSHARED;OPENSSL_THREADS;OPENSSL_NO_ASM;BUILDING_NODE_EXTENSION;HOST_BINARY=&quot;node.exe&quot;;DEBUG;_DEBUG;V8_ENABLE_CHECKS;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\include\node;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\src;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\openssl\config;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\openssl\openssl\include;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\uv\include;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\zlib;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\v8\include;..\src;..\src\headers;C:\Program Files (x86)\boost_1_82_0;C:\Users\garre\Desktop\TheFolder\JS Standalone App\PVSTV_BOT\node_modules\node-addon-api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NODE_GYP_MODULE_NAME=v8engine;USING_UV_SHARED=1;USING_V8_SHARED=1;V8_DEPRECATION_WARNINGS=1;V8_DEPRECATION_WARNINGS;V8_IMMINENT_DEPRECATION_WARNINGS;_GLIBCXX_USE_CXX11_ABI=1;WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_HAS_EXCEPTIONS=0;OPENSSL_NO_PINSHARED;OPENSSL_THREADS;NAPI_DISABLE_CPP_EXCEPTIONS;_HAS_EXCEPTIONS=1;BUILDING_NODE_EXTENSION;HOST_BINARY=&quot;node.exe&quot;;DEBUG;_DEBUG;V8_ENABLE_CHECKS;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\include\node;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\src;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\openssl\config;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\openssl\openssl\include;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\uv\include;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\zlib;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\v8\include;..\src;C:\Program Files (x86)\boost_1_82_0;..\node_modules\nan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\include\node;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\src;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\openssl\config;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\openssl\openssl\include;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\uv\include;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\zlib;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\v8\include;..\src;..\src\headers;C:\Program Files (x86)\boost_1_82_0;C:\Users\garre\Desktop\TheFolder\JS Standalone App\PVSTV_BOT\node_modules\node-addon-api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:__cplusplus -std:c++17 %(AdditionalOptions)</AdditionalOptions>
       <BufferSecurityCheck>true</BufferSecurityCheck>
+      <CompileAsWinRT>false</CompileAsWinRT>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
       <DisableSpecificWarnings>4351;4355;4800;4251;4275;4244;4267;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -104,7 +106,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <Optimization>Full</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PreprocessorDefinitions>NODE_GYP_MODULE_NAME=v8engine;USING_UV_SHARED=1;USING_V8_SHARED=1;V8_DEPRECATION_WARNINGS=1;V8_DEPRECATION_WARNINGS;V8_IMMINENT_DEPRECATION_WARNINGS;_GLIBCXX_USE_CXX11_ABI=1;ELECTRON_ENSURE_CONFIG_GYPI;USING_ELECTRON_CONFIG_GYPI;V8_COMPRESS_POINTERS;V8_COMPRESS_POINTERS_IN_SHARED_CAGE;V8_ENABLE_SANDBOX;V8_31BIT_SMIS_ON_64BIT_ARCH;WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_HAS_EXCEPTIONS=0;OPENSSL_NO_PINSHARED;OPENSSL_THREADS;OPENSSL_NO_ASM;BUILDING_NODE_EXTENSION;HOST_BINARY=&quot;node.exe&quot;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NODE_GYP_MODULE_NAME=v8engine;USING_UV_SHARED=1;USING_V8_SHARED=1;V8_DEPRECATION_WARNINGS=1;V8_DEPRECATION_WARNINGS;V8_IMMINENT_DEPRECATION_WARNINGS;_GLIBCXX_USE_CXX11_ABI=1;WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_HAS_EXCEPTIONS=0;OPENSSL_NO_PINSHARED;OPENSSL_THREADS;NAPI_DISABLE_CPP_EXCEPTIONS;_HAS_EXCEPTIONS=1;BUILDING_NODE_EXTENSION;HOST_BINARY=&quot;node.exe&quot;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <StringPooling>true</StringPooling>
@@ -117,7 +119,7 @@
       <AdditionalOptions>/LTCG:INCREMENTAL %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;DelayImp.lib;&quot;C:\\Users\\garre\\AppData\\Local\\node-gyp\\Cache\\24.0.0\\x64\\node.lib&quot;;C:\Users\garre\Desktop\TheFolder\JS Standalone App\src\SlippiDLL.lib;C:\Users\garre\Desktop\TheFolder\JS Standalone App\src\FirstDLL.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;DelayImp.lib;&quot;C:\\Users\\garre\\AppData\\Local\\node-gyp\\Cache\\18.2.0\\x64\\node.lib&quot;;C:\Users\garre\Desktop\TheFolder\JS Standalone App\PVSTV_BOT\src\SlippiDLL.lib;C:\Users\garre\Desktop\TheFolder\JS Standalone App\PVSTV_BOT\src\FirstDLL.lib</AdditionalDependencies>
       <AdditionalOptions>/LTCG:INCREMENTAL /ignore:4199 %(AdditionalOptions)</AdditionalOptions>
       <DelayLoadDLLs>node.exe;%(DelayLoadDLLs)</DelayLoadDLLs>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -129,24 +131,22 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\include\node;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\src;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\openssl\config;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\openssl\openssl\include;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\uv\include;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\zlib;C:\Users\garre\AppData\Local\node-gyp\Cache\24.0.0\deps\v8\include;..\src;C:\Program Files (x86)\boost_1_82_0;..\node_modules\nan;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NODE_GYP_MODULE_NAME=v8engine;USING_UV_SHARED=1;USING_V8_SHARED=1;V8_DEPRECATION_WARNINGS=1;V8_DEPRECATION_WARNINGS;V8_IMMINENT_DEPRECATION_WARNINGS;_GLIBCXX_USE_CXX11_ABI=1;ELECTRON_ENSURE_CONFIG_GYPI;USING_ELECTRON_CONFIG_GYPI;V8_COMPRESS_POINTERS;V8_COMPRESS_POINTERS_IN_SHARED_CAGE;V8_ENABLE_SANDBOX;V8_31BIT_SMIS_ON_64BIT_ARCH;WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_HAS_EXCEPTIONS=0;OPENSSL_NO_PINSHARED;OPENSSL_THREADS;OPENSSL_NO_ASM;BUILDING_NODE_EXTENSION;HOST_BINARY=&quot;node.exe&quot;;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\include\node;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\src;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\openssl\config;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\openssl\openssl\include;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\uv\include;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\zlib;C:\Users\garre\AppData\Local\node-gyp\Cache\18.2.0\deps\v8\include;..\src;..\src\headers;C:\Program Files (x86)\boost_1_82_0;C:\Users\garre\Desktop\TheFolder\JS Standalone App\PVSTV_BOT\node_modules\node-addon-api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NODE_GYP_MODULE_NAME=v8engine;USING_UV_SHARED=1;USING_V8_SHARED=1;V8_DEPRECATION_WARNINGS=1;V8_DEPRECATION_WARNINGS;V8_IMMINENT_DEPRECATION_WARNINGS;_GLIBCXX_USE_CXX11_ABI=1;WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_HAS_EXCEPTIONS=0;OPENSSL_NO_PINSHARED;OPENSSL_THREADS;NAPI_DISABLE_CPP_EXCEPTIONS;_HAS_EXCEPTIONS=1;BUILDING_NODE_EXTENSION;HOST_BINARY=&quot;node.exe&quot;;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="..\binding.gyp"/>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\v8engine.cpp">
-      <ObjectFileName>$(IntDir)\src\v8engine.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="C:\Users\garre\AppData\Roaming\npm\node_modules\node-gyp\src\win_delay_load_hook.cc"/>
+    <ClCompile Include="..\src\v8engine.cpp"/>
+    <ClCompile Include="C:\Users\garre\Desktop\TheFolder\JS Standalone App\PVSTV_BOT\node_modules\node-gyp\src\win_delay_load_hook.cc"/>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\SlippiDLL.dll">
       <FileType>Document</FileType>
       <Command>call mkdir &quot;..\build\Release&quot; 2&gt;nul &amp; set ERRORLEVEL=0 &amp; copy /Y &quot;..\src\SlippiDLL.dll&quot; &quot;..\build\Release\SlippiDLL.dll&quot;&#xD;&#xA;if %errorlevel% neq 0 exit /b %errorlevel%</Command>
-      <Message>Copying ./src/SlippiDLL.dll to ..\build\Release</Message>
+      <Message>Copying ./src/SlippiDLL.dll to ./build/Release\SlippiDLL.dll</Message>
       <Outputs>..\build\Release\SlippiDLL.dll</Outputs>
     </CustomBuild>
   </ItemGroup>

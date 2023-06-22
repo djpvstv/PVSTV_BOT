@@ -9,6 +9,7 @@
 // Standard Cpp includes
 #define NOMINMAX
 #include <vector>
+#include <memory>
 #include <string>
 #include <filesystem>
 #include <chrono>
@@ -17,16 +18,24 @@
 // Slippi Structs I made
 #include "exports.h"
 
+// Include one slippi header that's required
+#include "ParserImplementation.h"
+
 extern "C" {
 	namespace slippiapi {
 		class SLIPPIDLL_API SLParser {
 		public:
 			SLParser();
 			~SLParser();
-			double addTwoNumbersIncorrectly(double a, double b);
-			std::string basicParseSlippiFromPath(std::string path, slip::AggregatePreAnalysis aggregatePrework);
-			std::string basicParseSlippiFromPaths(std::vector<std::string> paths);
-			std::string parseSlippiFromPaths(std::vector<std::string> paths, slip::TargetParams& t);
+			void reset();
+			void resetParseWork();
+			void resetComboWork();
+			void basicParseSlippiFromPaths(std::vector<std::string> paths);
+			std::string printBasicParseSlippiFromPaths();
+			void parseSlippiFromPaths(std::vector<std::string> paths, slip::TargetParams& t);
+			std::string printSlippiCombosFromPaths();
+		private:
+			std::shared_ptr<slip::ParserInterfaceImp> m_p;
 		};
 	}
 }

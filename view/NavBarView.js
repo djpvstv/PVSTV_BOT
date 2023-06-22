@@ -14,7 +14,7 @@ class NavBarView {
 
     #navBarListItemCount = 0;
 
-    constructor( controller ) {
+    constructor( controller, spinnerController ) {
         this.#controller = controller;
 
         this.createPageSkeleton();
@@ -22,7 +22,7 @@ class NavBarView {
         this.createNavBar();
         this.createPanelForNavBar();
 
-        this.#parseViewPanel = new ParsePanelView(controller, this.#navPanels[0]);
+        this.#parseViewPanel = new ParsePanelView(controller, spinnerController, this.#navPanels[0]);
 
     }
 
@@ -75,7 +75,7 @@ class NavBarView {
         const skeletonDiv = document.getElementById("navbar_skeleton");
         skeletonDiv.appendChild(navBar);
 
-        skeletonDiv.addEventListener("click", async (args) => {
+        skeletonDiv.addEventListener("click", (args) => {
             this.#controller.cb_navbarSkeletonOnClick(args);
         });
     }

@@ -5,9 +5,10 @@ class ParsePanelView extends ParseViewBase {
 
     #fileTable = null;
     #dateTable = null;
+    #fileList = [];
 
-constructor (controller, panelDiv) {
-    super(controller, panelDiv);
+constructor (controller, spinnerController, panelDiv) {
+    super(controller, spinnerController, panelDiv);
     // Add rows for 
     // 1. Input Directory
     // 2. Labels
@@ -72,6 +73,7 @@ constructor (controller, panelDiv) {
                 <div class="d-flex flex-column h-100">
                     <div class="row flex-grow-1 position-relative mb-2">
                         <div id="${this.idMap.get("p1t1")}" class="table-overflow">
+                            <time-table-view></time-table-view>
                         </div>
                     </div>
                     <div class="row">
@@ -100,12 +102,16 @@ constructor (controller, panelDiv) {
     }
 
     attachCallbacks () {
-        this.getElementById("p1b1").addEventListener("click", () => {
-            this.controller.cb_emitButtonEvent(this.idMap.get("p1b1"), "parseDirectoryForSlippiFiles");
+        this.getElementById("p1b1").addEventListener("click", async () => {
+            await this.controller.cb_emitButtonEvent(this.idMap.get("p1b1"), "parseDirectoryForSlippiFiles");
         });
 
-        this.getElementById("p1b2").addEventListener("click", () => {
-            this.controller.cb_emitButtonEvent(this.idMap.get("p1b2"), "parseDirectory");
+        this.getElementById("p1b2").addEventListener("click", async () => {
+            this.progressController.showSpinner({
+                modalTitle: "Parsing Directory",
+                totalFiles: this.#fileList.length
+            });
+            await this.controller.cb_emitButtonEvent(this.idMap.get("p1b2"), "parseDirectory");
         });
     }
 
@@ -142,6 +148,7 @@ constructor (controller, panelDiv) {
     }
 
     cb_updateFilesTable (files) {
+        this.#fileList = files;
         this.#fileTable.updateFilesTable(files);
     }
 
@@ -217,6 +224,14 @@ constructor (controller, panelDiv) {
 
 
         accordDiv.innerHTML = skeletonInternal;
+    }
+
+    cb_updateDatesTable (event) {
+        const dateData = {
+            min: event.firstDate,
+            max: event.lastDate
+        }
+        this.#dateTable.updateDatesTable(dateData);
     }
 
 }

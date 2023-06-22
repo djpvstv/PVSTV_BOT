@@ -1,21 +1,27 @@
 const NavBarView = require("./NavBarView");
 const {EventEmitter} = require("events");
+const {ProgressView} = require("./Components/ProgressView");
 
 class MainView extends EventEmitter {
 
     #NavBar = null;
+    #Spinner = null;
     #controllers = null;
 
     constructor( controllers ) {
         super();
         this.#controllers = controllers;
-        this.createNavBar( controllers.getNavBarController() );
+        this.createNavBar( controllers.getNavBarController(), controllers.getProgressController() );
+        this.createSpinner( controllers.getProgressController() );
         this.createEventListeners();
     }
 
-    createNavBar (controller) {
-        const view = new NavBarView( controller );
-        this.#NavBar = view;
+    createNavBar (controller, progressController ) {
+        this.#NavBar = new NavBarView( controller, progressController );
+    }
+
+    createSpinner( controller ) {
+        this.#Spinner = new ProgressView( controller );
     }
 
     createEventListeners() {
@@ -38,6 +44,22 @@ class MainView extends EventEmitter {
                     case "updatePanelOneAccordion":
                         controller.on(eventName, (event) => {
                             this.#NavBar.getParseViewPanel().cb_updateFoundPlayersAccordion(event);
+                            this.#NavBar.getParseViewPanel().cb_updateDatesTable(event);
+                        });
+                        break;
+                    case "showSpinner":
+                        controller.on(eventName, (event) => {
+                            this.#Spinner.show(event.args);
+                        });
+                        break;
+                    case "hideSpinner":
+                        controller.on(eventName, (event) => {
+                            this.#Spinner.hide(event);
+                        });
+                        break;
+                    case "updateSpinnerCount":
+                        controller.on(eventName, (event) => {
+                            this.#Spinner.updateCount(event);
                         });
                         break;
                 }

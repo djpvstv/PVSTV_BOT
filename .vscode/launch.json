@@ -15,6 +15,22 @@
             },
             "args": ["."],
             "outputCapture": "std"
+        },
+        {
+            "name": "Electron: Renderer",
+            "type": "chrome",
+            "request": "launch",
+            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+            "windows": {
+                "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron.cmd"
+            },
+            "runtimeArgs": [
+                "${workspaceFolder}/index.html",
+                "--remote-debugging-port=9222"
+            ],
+            "outputCapture": "std",
+            "sourceMaps": true,
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }

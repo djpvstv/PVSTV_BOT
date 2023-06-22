@@ -73,6 +73,24 @@ class TableView {
             tableBody.appendChild(row);
         });
     }
+
+    updateDatesTable (dates) {
+        const tableDiv = this.#tableDiv;
+        tableDiv.innerHTML = `
+        <thead>
+            <tr>
+                <th scope="col">First Date</th>
+                <th scope="col">Last Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>${dates.min}</td>
+                <td>${dates.max}</td>
+            </tr>
+        </tbody>
+        `;
+    }
 }
 
 module.exports = {TableView, TableTypes};

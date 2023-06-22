@@ -5,37 +5,19 @@ const MainModel = require('./model/MainModel');
 // Communications from Controllers
 const createModel = (win) => {
     model = new MainModel(win);
-
-    ipcMain.on('buttonPressed', async (event, args) => {
-
-        switch (args.eventName) {
-            case "parseDirectoryForSlippiFiles":
-                model.processDirectoryForSlippiFiles(args.sourceID);
-                break;
-            case "parseDirectory":
-                model.processDirectoryForParse(args.sourceID);
-                break;
-            default:
-                console.log(`Cannot match event ${args}`);
-        }
-
-        
-    });
 }
-
-// Logger in case the app crashes and the console is wiped
-
 
 // App Window Functionality
 
-const createWindow = () => {
+const createWindow = async () => {
+    console.log(path.resolve(app.getAppPath(), 'preload.js'));
     const win = new BrowserWindow({
         width: 800,
         height: 600,
         minWidth: 416,
         minHeight: 359,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
+            preload: path.resolve(app.getAppPath(), 'preload.js'),
             nodeIntegration: true,
             contextIsolation: false
         }
@@ -61,4 +43,24 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
+});
+
+ipcMain.on("clientEvent", async (event, args) => {
+    try {
+        switch (args.eventName) {
+            case "parseDirectoryForSlippiFiles":
+                model.processDirectoryForSlippiFiles(event, args.sourceID);
+                break;
+            case "parseDirectory":
+                model.processDirectoryForParse(event, args.sourceID).catch(err => console.error(err));
+                break;
+            case "cancelComputation":
+                model.cancelComputation(event, args.sourceID);
+                break;
+            default:
+                console.log(`Cannot match event ${args}`);
+        }
+    } catch (error) {
+        console.log(error);
+    }
 });

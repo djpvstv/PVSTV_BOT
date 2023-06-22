@@ -1,7 +1,8 @@
 class ParseViewBase {
 
-    constructor (controller, panelDiv) {
+    constructor (controller, progressController, panelDiv) {
         this.controller = controller;
+        this.progressController = progressController;
         this.idMap = new Map();
     }
 
