@@ -1,22 +1,25 @@
-const {dialog} = require('electron');
-require('nan');
+const { dialog } = require('electron');
+const { Worker } = require('node:worker_threads');
+
 const fs = require('fs');
-const { resourceUsage } = require('process');
-const { parseSimple } = require('./../build/Release/v8engine.node');
 
 class MainModel {
 
     #win = null;
     #currentFiles = [];
     #directory = '';
+    #worker = null;
+
+    #bIsCancelled = false;
 
     constructor( mainWindow ) {
         this.#win = mainWindow;
+        this.createWorker();
     }
 
-    async processDirectoryForSlippiFiles ( buttonID ) {
+    async processDirectoryForSlippiFiles ( event, buttonID ) {
 
-        const filename = await dialog.showOpenDialogSync({
+        const filename = dialog.showOpenDialogSync({
             properties: [
                 "openDirectory"
             ]
@@ -56,27 +59,59 @@ class MainModel {
             returnData.files = files;
             returnData.srcID = buttonID;
         }
-        this.#win.webContents.send("parseDirectoryForSlippiFilesReturn", returnData);
+        
+        const data = {};
+        data.eventName = "parseDirectoryForSlippiFiles";
+        data.args = returnData;
+        event.sender.send("serverEvent",data);
     }
 
-    async processDirectoryForParse ( buttonID ) {
-        if (this.#currentFiles.length > 0) {
-            console.log(buttonID);
-            const argFiles = [];
-            this.#currentFiles.forEach((file) => {
-                argFiles.push(this.#directory + '\\\\' + file);
-            });
-            // call cpp code here
-            const cPlusPlusTimer = "simpleParse";
-            console.time(cPlusPlusTimer);
-            const retData = parseSimple(argFiles);
-            console.timeEnd(cPlusPlusTimer);
+    async processDirectoryForParse ( event, buttonID, chunk ) {
+        this.#worker.postMessage({
+            evt: 'stop',
+            value: false
+        });
 
-            // Return JSON
-            let jsonStr = retData.JSON.replaceAll(`\\\\\\\\`, `\\`);
-            this.#win.webContents.send("parseDirectorySimpleReturn", jsonStr);
-        }
+        this.#worker.postMessage({
+            evt: 'processForParse',
+            dir: this.#directory,
+            files: this.#currentFiles,
+            chunk: chunk
+        });
     }
+
+    async cancelComputation (buttonID) {
+        this.#worker.postMessage({
+            evt: 'stop',
+            value: true
+        });
+    }
+
+    createWorker () {
+        this.#worker = new Worker(__dirname + '\\SlippiParser.js',
+        {
+            workerData: {
+                isCancelled: false
+            }
+        });
+        this.#worker.on("message", (data) => {
+            switch (data.eventName) {
+                case "isCancelled":
+                    console.log('are we cancelled? ' + data.value);
+                    break;
+                case "parseDirectoryUpdateCount":
+                    this.#win.webContents.send("parseDirectoryUpdateCount", data);
+                    break;
+                case "parseDirectoryComplete":
+                    this.#win.webContents.send("serverEvent", data);
+                    break;
+                case "halted":
+                    console.log("horses held");
+                    break;
+            }
+        });
+      }
+
 }
 
 module.exports = MainModel;

@@ -7,6 +7,7 @@ class NavBarController extends EventEmitter {
     #timeout = 250;
     #timeoutStr = '';
     events = [
+        "hideSpinner",
         "updatePanelOneAccordion",
         "updatePanelOneDirectoryInput",
         "updatePanelOneFilesTable"
@@ -18,20 +19,23 @@ class NavBarController extends EventEmitter {
         this.setUpListeners();
     }
 
-    getEvents () {
-        return this.events;
+    setUpListeners () {
+        const that = this;
+        ipcRenderer.on("serverEvent", (evt, args) => {
+            // Handle returns
+            const response = args.args;
+            if (args.eventName === "parseDirectoryComplete") {
+                const parsedData = JSON.parse(response.replaceAll('\\', '/'));
+                this.emit("updatePanelOneAccordion", parsedData);
+                this.emit("hideSpinner");
+            } else if (args.eventName === "parseDirectoryForSlippiFiles") {
+                this.cb_receiveParsedDirectoryFromSlippi(response.valid, response.files, response.srcID, response.dir);
+            }
+        });
     }
 
-    setUpListeners () {
-        // Listeners from Model
-        const that = this;
-        ipcRenderer.on("parseDirectoryForSlippiFilesReturn", function(evt, args) {
-            that.cb_receiveParsedDirectoryFromSlippi(args.valid, args.files, args.srcID, args.dir);
-        });
-        ipcRenderer.on("parseDirectorySimpleReturn", function (evt, args){
-            const parsedData = JSON.parse(args.replaceAll('\\', '/'));
-            that.emit("updatePanelOneAccordion", parsedData);
-        });
+    getEvents () {
+        return this.events;
     }
 
     async cb_navbarSkeletonOnClick (args)  {
@@ -76,11 +80,18 @@ class NavBarController extends EventEmitter {
         }
     }
 
-    cb_emitButtonEvent (sourceID, eventName) {
+    async cb_emitButtonEvent (sourceID, eventName, evtData) {
         const data = {};
         data.sourceID = sourceID;
         data.eventName = eventName;
-        ipcRenderer.send("buttonPressed", data);
+        if (evtData) {
+            data.val = evtData;
+        }
+        try {
+            ipcRenderer.send("clientEvent", data);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     // Methods for reacting to model

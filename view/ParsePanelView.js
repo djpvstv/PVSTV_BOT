@@ -1,13 +1,16 @@
 const ParseViewBase = require('./PanelViewBase');
+const { AccordionView, AccordionTypes } = require("./Components/AccordionView");
 const {TableView, TableTypes} = require('./Components/TableView');
 
 class ParsePanelView extends ParseViewBase {
 
     #fileTable = null;
     #dateTable = null;
+    #fileList = [];
+    #foundPlayerAccordion = null;
 
-constructor (controller, panelDiv) {
-    super(controller, panelDiv);
+constructor (controller, spinnerController, panelDiv) {
+    super(controller, spinnerController, panelDiv);
     // Add rows for 
     // 1. Input Directory
     // 2. Labels
@@ -51,6 +54,10 @@ constructor (controller, panelDiv) {
     this.attachCallbacks();
     }
 
+    getFoundPlayerAccordion () {
+        return this.#foundPlayerAccordion;
+    }
+
     createDataSection () {
         const dataDiv = document.createElement("div");
         dataDiv.classList.add("col-12");
@@ -72,6 +79,7 @@ constructor (controller, panelDiv) {
                 <div class="d-flex flex-column h-100">
                     <div class="row flex-grow-1 position-relative mb-2">
                         <div id="${this.idMap.get("p1t1")}" class="table-overflow">
+                            <time-table-view></time-table-view>
                         </div>
                     </div>
                     <div class="row">
@@ -82,7 +90,8 @@ constructor (controller, panelDiv) {
             </div>
         `;
 
-        const accordDiv = this.createAccordionForPlayers();
+        this.#foundPlayerAccordion = new AccordionView(AccordionTypes.PARSE);
+        const accordDiv = this.#foundPlayerAccordion.createAccordionForPlayers();
         dataDiv.querySelector(`#${this.idMap.get("p1a1")}`).appendChild(accordDiv);
 
         this.#fileTable = new TableView(TableTypes.FILE);
@@ -94,18 +103,20 @@ constructor (controller, panelDiv) {
         return dataDiv;
     }
 
-    createAccordionForPlayers () {
-        const accordDiv = document.createElement("accordion");
-        return accordDiv;
-    }
-
     attachCallbacks () {
-        this.getElementById("p1b1").addEventListener("click", () => {
-            this.controller.cb_emitButtonEvent(this.idMap.get("p1b1"), "parseDirectoryForSlippiFiles");
+        this.getElementById("p1b1").addEventListener("click", async () => {
+            await this.controller.cb_emitButtonEvent(this.idMap.get("p1b1"), "parseDirectoryForSlippiFiles");
         });
 
-        this.getElementById("p1b2").addEventListener("click", () => {
-            this.controller.cb_emitButtonEvent(this.idMap.get("p1b2"), "parseDirectory");
+        this.getElementById("p1b2").addEventListener("click", async () => {
+            this.progressController.showSpinner({
+                modalTitle: "Parsing Directory",
+                totalFiles: this.#fileList.length
+            });
+            const batchDiv = document.getElementById(this.idMap.get("p1b2")+"_batchInput");
+            let batchNum = batchDiv.value === '' ? 20 :  parseInt(batchDiv.value);
+            batchNum = Math.min(batchNum, this.#fileList.length);
+            await this.controller.cb_emitButtonEvent(this.idMap.get("p1b2"), "parseDirectory", batchNum);
         });
     }
 
@@ -142,7 +153,12 @@ constructor (controller, panelDiv) {
     }
 
     cb_updateFilesTable (files) {
+        this.#fileList = files;
         this.#fileTable.updateFilesTable(files);
+    }
+
+    getPanelAccordion () {
+        return this.#foundPlayerAccordion;
     }
 
     cb_updateFoundPlayersAccordion (event) {
@@ -217,6 +233,14 @@ constructor (controller, panelDiv) {
 
 
         accordDiv.innerHTML = skeletonInternal;
+    }
+
+    cb_updateDatesTable (event) {
+        const dateData = {
+            min: event.firstDate,
+            max: event.lastDate
+        }
+        this.#dateTable.updateDatesTable(dateData);
     }
 
 }

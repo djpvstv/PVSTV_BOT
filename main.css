@@ -8,12 +8,35 @@
     order: -1;
     margin-left: 0;
     margin-right:0.5em;
-    background-image: url("./Bootstrap/svg/hash.svg");
-    background-color: white;
+    background-image: url("./Bootstrap/svg/caret-right-fill.svg");
 }
 
 .accordion-button:not(.collapsed)::after {
-    background-image: url("./Bootstrap/svg/hash.svg");
+    background-image: url("./Bootstrap/svg/caret-up-fill.svg");
     transform: var(--bs-accordion-btn-icon-transform);
-    background-color: rgb(207, 226, 255);
+}
+
+.accordion-button-sub::after {
+    order: -1;
+    margin-left: 0;
+    margin-right:0.5em;
+    background-image: url("./Bootstrap/svg/caret-right.svg");
+}
+
+.accordion-button-sub:not(.collapsed)::after {
+    background-image: url("./Bootstrap/svg/caret-up.svg");
+    transform: var(--bs-accordion-btn-icon-transform);
+}
+
+.dropped-label {
+    margin-top: 35px;
+}
+
+.batchInputWrapper {
+    float: right
+}
+
+.batchInput {
+    width: 200px;
+    margin-bottom: 5px;
 }
