@@ -1,4 +1,5 @@
 const ParseViewBase = require('./PanelViewBase');
+const { AccordionView, AccordionTypes } = require("./Components/AccordionView");
 const {TableView, TableTypes} = require('./Components/TableView');
 
 class ParsePanelView extends ParseViewBase {
@@ -6,6 +7,7 @@ class ParsePanelView extends ParseViewBase {
     #fileTable = null;
     #dateTable = null;
     #fileList = [];
+    #foundPlayerAccordion = null;
 
 constructor (controller, spinnerController, panelDiv) {
     super(controller, spinnerController, panelDiv);
@@ -52,6 +54,10 @@ constructor (controller, spinnerController, panelDiv) {
     this.attachCallbacks();
     }
 
+    getFoundPlayerAccordion () {
+        return this.#foundPlayerAccordion;
+    }
+
     createDataSection () {
         const dataDiv = document.createElement("div");
         dataDiv.classList.add("col-12");
@@ -84,7 +90,8 @@ constructor (controller, spinnerController, panelDiv) {
             </div>
         `;
 
-        const accordDiv = this.createAccordionForPlayers();
+        this.#foundPlayerAccordion = new AccordionView(AccordionTypes.PARSE);
+        const accordDiv = this.#foundPlayerAccordion.createAccordionForPlayers();
         dataDiv.querySelector(`#${this.idMap.get("p1a1")}`).appendChild(accordDiv);
 
         this.#fileTable = new TableView(TableTypes.FILE);
@@ -94,11 +101,6 @@ constructor (controller, spinnerController, panelDiv) {
         dataDiv.querySelector(`#${this.idMap.get("p1t2")}`).appendChild(this.#dateTable.getTableDiv());
 
         return dataDiv;
-    }
-
-    createAccordionForPlayers () {
-        const accordDiv = document.createElement("accordion");
-        return accordDiv;
     }
 
     attachCallbacks () {
@@ -111,7 +113,10 @@ constructor (controller, spinnerController, panelDiv) {
                 modalTitle: "Parsing Directory",
                 totalFiles: this.#fileList.length
             });
-            await this.controller.cb_emitButtonEvent(this.idMap.get("p1b2"), "parseDirectory");
+            const batchDiv = document.getElementById(this.idMap.get("p1b2")+"_batchInput");
+            let batchNum = batchDiv.value === '' ? 20 :  parseInt(batchDiv.value);
+            batchNum = Math.min(batchNum, this.#fileList.length);
+            await this.controller.cb_emitButtonEvent(this.idMap.get("p1b2"), "parseDirectory", batchNum);
         });
     }
 
@@ -150,6 +155,10 @@ constructor (controller, spinnerController, panelDiv) {
     cb_updateFilesTable (files) {
         this.#fileList = files;
         this.#fileTable.updateFilesTable(files);
+    }
+
+    getPanelAccordion () {
+        return this.#foundPlayerAccordion;
     }
 
     cb_updateFoundPlayersAccordion (event) {

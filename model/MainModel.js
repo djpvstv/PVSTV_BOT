@@ -66,7 +66,7 @@ class MainModel {
         event.sender.send("serverEvent",data);
     }
 
-    async processDirectoryForParse ( event, buttonID ) {
+    async processDirectoryForParse ( event, buttonID, chunk ) {
         this.#worker.postMessage({
             evt: 'stop',
             value: false
@@ -76,7 +76,7 @@ class MainModel {
             evt: 'processForParse',
             dir: this.#directory,
             files: this.#currentFiles,
-            chunk: 20
+            chunk: chunk
         });
     }
 

@@ -80,10 +80,13 @@ class NavBarController extends EventEmitter {
         }
     }
 
-    async cb_emitButtonEvent (sourceID, eventName) {
+    async cb_emitButtonEvent (sourceID, eventName, evtData) {
         const data = {};
         data.sourceID = sourceID;
         data.eventName = eventName;
+        if (evtData) {
+            data.val = evtData;
+        }
         try {
             ipcRenderer.send("clientEvent", data);
         } catch (error) {

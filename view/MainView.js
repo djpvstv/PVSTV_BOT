@@ -43,7 +43,7 @@ class MainView extends EventEmitter {
                         break;
                     case "updatePanelOneAccordion":
                         controller.on(eventName, (event) => {
-                            this.#NavBar.getParseViewPanel().cb_updateFoundPlayersAccordion(event);
+                            this.#NavBar.getParseViewPanel().getPanelAccordion().render(event);
                             this.#NavBar.getParseViewPanel().cb_updateDatesTable(event);
                         });
                         break;

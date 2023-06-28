@@ -8,7 +8,11 @@ class ParseViewBase {
 
     createImportFromDirectory ( openFolderButtonID, inputID, parseButtonID ) {
         const article = `
-        <label for="id="${openFolderButtonID}">Import from Directory</label>
+        <div class="batchInputWrapper">
+            <label for="${openFolderButtonID}_batchButton">Batch Size</label>
+            <input type="number" class="form-control batchInput" id="${parseButtonID}_batchInput" placeholder="20">
+        </div>
+        <label for="${openFolderButtonID}" class="dropped-label">Import from Directory</label>
         <div class="input-group mb-3">
             <button class="btn btn-light rm-1" id="${openFolderButtonID}">Choose...</button>
             <input type="text" class="form-control" id="${inputID}">

@@ -1,6 +1,6 @@
 // const bootstrap = require('bootstrap');
 
-const bootstrap = require('bootstrap/dist/js/bootstrap.bundle.min');
+const bootstrap = require('../../Bootstrap/js/bootstrap.bundle.min');
 
 class ProgressView {
 
