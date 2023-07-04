@@ -36,7 +36,6 @@ function processParseChunk(i, chunkSize, argFiles) {
             parentPort.postMessage(data);
         }
     }
-    
 }
 
 function processDirectoryForParse (files, dir, chunkSize) {
@@ -53,10 +52,55 @@ function processDirectoryForParse (files, dir, chunkSize) {
     return null;
 }
 
+// Recursively call this to allow a stop in-between loops
+function processComboByTagChunk (i, chunkSize, argFiles, tag) {
+    if (shouldWorkerStop()) {
+        parentPort.postMessage({
+            eventName: 'halted'
+        });
+    } else {
+        const chunk = argFiles.slice(i, i + chunkSize);
+        // Find Combos by Tag
+        eng.comboParse(chunk, tag);
+        const numCompleted = i + chunk.length;
+        const data = {};
+        data.eventName = "findCombosUpdateCount";
+        data.count = numCompleted;
+        parentPort.postMessage(data);
+        if (i + chunkSize < argFiles.length) {
+            setImmediate(processComboByTagChunk, i+chunkSize, chunkSize, argFiles, tag);
+        } else {
+            // Finish loop
+            const retData = eng.comboPrint();
+            let jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            const data = {};
+            data.eventName = "findCombosComplete";
+            data.args = jsonStr;
+            parentPort.postMessage(data);
+        }
+    }
+}
+
+function processDirectoryForCombosByTag (files, dir, chunkSize, tag) {
+    if (files.length > 0) {
+        eng.resetCombo();
+
+        const argFiles = [];
+        files.forEach((file) => {
+            argFiles.push(dir + '\\\\' + file);
+        });
+
+        processComboByTagChunk(0, chunkSize, argFiles, tag);
+    }
+}
+
 parentPort.on('message', (message) => {
     switch (message.evt) {
         case 'processForParse':
             processDirectoryForParse(message.files, message.dir, message.chunk);
+            break;
+        case 'processForComboTag':
+            processDirectoryForCombosByTag(message.files, message.dir, message.chunk, message.tag);
             break;
         case 'isCancelled':
             parentPort.postMessage({

@@ -8,7 +8,8 @@
   "scripts": {
     "test": "test",
     "start": "electron .",
-    "buildcpp": "node-gyp rebuild --target=24.0.0 --dist-url=https://electronjs.org/headers"
+    "buildcpp": "node-gyp rebuild --target=24.0.0 --dist-url=https://electronjs.org/headers",
+    "package": "electron-packager . --platform=win32 --arch=x64 PVSTVBOT --icon=img/noodles.ico"
   },
   "author": "",
   "license": "ISC",

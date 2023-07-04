@@ -4,13 +4,14 @@ const {TableView, TableTypes} = require('./Components/TableView');
 
 class ParsePanelView extends ParseViewBase {
 
+    #appState = null;
     #fileTable = null;
     #dateTable = null;
-    #fileList = [];
     #foundPlayerAccordion = null;
 
-constructor (controller, spinnerController, panelDiv) {
-    super(controller, spinnerController, panelDiv);
+constructor (controller, spinnerController, panelDivID, appState) {
+    super(controller, spinnerController);
+    this.#appState = appState;
     // Add rows for 
     // 1. Input Directory
     // 2. Labels
@@ -23,6 +24,8 @@ constructor (controller, spinnerController, panelDiv) {
     labelRow.classList.add("row");
     dataRow.classList.add("row", "flex-grow-1");
 
+    const panelDiv = document.getElementById(panelDivID);
+
     panelDiv.appendChild(inputRow);
     panelDiv.appendChild(labelRow);
     panelDiv.appendChild(dataRow);
@@ -33,7 +36,7 @@ constructor (controller, spinnerController, panelDiv) {
     this.idMap.set("p1b2", "parseSlippi_parse_button");
     this.idMap.set("p1a1", "parseSlippi_players_outmostAccordion");
 
-    const formDiv = this.createImportFromDirectory(this.idMap.get("p1b1"), this.idMap.get("p1i1"), this.idMap.get("p1b2"));
+    const formDiv = this.createImportFromDirectory(this.idMap.get("p1b1"), this.idMap.get("p1i1"), this.idMap.get("p1b2"), "Parse Directory");
 
     inputRow.appendChild(formDiv);
 
@@ -47,7 +50,7 @@ constructor (controller, spinnerController, panelDiv) {
     </div>
     `;
 
-    // Create Accordion and Tables for Data Sectio
+    // Create Accordion and Tables for Data Section
     const dataDiv = this.createDataSection();
     dataRow.appendChild(dataDiv);
 
@@ -69,7 +72,7 @@ constructor (controller, spinnerController, panelDiv) {
         <div class="row h-100">
             <div class="col-6 position-relative">
                 <div class="row h-100">
-                    <div class="menu accordion-overflow">
+                    <div class="menu accordion-overflow pos-abs">
                         <div class="accordion" id="${this.idMap.get("p1a1")}">
                         </div>
                     </div>
@@ -90,7 +93,7 @@ constructor (controller, spinnerController, panelDiv) {
             </div>
         `;
 
-        this.#foundPlayerAccordion = new AccordionView(AccordionTypes.PARSE);
+        this.#foundPlayerAccordion = new AccordionView(AccordionTypes.PARSE, this.#appState);
         const accordDiv = this.#foundPlayerAccordion.createAccordionForPlayers();
         dataDiv.querySelector(`#${this.idMap.get("p1a1")}`).appendChild(accordDiv);
 
@@ -105,55 +108,33 @@ constructor (controller, spinnerController, panelDiv) {
 
     attachCallbacks () {
         this.getElementById("p1b1").addEventListener("click", async () => {
-            await this.controller.cb_emitButtonEvent(this.idMap.get("p1b1"), "parseDirectoryForSlippiFiles");
+            await this.controller.cb_emitButtonEvent(this.idMap.get("p1b1"), "parseDirectoryForSlippiFilesByButton");
+        });
+
+        this.getElementById("p1i1").addEventListener("change", async () => {
+            const fileName = this.getElementById("p1i1").value;
+            await this.controller.cb_emitButtonEvent(this.idMap.get("p1i1"),"parseDirectoryForSlippiFilesByInput",fileName);
         });
 
         this.getElementById("p1b2").addEventListener("click", async () => {
             this.progressController.showSpinner({
                 modalTitle: "Parsing Directory",
-                totalFiles: this.#fileList.length
+                totalFiles: this.fileList.length
             });
             const batchDiv = document.getElementById(this.idMap.get("p1b2")+"_batchInput");
             let batchNum = batchDiv.value === '' ? 20 :  parseInt(batchDiv.value);
-            batchNum = Math.min(batchNum, this.#fileList.length);
+            batchNum = Math.min(batchNum, this.fileList.length);
             await this.controller.cb_emitButtonEvent(this.idMap.get("p1b2"), "parseDirectory", batchNum);
         });
     }
 
-    // Check to see if the folder path is OK
-    cb_updateValidationForInputOne (isValid, dir) {
-
-        const inputDiv = this.getElementById("p1i1");
-        const parseDiv = this.getElementById("p1b2");
-
-        if (dir) {
-            inputDiv.setAttribute("value", dir);
-        }
-
-        if (!isValid) {
-            inputDiv.classList.remove("is-valid");
-            parseDiv.setAttribute("disabled","");
-
-            if (typeof dir === 'undefined') {
-                inputDiv.classList.remove("is-invalid");
-                inputDiv.setAttribute("value","");
-                // Early return - closed or cancelled UI
-                return;
-            }
-            
-            inputDiv.classList.add("is-invalid");
-            
-            // Early return - Invalid directory
-            return;
-        }
-
-        parseDiv.removeAttribute("disabled");
-        inputDiv.classList.remove("is-invalid");
-        inputDiv.classList.add("is-valid");
+    async updatePanelAccordion (event) {
+        await this.getPanelAccordion().render(event);
+        this.controller.emit("hideSpinner");
     }
 
-    cb_updateFilesTable (files) {
-        this.#fileList = files;
+    updateFilesTable (files) {
+        this.fileList = files;
         this.#fileTable.updateFilesTable(files);
     }
 
@@ -161,86 +142,20 @@ constructor (controller, spinnerController, panelDiv) {
         return this.#foundPlayerAccordion;
     }
 
-    cb_updateFoundPlayersAccordion (event) {
-        const parentAccordionID = this.idMap.get("p1a1")
-        const accordDiv = this.getElementById("p1a1");
-        let skeletonInternal = ``;
-        let i = 0;
-        event.players.forEach((player) => {
-            const playerTag = Object.keys(player)[0];
-            const allCharList = player[playerTag].char_id;
-            const characterList = allCharList.filter(this.onlyUnique);
-
-            const allNameList = player[playerTag].disp_name;
-            const nameList = allNameList.filter(this.onlyUnique);
-
-            let displayNames = ``;
-            nameList.forEach((name) => {
-                const thisNameCount = allNameList.filter(n => n === name).length;
-                displayNames = `${displayNames}<br>${name} (${thisNameCount})`;
-            });
-
-            let characterIcons = ``;
-            characterList.forEach((character) => {
-                const thisCharCount = allCharList.filter(c => c == character).length;
-                characterIcons = `${characterIcons}
-                <div>
-                    <img src="img/si_${character}.png" width="24" height="24"> (${thisCharCount})
-                </div>`;
-            });
-
-            skeletonInternal = `
-            ${skeletonInternal}
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="player_${playerTag}_heading">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#player_${playerTag}_collapse" aria-expanded="false" aria-controls="player_${playerTag}_collapse">
-                        ${playerTag}
-                    </button>
-                </h2>
-                <div id="player_${playerTag}_collapse" class="accordion-collapse collapse" aria-labelledby="player_${playerTag}_heading" data-bs-parent="#${parentAccordionID}">
-                    <div class="accordion-body">
-                        <div class="accordion" id="player_${playerTag}_character_display_accordion">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="player_${playerTag}_characters">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#player_${playerTag}_character_list" aria-expanded="false" aria-controls="player_${playerTag}_character_list">
-                                        Characters Played
-                                    </button>
-                                </h2>
-                                <div id="player_${playerTag}_character_list" class="accordion-collapse collapse" aria-labelledby="player_${playerTag}_characters" data-bs-parent="player_${playerTag}_character_display_accordion">
-                                    <div class="accordion-body">
-                                        ${characterIcons}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
-                                        Display Names Used
-                                    </button>
-                                </h2>
-                                <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingTwo" data-bs-parent="player_${playerTag}_character_display_accordion">
-                                    <div class="accordion-body">
-                                        ${displayNames.substring(4)}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-           `; 
-        }, this);
-
-
-        accordDiv.innerHTML = skeletonInternal;
-    }
-
-    cb_updateDatesTable (event) {
+    updateDatesTable (event) {
         const dateData = {
             min: event.firstDate,
             max: event.lastDate
         }
         this.#dateTable.updateDatesTable(dateData);
+    }
+
+    getInputDivOne () {
+        return this.getElementById("p1i1");
+    }
+
+    getButtonDivTwo () {
+        return this.getElementById("p1b2");
     }
 
 }

@@ -1,7 +1,7 @@
 const { dialog } = require('electron');
 const { Worker } = require('node:worker_threads');
 
-const fs = require('fs');
+const fs = require('fs/promises');
 
 class MainModel {
 
@@ -17,7 +17,7 @@ class MainModel {
         this.createWorker();
     }
 
-    async processDirectoryForSlippiFiles ( event, buttonID ) {
+    async processDirectoryForSlippiFilesWithUI ( event, buttonID ) {
 
         const filename = dialog.showOpenDialogSync({
             properties: [
@@ -25,27 +25,39 @@ class MainModel {
             ]
         });
     
+        this.processDirectoryForSlippiFiles(event, buttonID, filename);
+    }
+
+    async processDirectoryForSlippiFilesWithoutUI (event, buttonID, fileName) {
+        this.processDirectoryForSlippiFiles(event, buttonID, [fileName]);
+    }
+
+    async processDirectoryForSlippiFiles(event, buttonID, filename) {
         let bIsValid = false;
         const returnData = {};
         returnData.valid = bIsValid;
         let files = [];
         let directoryToCheck;
-
+ 
         if (typeof filename !== 'undefined') {
             directoryToCheck = filename[0];
             
-        
-            fs.readdirSync(directoryToCheck).forEach(file => {
-                if (file) {
-                    const matches = file.match(/\.[0-9a-z]+$/i);
-                    if (matches) {
-                        const fileType = matches[0];
-                        if (fileType === '.slp') {
-                            files.push(file);
+            try {
+                const dirFiles = await fs.readdir(directoryToCheck);
+                dirFiles.forEach(file => {
+                    if (file) {
+                        const matches = file.match(/\.[0-9a-z]+$/i);
+                        if (matches) {
+                            const fileType = matches[0];
+                            if (fileType === '.slp') {
+                                files.push(file);
+                            }
                         }
                     }
-                }
-            });
+                })
+            } catch (err) {
+                returnData.errMsg = err;
+            }
 
             bIsValid = files.length > 0;
 
@@ -63,6 +75,7 @@ class MainModel {
         const data = {};
         data.eventName = "parseDirectoryForSlippiFiles";
         data.args = returnData;
+        data.srcID = buttonID;
         event.sender.send("serverEvent",data);
     }
 
@@ -87,6 +100,31 @@ class MainModel {
         });
     }
 
+    async findCombos (event, buttonID, params) {
+        console.log(params);
+
+        switch (params.flavor) {
+            case 4:
+                this.findCombosFromTag(event, buttonID, params.targetTag, params.batchNum);
+                break;
+        }
+    }
+
+    async findCombosFromTag (event, buttonID, tag, chunk) {
+        this.#worker.postMessage({
+            evt: 'stop',
+            value: false
+        });
+
+        this.#worker.postMessage({
+            evt: 'processForComboTag',
+            dir: this.#directory,
+            files: this.#currentFiles,
+            tag: tag,
+            chunk: chunk
+        });
+    }
+
     createWorker () {
         this.#worker = new Worker(__dirname + '\\SlippiParser.js',
         {
@@ -107,6 +145,12 @@ class MainModel {
                     break;
                 case "halted":
                     console.log("horses held");
+                    break;
+                case "findCombosUpdateCount":
+                    this.#win.webContents.send("findCombosUpdateCount", data);
+                    break;
+                case "findCombosComplete":
+                    this.#win.webContents.send("findComboEvent", data);
                     break;
             }
         });

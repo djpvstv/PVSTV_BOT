@@ -13,6 +13,7 @@ class MainController {
 
         this.#ControllerList.push(this.#NavBarController);
         this.#ControllerList.push(this.#ProgressController);
+        this.#ControllerList.push(this.#NavBarController.getFindComboController());
     }
 
     // Getters

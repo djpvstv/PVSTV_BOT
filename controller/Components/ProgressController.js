@@ -21,6 +21,9 @@ class ProgressController extends EventEmitter {
         ipcRenderer.on("parseDirectoryUpdateCount", (evt, args) => {
             that.emit("updateSpinnerCount", args);
         });
+        ipcRenderer.on("findCombosUpdateCount", (evt, args) => {
+            that.emit("updateSpinnerCount", args);
+        });
     }
 
     getEvents () {

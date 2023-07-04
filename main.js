@@ -1,3 +1,5 @@
+require('v8-compile-cache');
+
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const MainModel = require('./model/MainModel');
@@ -47,18 +49,28 @@ app.on('window-all-closed', () => {
 
 ipcMain.on("clientEvent", async (event, args) => {
     try {
+        let extraData = null;
+        if (Object.hasOwnProperty.call(args, "val")) {
+            extraData = args.val;
+        }
         switch (args.eventName) {
-            case "parseDirectoryForSlippiFiles":
-                model.processDirectoryForSlippiFiles(event, args.sourceID);
+            case "parseDirectoryForSlippiFilesByButton":
+                model.processDirectoryForSlippiFilesWithUI(event, args.sourceID);
+                break;
+            case "parseDirectoryForSlippiFilesByInput":
+                model.processDirectoryForSlippiFilesWithoutUI(event, args.sourceID, extraData);
                 break;
             case "parseDirectory":
-                model.processDirectoryForParse(event, args.sourceID).catch(err => console.error(err));
+                model.processDirectoryForParse(event, args.sourceID, extraData).catch(err => console.error(err));
                 break;
             case "cancelComputation":
                 model.cancelComputation(event, args.sourceID);
                 break;
+            case "findCombos":
+                model.findCombos(event, args.sourceID, extraData).catch(err => (console.error(err)));
+                break;
             default:
-                console.log(`Cannot match event ${args}`);
+                console.log(`Cannot match event ${args.eventName}`);
         }
     } catch (error) {
         console.log(error);

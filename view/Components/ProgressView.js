@@ -46,6 +46,13 @@ class ProgressView {
             }
         });
 
+        // Correct the state of the spinner if the model is faster.
+        document.getElementById("progressModal").addEventListener("shown.bs.modal", async () => {
+            if (!this.#isShowing) {
+                this.#modal.hide();
+            }
+        });
+
     }
 
     renderDiv () {

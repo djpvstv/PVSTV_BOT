@@ -11,7 +11,7 @@
     background-image: url("./Bootstrap/svg/caret-right-fill.svg");
 }
 
-.accordion-button:not(.collapsed)::after {
+.accordion-button:not(.collapsed-icon)::after {
     background-image: url("./Bootstrap/svg/caret-up-fill.svg");
     transform: var(--bs-accordion-btn-icon-transform);
 }
@@ -23,7 +23,7 @@
     background-image: url("./Bootstrap/svg/caret-right.svg");
 }
 
-.accordion-button-sub:not(.collapsed)::after {
+.accordion-button-sub:not(.collapsed-icon)::after {
     background-image: url("./Bootstrap/svg/caret-up.svg");
     transform: var(--bs-accordion-btn-icon-transform);
 }
@@ -39,4 +39,78 @@
 .batchInput {
     width: 200px;
     margin-bottom: 5px;
+}
+
+.errybody {
+    height: 100px
+}
+
+.h-0 {
+    height: 0px;
+}
+
+.navbar_skeleton {
+    height: 42px;
+}
+
+.bg-purple {
+    background: rgb(48,0,50);
+}
+
+.bg-gray {
+    background: rgb(74,74,74);
+}
+
+.bg-blue {
+    background: rgb(50,101,196);
+}
+
+.bg-red {
+    background: rgb(196,50,53);
+}
+
+.position-relative {
+    position: relative;
+}
+
+.accordion-overflow {
+    overflow: auto;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: inherit;
+}
+
+.pos-abs {
+    position: absolute;
+}
+
+.table-overflow {
+    overflow: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: inherit;
+}
+
+.panel-height {
+    height: 0px;
+    display:none!important;
+}
+
+.panel-height.active {
+    height: 100%;
+    display: flex!important;
+}
+
+.input-group-match-select {
+    padding-top: 6px;
+    padding-bottom: 5px;
+}
+
+.ofs {
+    overflow-y: scroll
 }

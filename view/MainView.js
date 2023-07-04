@@ -8,20 +8,20 @@ class MainView extends EventEmitter {
     #Spinner = null;
     #controllers = null;
 
-    constructor( controllers ) {
+    constructor( controllers, appState ) {
         super();
         this.#controllers = controllers;
-        this.createNavBar( controllers.getNavBarController(), controllers.getProgressController() );
-        this.createSpinner( controllers.getProgressController() );
+        this.createNavBar( controllers.getNavBarController(), controllers.getProgressController(), appState);
+        this.createSpinner( controllers.getProgressController(), appState );
         this.createEventListeners();
     }
 
-    createNavBar (controller, progressController ) {
-        this.#NavBar = new NavBarView( controller, progressController );
+    createNavBar (controller, progressController, appState ) {
+        this.#NavBar = new NavBarView( controller, progressController, appState );
     }
 
-    createSpinner( controller ) {
-        this.#Spinner = new ProgressView( controller );
+    createSpinner( controller, appState ) {
+        this.#Spinner = new ProgressView( controller, appState );
     }
 
     createEventListeners() {
@@ -33,18 +33,40 @@ class MainView extends EventEmitter {
                 switch (eventName) {
                     case "updatePanelOneDirectoryInput":
                         controller.on(eventName, (event) => {
-                            this.#NavBar.getParseViewPanel().cb_updateValidationForInputOne(event.isValid, event.dir);
+                            this.#NavBar.getParseViewPanel().updateValidationStateForInputOne(event.isValid, event.dir, true, event.errorMsg);
                         });
                         break;
                     case "updatePanelOneFilesTable":
                         controller.on(eventName, (event) => {
-                            this.#NavBar.getParseViewPanel().cb_updateFilesTable(event.files);
+                            this.#NavBar.getParseViewPanel().updateFilesTable(event.files);
                         });
                         break;
                     case "updatePanelOneAccordion":
                         controller.on(eventName, (event) => {
-                            this.#NavBar.getParseViewPanel().getPanelAccordion().render(event);
-                            this.#NavBar.getParseViewPanel().cb_updateDatesTable(event);
+                            this.#NavBar.getParseViewPanel().updatePanelAccordion(event);
+                            this.#NavBar.getParseViewPanel().updateDatesTable(event);
+                        });
+                        break;
+                    case "updatePanelThreeDirectoryInput":
+                        controller.on(eventName, (event) => {
+                            const comboPanel = this.#NavBar.getComboViewPanel()
+                            comboPanel.updateValidationStateForInputOne(event.isValid, event.dir, false, event.errorMsg);
+                            comboPanel.getController().validateAllWidgetsForBigButton(comboPanel.getFlavor());
+                        })
+                        break;
+                    case "updatePanelThreeComboButton":
+                        controller.on(eventName, (event) => {
+                            this.#NavBar.getComboViewPanel().setFileNum(event.files.length);
+                        });
+                        break;
+                    case "updatePanelThreeAccordion":
+                        controller.on(eventName, (event) => {
+                            this.#NavBar.getComboViewPanel().getPanelAccordion().render(event);
+                        });
+                        break;
+                    case "updatecombotarget":
+                        controller.on(eventName, (event) => {
+                            this.#NavBar.getComboViewPanel().updateTargetType(event.flavor);
                         });
                         break;
                     case "showSpinner":
