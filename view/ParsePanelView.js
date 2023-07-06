@@ -9,52 +9,52 @@ class ParsePanelView extends ParseViewBase {
     #dateTable = null;
     #foundPlayerAccordion = null;
 
-constructor (controller, spinnerController, panelDivID, appState) {
-    super(controller, spinnerController);
-    this.#appState = appState;
-    // Add rows for 
-    // 1. Input Directory
-    // 2. Labels
-    // 3. Accordion / tables
-    const inputRow = document.createElement("div");
-    const labelRow = document.createElement("div");
-    const dataRow = document.createElement("div");
+    constructor (controller, spinnerController, panelDivID, appState) {
+        super(controller, spinnerController);
+        this.#appState = appState;
+        // Add rows for 
+        // 1. Input Directory
+        // 2. Labels
+        // 3. Accordion / tables
+        const inputRow = document.createElement("div");
+        const labelRow = document.createElement("div");
+        const dataRow = document.createElement("div");
 
-    inputRow.classList.add("row");
-    labelRow.classList.add("row");
-    dataRow.classList.add("row", "flex-grow-1");
+        inputRow.classList.add("row");
+        labelRow.classList.add("row");
+        dataRow.classList.add("row", "flex-grow-1");
 
-    const panelDiv = document.getElementById(panelDivID);
+        const panelDiv = document.getElementById(panelDivID);
 
-    panelDiv.appendChild(inputRow);
-    panelDiv.appendChild(labelRow);
-    panelDiv.appendChild(dataRow);
+        panelDiv.appendChild(inputRow);
+        panelDiv.appendChild(labelRow);
+        panelDiv.appendChild(dataRow);
 
-    // Create input for directory, save ids
-    this.idMap.set("p1b1", "parseSlippi_choose_button");
-    this.idMap.set("p1i1", "parseSlippi_input");
-    this.idMap.set("p1b2", "parseSlippi_parse_button");
-    this.idMap.set("p1a1", "parseSlippi_players_outmostAccordion");
+        // Create input for directory, save ids
+        this.idMap.set("p1b1", "parseSlippi_choose_button");
+        this.idMap.set("p1i1", "parseSlippi_input");
+        this.idMap.set("p1b2", "parseSlippi_parse_button");
+        this.idMap.set("p1a1", "parseSlippi_players_outmostAccordion");
 
-    const formDiv = this.createImportFromDirectory(this.idMap.get("p1b1"), this.idMap.get("p1i1"), this.idMap.get("p1b2"), "Parse Directory");
+        const formDiv = this.createImportFromDirectory(this.idMap.get("p1b1"), this.idMap.get("p1i1"), this.idMap.get("p1b2"), "Parse Directory");
 
-    inputRow.appendChild(formDiv);
+        inputRow.appendChild(formDiv);
 
-    // Create Labels for Data section
-    labelRow.innerHTML = `
-    <div class="col-6 text-center">
-        <h3>Found Players</h3>
-    </div>
-    <div class="col-6 text-center">
-        <h3>Found Files</h3>
-    </div>
-    `;
+        // Create Labels for Data section
+        labelRow.innerHTML = `
+        <div class="col-6 text-center">
+            <h3>Found Players</h3>
+        </div>
+        <div class="col-6 text-center">
+            <h3>Found Files</h3>
+        </div>
+        `;
 
-    // Create Accordion and Tables for Data Section
-    const dataDiv = this.createDataSection();
-    dataRow.appendChild(dataDiv);
+        // Create Accordion and Tables for Data Section
+        const dataDiv = this.createDataSection();
+        dataRow.appendChild(dataDiv);
 
-    this.attachCallbacks();
+        this.attachCallbacks();
     }
 
     getFoundPlayerAccordion () {
@@ -67,20 +67,23 @@ constructor (controller, spinnerController, panelDivID, appState) {
         this.idMap.set("p1a1", "parseSlippi_players_outmostAccordion");
         this.idMap.set("p1t1", "parseSlippi_files_table");
         this.idMap.set("p1t2", "parseSlippi_times_table");
+        this.idMap.set("p1p1", "parseSlipp_pagination_div");
 
         dataDiv.innerHTML = `
         <div class="row h-100">
-            <div class="col-6 position-relative">
-                <div class="row h-100">
-                    <div class="menu accordion-overflow pos-abs">
-                        <div class="accordion" id="${this.idMap.get("p1a1")}">
+            <div class="col-6">
+                <div class="d-flex flex-column h-100">
+                    <div class="row flex-grow-1 position-relative">
+                        <div class="menu accordion-overflow accordion" id="${this.idMap.get("p1a1")}">
                         </div>
+                    </div>
+                    <div id="${this.idMap.get("p1p1")}" class="row bottom-pagination">
                     </div>
                 </div>
             </div>
             <div class="col-6">
                 <div class="d-flex flex-column h-100">
-                    <div class="row flex-grow-1 position-relative mb-2">
+                    <div class="row flex-grow-1 position-relative">
                         <div id="${this.idMap.get("p1t1")}" class="table-overflow">
                             <time-table-view></time-table-view>
                         </div>
@@ -93,7 +96,7 @@ constructor (controller, spinnerController, panelDivID, appState) {
             </div>
         `;
 
-        this.#foundPlayerAccordion = new AccordionView(AccordionTypes.PARSE, this.#appState);
+        this.#foundPlayerAccordion = new AccordionView(AccordionTypes.PARSE, this.#appState, this.controller);
         const accordDiv = this.#foundPlayerAccordion.createAccordionForPlayers();
         dataDiv.querySelector(`#${this.idMap.get("p1a1")}`).appendChild(accordDiv);
 

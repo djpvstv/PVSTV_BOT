@@ -75,6 +75,7 @@
 
 .accordion-overflow {
     overflow: auto;
+    position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
@@ -113,4 +114,15 @@
 
 .ofs {
     overflow-y: scroll
+}
+
+.bottom-pagination {
+    margin-top: 1rem;
+}
+
+.page-item-elipsis {
+    --bs-pagination-disabled-bg: var(--bs-body-bg);
+    --bs-pagination-border-color: var(--bs-body-bg);
+    border-left: var(--bs-border-width) solid var(--bs-border-color);
+    --bs-pagination-border-width: 0px;
 }

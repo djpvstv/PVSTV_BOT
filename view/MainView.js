@@ -47,6 +47,11 @@ class MainView extends EventEmitter {
                             this.#NavBar.getParseViewPanel().updateDatesTable(event);
                         });
                         break;
+                    case "updatePanelOneAccordionJustAccordion":
+                        controller.on(eventName, (event) => {
+                            this.#NavBar.getParseViewPanel().updatePanelAccordion(event);
+                        });
+                        break;
                     case "updatePanelThreeDirectoryInput":
                         controller.on(eventName, (event) => {
                             const comboPanel = this.#NavBar.getComboViewPanel()

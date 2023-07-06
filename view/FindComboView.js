@@ -41,19 +41,17 @@ class FindComboView extends ParseViewBase {
 
         inputRow.appendChild(formDiv);
 
-        this.#foundCombosAccordion = new AccordionView(AccordionTypes.FINDCOMBOS, this.#appState);
+        this.#foundCombosAccordion = new AccordionView(AccordionTypes.FINDCOMBOS, this.#appState, this.#controller);
         const accordDiv = this.#foundCombosAccordion.createAccordionForCombos();
         accordRow.appendChild(accordDiv);
         accordRow.innerHTML = `
             <div class="col-12">
-                <div class="row h-100">
-                    <div class="col-12 position-relative">
-                        <div class="row h-100">
-                            <div class="menu accordion-overflow pos-abs">
-                                <div class="accordion" id="${this.idMap.get("a1")}">
-                                </div>
-                            </div>
+                <div class="d-flex flex-column h-100">
+                    <div class="row flex-grow-1 position-relative">
+                        <div class="menu accordion-overflow accordion" id="${this.idMap.get("a1")}">
                         </div>
+                    </div>
+                    <div id="${this.idMap.get("p1")}" class="row bottom-pagination">
                     </div>
                 </div>
             </div>
@@ -84,6 +82,7 @@ class FindComboView extends ParseViewBase {
         this.idMap.set("i3d1", "comboSlippi_input_targetTag_dataList");
         this.idMap.set("i4", "comboSlippi_input_targetCharacter");
         this.idMap.set("i5", "comboSlippi_input_targetColor");
+        this.idMap.set("p1", "comboSlippi_pagination_div");
 
         this.getController().setIDMap(this.idMap);
     }
@@ -237,7 +236,7 @@ class FindComboView extends ParseViewBase {
             <select class="form-select-sm w-100" id="${this.idMap.get("i2")}">
                 <option ${flavor == 1 ? 'selected' : ''} value="1" id="${this.idMap.get("i2s1")}">By Tag</option>
                 <option ${flavor == 2 ? 'selected' : ''} value="2" id="${this.idMap.get("i2s2")}">By Character</option>
-                <option ${flavor == 3? 'selected' : ''} value="3" id="${this.idMap.get("i2s3")}">By Character and Color</option>
+                <option ${flavor == 3 ? 'selected' : ''} value="3" id="${this.idMap.get("i2s3")}">By Character and Color</option>
                 <option ${flavor == 4 ? 'selected' : ''} value="4" id="${this.idMap.get("i2s4")}">By Tag and Character</option>
                 <option ${flavor == 5 ? 'selected' : ''} value="5" id="${this.idMap.get("i2s5")}">By Tag, Character, and Color</option>
             </select>

@@ -63,6 +63,12 @@ ipcMain.on("clientEvent", async (event, args) => {
             case "parseDirectory":
                 model.processDirectoryForParse(event, args.sourceID, extraData).catch(err => console.error(err));
                 break;
+            case "updateParsePagination":
+                model.updateParsePagination(event, args.sourceID, extraData);
+                break;
+            case "updateComboPagination":
+                model.updateComboPagination(event, args.sourceID, extraData);
+                break;
             case "cancelComputation":
                 model.cancelComputation(event, args.sourceID);
                 break;

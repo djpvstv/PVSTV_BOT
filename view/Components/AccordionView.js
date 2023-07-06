@@ -9,9 +9,11 @@ const AccordionTypes = Object.freeze({
 class AccordionView {
 
     #accordionDiv = null;
+    #controller = null;
     #idList = null;
     #appState = null;
     #outerAccordionID = "";
+    #paginationID = "";
     #type = null;
     #collapseIDMap = null;
     #collapseMap = null;
@@ -21,16 +23,19 @@ class AccordionView {
     // This is a performance limitation
     MAX_COLLAPSE_SIZE = 99;
 
-    constructor (type, appState) {
+    constructor (type, appState, controller) {
         switch (type) {
             case AccordionTypes.PARSE:
                 this.#outerAccordionID = "parseSlippi_players_outmostAccordion";
+                this.#paginationID = "parseSlipp_pagination_div";
                 break;
             case AccordionTypes.FINDCOMBOS:
                 this.#outerAccordionID = "comboSlippi_combos_outmostAccordion";
+                this.#paginationID = "comboSlippi_pagination_div";
                 break;
         }
         this.#appState = appState;
+        this.#controller = controller;
         this.#type = type;
         this.#idList = [];
         this.#collapseList = [];
@@ -115,7 +120,7 @@ class AccordionView {
 
     async renderParsed (event) {
         this.destroyPreviousBootstrapCollapseObjects();
-
+        const bUsePagination = event.needsPagination;
         const parentAccordionID = this.#outerAccordionID;
         const accordDiv = document.getElementById(parentAccordionID);
         let skeletonInternal = ``;
@@ -219,103 +224,229 @@ class AccordionView {
             `; 
         }, this);
 
-        this.#appState.setFoundTags(foundTags);
+        if (bUsePagination) {
+            const activePage = event.page;
+            const totalPages = event.totalPage;
+            this._createPaginationSection(activePage, totalPages);
+            this._attachPaginationCallbacks(activePage, totalPages);
+        }
+
+        if (Object.hasOwnProperty.call(event, "totalNames")) {
+            this.#appState.setFoundTags(event.totalNames);
+        }
         accordDiv.innerHTML = skeletonInternal;
 
         this.createLimitedBootstrapObjects();
     }
 
+    _createPaginationSection (activePage, totalPages) {
+        const paginationID = this.#paginationID;
+        const pagDiv = document.getElementById(paginationID);
+        let pageSkeletonInternal;
+        if (totalPages <= 3) {
+            pageSkeletonInternal = `
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
+                        <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
+                    </li>
+                    <li id="${this.#paginationID + "_left"}" class="page-item${activePage === 1 ? ' disabled' : ''}"><a class="page-link" href="#">1</a></li>
+                    <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' disabled' : ''}"><a class="page-link" href="#">2</a></li>
+                    <li id="${this.#paginationID + "_right"}" class="page-item${activePage === 3 ? ' disabled' : ''}"><a class="page-link" href="#">3</a></li>
+                    <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === 3 ? ' disabled' : ''}">
+                        <a class="page-link" href="#"${activePage === 3 ? ' aria-disabled="true"' : ''}>Next</a>
+                    </li>
+                </ul>
+            </nav>`;
+        } else {
+            const leftDistance = activePage - 1;
+            const rightDistance = totalPages - activePage;
+
+            pageSkeletonInternal = `
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
+                        <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
+                    </li>
+                    ${leftDistance <= 1 ? `
+                        <li id="${this.#paginationID + "_left"}"  class="page-item${activePage === 1 ? ' active' : ''}"><a class="page-link" href="#">1</a></li>
+                        <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' active' : ''}"><a class="page-link" href="#">2</a></li>
+                        <li id="${this.#paginationID + "_right"}" class="page-item${activePage === 3 ? ' active' : ''}"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
+                        <li id="${this.#paginationID + "_end"}" class="page-item"><a class="page-link" href="#">${String(totalPages)}</a></li>
+                    ` : rightDistance <= 1 ? `
+                        <li id="${this.#paginationID + "_start"}" class="page-item"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
+                        <li id="${this.#paginationID + "_left"}"  class="page-item${activePage === totalPages - 2 ? ' active' : ''}"><a class="page-link" href="#">${String(totalPages)-2}</a></li>
+                        <li id="${this.#paginationID + "_center"}" class="page-item${activePage === totalPages - 1 ? ' active' : ''}"><a class="page-link" href="#">${String(totalPages)-1}</a></li>
+                        <li id="${this.#paginationID + "_right"}" class="page-item${activePage === totalPages ? ' active' : ''}"><a class="page-link" href="#">${String(totalPages)}</a></li>
+                    ` : `
+                        <li id="${this.#paginationID + "_start"}" class="page-item"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
+                        <li id="${this.#paginationID + "_left"}"  class="page-item"><a class="page-link" href="#">${String(activePage-1)}</a></li>
+                        <li id="${this.#paginationID + "_center"}" class="page-item active"><a class="page-link" href="#">${String(activePage)}</a></li>
+                        <li id="${this.#paginationID + "_right"}" class="page-item"><a class="page-link" href="#">${String(activePage+1)}</a></li>
+                        <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
+                        <li id="${this.#paginationID + "_end"}"class="page-item"><a class="page-link" href="#">${String(totalPages)}</a></li>
+                    `}
+                    <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === totalPages ? ' disabled' : ''}">
+                        <a class="page-link" href="#"${activePage === totalPages ? ' aria-disabled="true"' : ''}>Next</a>
+                    </li>
+                </ul>
+            </nav>`;
+
+        }
+        pagDiv.innerHTML = pageSkeletonInternal;
+    }
+
+    _attachPaginationCallbacks(activePage, totalPages) {
+        document.getElementById(this.#paginationID + "_backwards").addEventListener("click", async (evt) => {
+            if (!evt.srcElement.classList.contains('disabled')) {
+                await this.#controller.cb_emitButtonEvent(this.#paginationID + "_backwards", this.getUpdatePaginationEventName(), activePage - 1);
+            }
+        });
+
+        document.getElementById(this.#paginationID + "_forwards").addEventListener("click", async (evt) => {
+            if (!evt.srcElement.classList.contains('disabled')) {
+                await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), activePage + 1);
+            }
+        });
+
+        document.getElementById(this.#paginationID + "_left").addEventListener("click", async (evt) => {
+            if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
+                const labelVal = parseInt(evt.srcElement.innerHTML);
+                await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
+            }
+        })
+
+        document.getElementById(this.#paginationID + "_center").addEventListener("click", async (evt) => {
+            if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
+                const labelVal = parseInt(evt.srcElement.innerHTML);
+                await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
+            }
+        });
+
+        document.getElementById(this.#paginationID + "_right").addEventListener("click", async (evt) => {
+            if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
+                const labelVal = parseInt(evt.srcElement.innerHTML);
+                await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
+            }
+        });
+
+        const startEl = document.getElementById(this.#paginationID + "_start");
+        const endEl = document.getElementById(this.#paginationID + "_end");
+        if (startEl) {
+            startEl.addEventListener("click", async (evt) => {
+                if (!evt.srcElement.classList.contains('disabled')) {
+                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_start", this.getUpdatePaginationEventName(), 1);
+                }
+            });
+        }
+        if (endEl) {
+            endEl.addEventListener("click", async (evt) => {
+                if (!evt.srcElement.classList.contains('disabled')) {
+                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_end", this.getUpdatePaginationEventName(), totalPages);
+                }
+            });
+        }
+    }
+
     async renderCombos (event) {
         this.destroyPreviousBootstrapCollapseObjects();
-
+        const bUsePagination = event.needsPagination;
+        const numCombos = event.combos.length;
         const parentAccordionID = this.#outerAccordionID;
         const accordDiv = document.getElementById(parentAccordionID);
         let skeletonInternal = ``;
         let i = 0;
         
-        for (const file in event) {
-            let comboNum = 0;
-            const stageID = event[file].stage_ID;
-            if (event[file].combos) {
-                event[file].combos.forEach(combo => {
-                    const cleanFile = file.substring(file.lastIndexOf('/') + 1).replace(/\.[^/.]+$/,"");
-                    const comboID = cleanFile + "_" + String(comboNum);
-                    const playerChar = "Foxy";
-                    const opponentChar = "PVSTV";
+        while (i < numCombos) {
+            const combo = event.combos[i];
+            const stageID = combo.stage;
+            const cleanFile = combo.file.substring(combo.file.lastIndexOf("/") + 1).replace(/\.[^/.]+$/,"");
+            const comboID = cleanFile + "_" + String(i);
+            const playerChar = "Foxy";
+            const opponentChar = "PVSTV";
 
-                    // Loop over moves
-                    let moveHTML = `
-                    <div>
-                        Killed? ${combo.didKill} Start: ${combo.startFrame} End: ${combo.endFrame} Dmg: ${combo.endPercent - combo.startPercent}
-                    </div><div>
-                        ${cleanFile}
+            // Loop over moves
+            let moveHTML = `
+            <div>
+                Killed? ${combo.combo.didKill} Start: ${combo.combo.startFrame} End: ${combo.combo.endFrame} Dmg: ${combo.combo.endPercent - combo.combo.startPercent}
+            </div><div>
+                ${cleanFile}
+            </div>
+            `;
+
+            let moveNum = 0;
+            combo.combo.moves.forEach(move => {
+                const moveID = comboID + "_" + String(moveNum);
+
+                const moveHeaderID = "combo_" + moveID;
+                const moveHeaderButtonID = moveHeaderID + "_button";
+                const moveCollapseID = "combo_" + moveID + "_move_list";
+                this.#idList.push(moveHeaderID);
+                this.#collapseIDMap.set(moveHeaderID, {
+                    collapseID: moveCollapseID,
+                    buttonID: moveHeaderButtonID
+                });
+                
+                moveHTML = `${moveHTML}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="${moveHeaderID}">
+                        <button id="${moveHeaderButtonID}" class="accordion-button accordion-button-sub collapsed collapsed-icon">
+                            Move ${move.moveID}
+                        </button>
+                    </h2>
+                    <div id="${moveCollapseID}" class="accordion-collapse collapse">
+                        <div class="accordion-body">
+                            Damage: ${move.damage}
+                            Coords: X: ${move.xPos}, Y: ${move.yPos}
+                            frame: ${move.frame}
+                            hit: ${move.hitCount}
+                        </div>
                     </div>
-                    `;
+                </div>
+                `;
+                moveNum++;
+            });
 
-                    let moveNum = 0;
-                    combo.moves.forEach(move => {
-                        const moveID = comboID + "_" + String(moveNum);
+            const moveHeaderID = "combo_" + comboID + "_heading";
+            const moveHeaderButtonID = moveHeaderID + "_button";
+            const moveCollapseID = "combo_" + comboID + "_collapse";
+            this.#idList.push(moveHeaderID);
+            this.#collapseIDMap.set(moveHeaderID, {
+                collapseID: moveCollapseID,
+                buttonID: moveHeaderButtonID
+            });
 
-                        const moveHeaderID = "combo_" + moveID;
-                        const moveHeaderButtonID = moveHeaderID + "_button";
-                        const moveCollapseID = "combo_" + moveID + "_move_list";
-                        this.#idList.push(moveHeaderID);
-                        this.#collapseIDMap.set(moveHeaderID, {
-                            collapseID: moveCollapseID,
-                            buttonID: moveHeaderButtonID
-                        });
-                        
-                        moveHTML = `${moveHTML}
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="${moveHeaderID}">
-                                <button id="${moveHeaderButtonID}" class="accordion-button accordion-button-sub collapsed collapsed-icon">
-                                    Move ${move.moveID}
-                                </button>
-                            </h2>
-                            <div id="${moveCollapseID}" class="accordion-collapse collapse">
-                                <div class="accordion-body">
-                                    Damage: ${move.damage}
-                                    Coords: X: ${move.xPos}, Y: ${move.yPos}
-                                    frame: ${move.frame}
-                                    hit: ${move.hitCount}
+            skeletonInternal = `
+                ${skeletonInternal}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="${moveHeaderID}">
+                            <button id="${moveHeaderButtonID}" class="accordion-button collapsed collapsed-icon">
+                                ${playerChar} combos ${opponentChar} on ${stageID} (${combo.combo.moves.length} moves)
+                            </button>
+                        </h2>
+                        <div id="${moveCollapseID}" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="accordion" id="combo_${comboID}_character_display_accordion">
+                                    ${moveHTML}
                                 </div>
                             </div>
                         </div>
-                        `;
-                        moveNum++;
-                    });
+                    </div>
+                    `;
 
-                    const moveHeaderID = "combo_" + comboID + "_heading";
-                    const moveHeaderButtonID = moveHeaderID + "_button";
-                    const moveCollapseID = "combo_" + comboID + "_collapse";
-                    this.#idList.push(moveHeaderID);
-                    this.#collapseIDMap.set(moveHeaderID, {
-                        collapseID: moveCollapseID,
-                        buttonID: moveHeaderButtonID
-                    });
-
-                    skeletonInternal = `
-                        ${skeletonInternal}
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="${moveHeaderID}">
-                                    <button id="${moveHeaderButtonID}" class="accordion-button collapsed collapsed-icon">
-                                        ${playerChar} combos ${opponentChar} on ${stageID} (${combo.moves.length} moves)
-                                    </button>
-                                </h2>
-                                <div id="${moveCollapseID}" class="accordion-collapse collapse">
-                                    <div class="accordion-body">
-                                        <div class="accordion" id="combo_${comboID}_character_display_accordion">
-                                            ${moveHTML}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            `;
-
-                    comboNum++;
-                });
-            }
+            i++;
         }
+
+        if (bUsePagination) {
+            const activePage = event.page;
+            const totalPages = event.totalPage;
+            this._createPaginationSection(activePage, totalPages);
+            this._attachPaginationCallbacks(activePage, totalPages);
+        }
+        
         accordDiv.innerHTML = skeletonInternal;
 
         this.createLimitedBootstrapObjects();
@@ -403,6 +534,15 @@ class AccordionView {
 
     onlyUnique(value, index, array) {
         return array.indexOf(value) === index;
+    }
+
+    getUpdatePaginationEventName() {
+        switch(this.getType()) {
+            case AccordionTypes.PARSE:
+                return "updateParsePagination";
+            case AccordionTypes.FINDCOMBOS:
+                return "updateComboPagination";
+        }
     }
 }
 

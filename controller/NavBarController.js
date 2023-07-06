@@ -15,6 +15,7 @@ class NavBarController extends EventEmitter {
         "updatePanelOneAccordion",
         "updatePanelOneDirectoryInput",
         "updatePanelOneFilesTable",
+        "updatePanelOneAccordionJustAccordion",
         "updatePanelThreeDirectoryInput",
         "updatePanelThreeComboButton"
     ]
@@ -36,21 +37,28 @@ class NavBarController extends EventEmitter {
         const that = this;
         ipcRenderer.on("serverEvent", (evt, args) => {
             // Handle returns
-            const response = args.args;
-            if (args.eventName === "parseDirectoryComplete") {
-                const parsedData = JSON.parse(response.replaceAll('\\', '/').replaceAll('/"','\\\"'));
-                this.emit("updatePanelOneAccordion", parsedData);
-            } else if (args.eventName === "parseDirectoryForSlippiFiles") {
-                switch (args.srcID) {
-                    case "parseSlippi_input":
-                    case "parseSlippi_choose_button":
-                        this.cb_receiveParsedDirectoryFromSlippi(response.valid, response.files, response.srcID, response.dir, 0, response.errMsg);
-                        break;
-                    case "comboSlippi_input":
-                    case "comboSlippi_choose_button":
-                        this.cb_receiveParsedDirectoryFromSlippi(response.valid, response.files, response.srcID, response.dir, 2, response.errMsg);
-                        break;
-                }
+            let response = args.args;
+            switch (args.eventName) {
+                case "parseDirectoryComplete":
+                    response = {...response, ...args};
+                    this.emit("updatePanelOneAccordion", response);
+                    break;
+                case "updatePanelOneAccordionJustAccordion":
+                    response = {...response, ...args};
+                    this.emit("updatePanelOneAccordionJustAccordion", response);
+                    break;
+                case "parseDirectoryForSlippiFiles":
+                    switch (args.srcID) {
+                        case "parseSlippi_input":
+                        case "parseSlippi_choose_button":
+                            this.cb_receiveParsedDirectoryFromSlippi(response.valid, response.files, response.srcID, response.dir, 0, response.errMsg);
+                            break;
+                        case "comboSlippi_input":
+                        case "comboSlippi_choose_button":
+                            this.cb_receiveParsedDirectoryFromSlippi(response.valid, response.files, response.srcID, response.dir, 2, response.errMsg);
+                            break;
+                    }
+                    break;
             }
         });
     }

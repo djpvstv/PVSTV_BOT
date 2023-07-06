@@ -10,10 +10,17 @@ class MainModel {
     #directory = '';
     #worker = null;
 
+    #usePagination = null;
+    #parseInfo = null;
+    #comboInfo = null;
+
     #bIsCancelled = false;
+
+    #PAGINATION_LOWER_LIMIT = 100;
 
     constructor( mainWindow ) {
         this.#win = mainWindow;
+        this.#usePagination = [false, false, false];
         this.createWorker();
     }
 
@@ -79,6 +86,115 @@ class MainModel {
         event.sender.send("serverEvent",data);
     }
 
+    handleProcessedSlippiParse(data) {
+        const parsedData = JSON.parse(data.args.replaceAll('\\', '/').replaceAll('/"','\\\"'));
+        const numPlayers = parsedData.players.length;
+        const totalNumPages = Math.ceil(numPlayers / this.#PAGINATION_LOWER_LIMIT); 
+        const bNeedsPagination = numPlayers > this.#PAGINATION_LOWER_LIMIT;
+
+        const page = 1;
+        
+        const totalNames = [];
+        let i = 0;
+        while (i < numPlayers) {
+            totalNames.push(Object.keys(parsedData.players[i])[0].replaceAll('＃','#').toUpperCase());
+            i++
+        }
+        
+        this.#usePagination[0] = bNeedsPagination;
+        if (bNeedsPagination) {
+            const startIdx = this.#PAGINATION_LOWER_LIMIT * (page-1);
+            this.#parseInfo = Object.assign({}, parsedData);
+            parsedData.players = parsedData.players.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);
+        }
+
+        this.#win.webContents.send("serverEvent", {
+            args: parsedData,
+            totalNames: totalNames,
+            eventName: data.eventName,
+            needsPagination: bNeedsPagination,
+            page: page,
+            totalPage: totalNumPages
+        });
+    }
+
+    async updateParsePagination ( event, buttonID, targetPage ) {
+        const numPlayers = this.#parseInfo.players.length;
+        const totalNumPages = Math.ceil(numPlayers / this.#PAGINATION_LOWER_LIMIT); 
+        const startIdx = this.#PAGINATION_LOWER_LIMIT * (targetPage-1);
+        const parsedData = Object.assign({}, this.#parseInfo);
+        parsedData.players = parsedData.players.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);
+        this.#win.webContents.send("serverEvent", {
+            args: parsedData,
+            eventName: "updatePanelOneAccordionJustAccordion",
+            needsPagination: true,
+            page: targetPage,
+            totalPage: totalNumPages
+        });
+    }
+
+    handleProcessedComboParse (data) {
+        const parsedData = JSON.parse(data.args.replaceAll('\\', '/').replaceAll('/"','\\\"'));
+        const files = Object.keys(parsedData);
+        const numFiles = files.length;
+        let numCombos = 0;
+        let comboData = [];
+        let i = 0, j = 0;
+        while (i < numFiles) {
+            j = 0;
+            const currentNumCombos = parsedData[files[i]].combos.length;
+            while (j < currentNumCombos) {
+                comboData[numCombos + j] = {
+                    combo: parsedData[files[i]].combos[j],
+                    stage: parsedData[files[i]].stage_ID,
+                    file: files[i]
+                }
+                j++;
+            }
+            numCombos = numCombos + currentNumCombos;
+            i++;
+        }
+
+        const totalNumPages = Math.ceil(numCombos / this.#PAGINATION_LOWER_LIMIT); 
+        const bNeedsPagination = numCombos > this.#PAGINATION_LOWER_LIMIT;
+        const page = 1;
+
+        this.#usePagination[2] = bNeedsPagination;
+        if (bNeedsPagination) {
+            const startIdx = this.#PAGINATION_LOWER_LIMIT * (page-1);
+            this.#comboInfo = [...comboData];
+            comboData = comboData.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);
+        }
+
+        this.#win.webContents.send("findComboEvent", {
+            eventName: data.eventName,
+            args: {
+                combos: comboData,
+                totalCombos: numCombos,
+                page: page,
+                needsPagination: bNeedsPagination,
+                totalPage: totalNumPages
+            }
+        });
+    }
+
+    async updateComboPagination ( event, buttonID, targetPage ) {
+        const numCombos = this.#comboInfo.length;
+        const totalNumPages = Math.ceil(numCombos / this.#PAGINATION_LOWER_LIMIT); 
+        const startIdx = this.#PAGINATION_LOWER_LIMIT * (targetPage-1);
+        let parsedData = [...this.#comboInfo];
+        parsedData = parsedData.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);
+        this.#win.webContents.send("findComboEvent", {
+            eventName: "updatePanelThreeAccordionJustAccordion",
+            args: {
+                combos: parsedData,
+                needsPagination: true,
+                page: targetPage,
+                totalPage: totalNumPages
+            }
+        });
+    }
+
     async processDirectoryForParse ( event, buttonID, chunk ) {
         this.#worker.postMessage({
             evt: 'stop',
@@ -141,7 +257,7 @@ class MainModel {
                     this.#win.webContents.send("parseDirectoryUpdateCount", data);
                     break;
                 case "parseDirectoryComplete":
-                    this.#win.webContents.send("serverEvent", data);
+                    this.handleProcessedSlippiParse(data);
                     break;
                 case "halted":
                     console.log("horses held");
@@ -150,7 +266,7 @@ class MainModel {
                     this.#win.webContents.send("findCombosUpdateCount", data);
                     break;
                 case "findCombosComplete":
-                    this.#win.webContents.send("findComboEvent", data);
+                    this.handleProcessedComboParse(data);
                     break;
             }
         });

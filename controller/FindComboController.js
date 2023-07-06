@@ -17,11 +17,12 @@ class FindComboController extends EventEmitter {
     setUpListeners () {
         const that = this;
         ipcRenderer.on("findComboEvent", (evt, args) => {
-            const response = args.args;
+            let response = args.args;
             if (args.eventName === "findCombosComplete") {
-                const parsedData = JSON.parse(response.replaceAll('\\', '/'));
-                this.emit("updatePanelThreeAccordion", parsedData);
+                this.emit("updatePanelThreeAccordion", response);
                 this.emit("hideSpinner");
+            } else if (args.eventName === "updatePanelThreeAccordionJustAccordion") {
+                this.emit("updatePanelThreeAccordion", response);
             }
         });
     }
