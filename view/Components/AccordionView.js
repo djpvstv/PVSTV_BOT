@@ -1,4 +1,5 @@
 const bootstrap = require('../../Bootstrap/js/bootstrap.bundle.min');
+const utility = require('../../Utility');
 
 const AccordionTypes = Object.freeze({
     PARSE:      0,
@@ -184,8 +185,8 @@ class AccordionView {
 
             skeletonInternal = `
                 ${skeletonInternal}
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="${headingID}">
+                <div class="accordion-item outer-accordion-item">
+                    <h2 class="accordion-header outer-accordion-header" id="${headingID}">
                         <button id="${headingButtonID}" class="accordion-button collapsed collapsed-icon">
                             ${playerTag}
                         </button>
@@ -364,9 +365,12 @@ class AccordionView {
             const combo = event.combos[i];
             const stageID = combo.stage;
             const cleanFile = combo.file.substring(combo.file.lastIndexOf("/") + 1).replace(/\.[^/.]+$/,"");
-            const comboID = cleanFile + "_" + String(i);
-            const playerChar = "Foxy";
-            const opponentChar = "PVSTV";
+            const comboID = cleanFile + "_" + String(combo.comboNum);
+            const playerTag = combo.target_tag.replaceAll('＃','#');
+            const opponentTag = combo.opponent_tag.replaceAll('＃','#');
+
+            const playerChar = combo.target_char;
+            const opponentChar = combo.opponent_char;
 
             // Loop over moves
             let moveHTML = `
@@ -394,7 +398,7 @@ class AccordionView {
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="${moveHeaderID}">
                         <button id="${moveHeaderButtonID}" class="accordion-button accordion-button-sub collapsed collapsed-icon">
-                            Move ${move.moveID}
+                            Move ${move.moveID}: ${utility.getMoveNameFromAttackID(move.moveID)}
                         </button>
                     </h2>
                     <div id="${moveCollapseID}" class="accordion-collapse collapse">
@@ -421,10 +425,13 @@ class AccordionView {
 
             skeletonInternal = `
                 ${skeletonInternal}
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="${moveHeaderID}">
+                    <div class="accordion-item outer-accordion-item">
+                        <h2 class="accordion-header outer-accordion-header" id="${moveHeaderID}">
                             <button id="${moveHeaderButtonID}" class="accordion-button collapsed collapsed-icon">
-                                ${playerChar} combos ${opponentChar} on ${stageID} (${combo.combo.moves.length} moves)
+                            <img src="./img/si_${String(parseInt(playerChar))}.png" width="20" height="20">
+                                ${playerTag} combos
+                                <img src="./img/si_${String(parseInt(opponentChar))}.png" width="20" height="20">
+                                ${opponentTag} on ${stageID} (${combo.combo.moves.length} moves)
                             </button>
                         </h2>
                         <div id="${moveCollapseID}" class="accordion-collapse collapse">
@@ -450,86 +457,6 @@ class AccordionView {
         accordDiv.innerHTML = skeletonInternal;
 
         this.createLimitedBootstrapObjects();
-    }
-
-    async oldRenderCombos (event) {
-        let comboLimit = 0;
-        const parentAccordionID = this.#outerAccordionID;
-        const accordDiv = document.getElementById(parentAccordionID);
-        let skeletonInternal = ``;
-        let i = 0;
-        const foundTags = [];
-        for (const file in event) {
-            if (comboLimit >= 100) {
-                break;
-            }
-            let comboNum = 0;
-            const stageID = event[file].stage_ID;
-            if (event[file].combos) {
-                event[file].combos.forEach(combo => {
-                    const cleanFile = file.substring(file.lastIndexOf('/') + 1).replace(/\.[^/.]+$/,"");
-                    const comboID = cleanFile + "_" + String(comboNum);
-                    const playerChar = "Foxy";
-                    const opponentChar = "PVSTV";
-
-                    // Loop over moves
-                    let moveHTML = `
-                    <div>
-                        Killed? ${combo.didKill} Start: ${combo.startFrame} End: ${combo.endFrame} Dmg: ${combo.endPercent - combo.startPercent}
-                    </div><div>
-                        ${cleanFile}
-                    </div>
-                    `;
-                    if (comboLimit <= 20) {
-                        let moveNum = 0;
-                        combo.moves.forEach(move => {
-                            const moveID = comboID + "_" + String(moveNum);
-                            
-                            moveHTML = `${moveHTML}
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="combo_${moveID}">
-                                    <button class="accordion-button accordion-button-sub collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#combo_${moveID}_move_list" aria-expanded="false" aria-controls="combo_${moveID}_move_list">
-                                        Move ${move.moveID}
-                                    </button>
-                                </h2>
-                                <div id="combo_${moveID}_move_list" class="accordion-collapse collapse" aria-labelledby="combo_${moveID}"> <!-- data-bs-parent="#combo_${comboID}_character_display_accordion"> -->
-                                    <div class="accordion-body">
-                                        Damage: ${move.damage}
-                                        Coords: X: ${move.xPos}, Y: ${move.yPos}
-                                        frame: ${move.frame}
-                                        hit: ${move.hitCount}
-                                    </div>
-                                </div>
-                            </div>
-                            `;
-                            moveNum++;
-                        });
-                    }
-
-
-                    skeletonInternal = `
-                        ${skeletonInternal}
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="combo_${comboID}_heading">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#combo_${comboID}_collapse" aria-expanded="false" aria-controls="combo_${comboID}_collapse">
-                                        ${playerChar} combos ${opponentChar} on ${stageID} (${combo.moves.length} moves)
-                                    </button>
-                                </h2>
-                                <div id="combo_${comboID}_collapse" class="accordion-collapse collapse" aria-labelledby="combo_${comboID}_heading" data-bs-parent="#${parentAccordionID}">
-                                    <div class="accordion-body">
-                                        <div class="accordion" id="combo_${comboID}_character_display_accordion">
-                                            ${moveHTML}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            `;
-                    comboNum++;
-                });
-            }
-            comboLimit++;
-        }
-        accordDiv.innerHTML = skeletonInternal;
     }
 
     onlyUnique(value, index, array) {

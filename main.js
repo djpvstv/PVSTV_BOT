@@ -75,6 +75,9 @@ ipcMain.on("clientEvent", async (event, args) => {
             case "findCombos":
                 model.findCombos(event, args.sourceID, extraData).catch(err => (console.error(err)));
                 break;
+            case "playCombo":
+                model.playCombo(event, args.sourceID, extraData);
+                break;
             default:
                 console.log(`Cannot match event ${args.eventName}`);
         }

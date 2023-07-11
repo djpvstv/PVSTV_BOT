@@ -8,10 +8,17 @@ class FindComboController extends EventEmitter {
         "hideSpinner"
     ];
     #idMap = null;
+    #contextShowing = null;
+    #charUpperLimit = 26;
+    #contextSelect = {
+        game: null,
+        combo: null
+    };
 
     constructor () {
         super();
         this.setUpListeners();
+        this.#contextShowing = false;
     }
 
     setUpListeners () {
@@ -56,6 +63,56 @@ class FindComboController extends EventEmitter {
         }
     }
 
+    cb_handleRightClick (event) {
+        this.#contextShowing = true;
+        const closestParent = event.srcElement.closest(".outer-accordion-item");
+        if (!(closestParent)) return;
+
+        const gameAndCombo = closestParent.querySelector(".outer-accordion-header").id.replace("combo_","").replace("_heading","");
+        const parts = gameAndCombo.split("").reverse().join("").split("_");
+        const comboNum = parseInt(parts.shift());
+        const game = parts.join("_").split("").reverse().join("");
+
+        const contextDiv = document.getElementById(this.idMap.get("c1"));
+
+        let xPos = event.clientX + window.scrollX;
+        let yPos = event.clienty + window.scrollY;
+
+        xPos = window.innerWidth < xPos + 250 ? xPos - 250 : xPos;
+        yPos = window.innerHeight < yPos + 198 ? yPos - 198 : yPos;
+
+        contextDiv.style.left = xPos;
+        contextDiv.style.top = yPos;
+        contextDiv.classList.remove("hidden-context");
+        contextDiv.classList.add("show-context");
+
+        this.#contextSelect.combo = comboNum;
+        this.#contextSelect.game = game;
+    }
+
+    cb_hideContextMenu (event, forceClose) {
+        if (this.#contextShowing) {
+            // don't close if clicking on context menu
+            if (!forceClose) {
+                if (event.srcElement.closest(".wrapper")) return;
+            }
+                
+            const contextDiv = document.getElementById(this.idMap.get("c1"));
+            contextDiv.classList.add("hidden-context");
+            contextDiv.classList.remove("show-context");
+            this.#contextShowing = false;
+        }
+    }
+
+    cb_playCombo () {
+        this.cb_hideContextMenu(null, true);
+        const sendData = {
+            game: this.#contextSelect.game,
+            combo: this.#contextSelect.combo
+        };
+        this.cb_emitButtonEvent(this.idMap.get("c1l1"), "playCombo", sendData);
+    }
+
     // Validation Methods 
     cb_validateTargetTab (newTab) {
         // Three uppercase letters (1-10), #, 1-3 numbers
@@ -76,24 +133,28 @@ class FindComboController extends EventEmitter {
         return isValid;
     }
 
+    cb_validateTargetChar (newChar) {
+        return Number.isInteger(newChar) && newChar >= 0 && newChar < this.#charUpperLimit;
+    }
+
     validateAllWidgetsForBigButton () {
         const flavor = parseInt(this.getElementById("i2").value);
 
         const isTagValid = /^[A-Z]{1,10}#\d{1,3}$/.test(this.getElementById("i3").value);
         const isDirInputValid = this.getElementById("i1").classList.contains("is-valid");
-        const isCharValid = false;
+        const isCharValid = this.getElementById("i4b1") ? parseInt(this.getElementById("i4b1").value) > 0 && parseInt(this.getElementById("i4b1").value) < this.#charUpperLimit: false;
         const isColorValid = false;
 
         switch (flavor) {
-            case 1:
+            case 1: // TAG
                 return isTagValid && isDirInputValid;
-            case 2:
+            case 2: // CHAR
                 return isCharValid && isDirInputValid;
-            case 3:
+            case 3: // CHAR_COLOR
                 return isCharValid && isColorValid && isDirInputValid;
-            case 4:
+            case 4: // CHAR_TAG
                 return isTagValid && isCharValid && isDirInputValid;
-            case 5:
+            case 5: // CHAR_TAG_COLOR
                 return isTagValid && isCharValid && isColorValid && isDirInputValid;
         }
     }

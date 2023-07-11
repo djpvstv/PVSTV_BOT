@@ -1,5 +1,6 @@
 const { dialog } = require('electron');
 const { Worker } = require('node:worker_threads');
+const SlippiPlayer = require('./SlippiPlayer');
 
 const fs = require('fs/promises');
 
@@ -13,12 +14,22 @@ class MainModel {
     #usePagination = null;
     #parseInfo = null;
     #comboInfo = null;
+    #fileComboMap = null;
+
+    #slippiPlayer = null;
 
     #bIsCancelled = false;
 
     #PAGINATION_LOWER_LIMIT = 100;
 
+    #meleeIsoPath = "";
+    #slippiPath = "";
+
     constructor( mainWindow ) {
+        this.#meleeIsoPath = "C:\\Users\\garre\\Documents\\My Games\\Dolphin ISOs\\ANIMELEE - COMPLETE EDITION Nabooru.iso";
+        this.#slippiPath = "C:\\Users\\garre\\AppData\\Roaming\\Slippi Launcher\\playback\\Slippi Dolphin.exe";
+        this.#slippiPlayer = new SlippiPlayer(this.#slippiPath, this.#meleeIsoPath);
+        this.#fileComboMap = new Map();
         this.#win = mainWindow;
         this.#usePagination = [false, false, false];
         this.createWorker();
@@ -134,6 +145,7 @@ class MainModel {
     }
 
     handleProcessedComboParse (data) {
+        this.#fileComboMap.clear();
         const parsedData = JSON.parse(data.args.replaceAll('\\', '/').replaceAll('/"','\\\"'));
         const files = Object.keys(parsedData);
         const numFiles = files.length;
@@ -146,9 +158,17 @@ class MainModel {
             while (j < currentNumCombos) {
                 comboData[numCombos + j] = {
                     combo: parsedData[files[i]].combos[j],
+                    comboNum: j,
                     stage: parsedData[files[i]].stage_ID,
-                    file: files[i]
+                    file: files[i],
+                    target_tag: parsedData[files[i]].target_tag,
+                    target_char: parsedData[files[i]].target_char,
+                    target_color: parsedData[files[i]].target_color,
+                    opponent_tag: parsedData[files[i]].opponent_tag,
+                    opponent_char: parsedData[files[i]].opponent_char,
+                    opponent_color: parsedData[files[i]].opponent_color
                 }
+                this.#fileComboMap.set(files[i].substring(files[i].lastIndexOf("/") + 1).replace(/\.[^/.]+$/,"") + "_" + String(j), numCombos + j);
                 j++;
             }
             numCombos = numCombos + currentNumCombos;
@@ -160,9 +180,9 @@ class MainModel {
         const page = 1;
 
         this.#usePagination[2] = bNeedsPagination;
+        this.#comboInfo = [...comboData];
         if (bNeedsPagination) {
             const startIdx = this.#PAGINATION_LOWER_LIMIT * (page-1);
-            this.#comboInfo = [...comboData];
             comboData = comboData.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);
         }
 
@@ -220,8 +240,20 @@ class MainModel {
         console.log(params);
 
         switch (params.flavor) {
-            case 4:
+            case 1:
                 this.findCombosFromTag(event, buttonID, params.targetTag, params.batchNum);
+                break;
+            case 2:
+                this.findCombosFromChar(event, buttonID, params.targetChar, params.batchNum);
+                break;
+            case 3:
+                this.findCombosFromCharColor(event, buttonID, params.targetChar, params.targetColor, params.batchNum);
+                break;
+            case 4:
+                this.findCombosFromCharTag(event, buttonID, params.targetChar, params.targetTag, params.batchNum);
+                break;
+            case 5:
+                this.findCombosFromCharTagColor(event, buttonID, params.targetChar, params.targetTag, params.targetColor, params.batchNum);
                 break;
         }
     }
@@ -239,6 +271,84 @@ class MainModel {
             tag: tag,
             chunk: chunk
         });
+    }
+    
+    async findCombosFromChar(event, buttonID, char, chunk) {
+        this.#worker.postMessage({
+            evt: 'stop',
+            value: false
+        });
+
+        this.#worker.postMessage({
+            evt: 'processForComboChar',
+            dir: this.#directory,
+            files: this.#currentFiles,
+            char: char,
+            chunk: chunk
+        });
+    }
+
+    async findCombosFromCharColor(event, buttonID, char, color, chunk) {
+        this.#worker.postMessage({
+            evt: 'stop',
+            value: false
+        });
+
+        this.#worker.postMessage({
+            evt: 'processForComboCharColor',
+            dir: this.#directory,
+            files: this.#currentFiles,
+            char: char,
+            color: color,
+            chunk: chunk
+        });
+    }
+
+    async findCombosFromCharTag(event, buttonID, char, tag, chunk) {
+        this.#worker.postMessage({
+            evt: 'stop',
+            value: false
+        });
+
+        this.#worker.postMessage({
+            evt: 'processForComboCharTag',
+            dir: this.#directory,
+            files: this.#currentFiles,
+            char: char,
+            tag: tag,
+            chunk: chunk
+        });
+    }
+
+    async findCombosFromCharTagColor(event, buttonID, char, tag, color, chunk) {
+        this.#worker.postMessage({
+            evt: 'stop',
+            value: false
+        });
+
+        this.#worker.postMessage({
+            evt: 'processForComboCharTagColor',
+            dir: this.#directory,
+            files: this.#currentFiles,
+            char: char,
+            tag: tag,
+            color: color,
+            chunk: chunk
+        });
+    }
+
+    async playCombo (event, sourceID, gameAndCombo) {
+        const game = gameAndCombo.game;
+        const comboNum = gameAndCombo.combo;
+        const comboIndex = this.#fileComboMap.get(game + "_" + comboNum);
+
+        const combos = [{
+            startFrame: parseInt(this.#comboInfo[comboIndex].combo.startFrame),
+            endFrame: parseInt(this.#comboInfo[comboIndex].combo.endFrame),
+            filePath: this.#comboInfo[comboIndex].file
+        }];
+    
+        await this.#slippiPlayer.playCombos(combos);
     }
 
     createWorker () {

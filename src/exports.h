@@ -100,6 +100,11 @@ namespace slip {
 
 	struct IndividualAnalysis {
 		std::string                   fileName;
+		int                           target_char;
+		int                           target_color;
+		std::string                   target_tag;
+		int                           opponent_char;
+		int                           opponent_color;
 		int                           stage_id;
 		std::vector<slip::Combo>      comboVec;    //Vector of connecting moves
 		std::vector<slip::Conversion> convoVec;    //Vector of converting moves

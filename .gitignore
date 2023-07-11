@@ -9,3 +9,6 @@ node_modules/
 logger.js
 test.js
 build/Release/v8engine.node
+build/binding.sln
+build/config.gypi
+temp.json
