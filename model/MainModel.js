@@ -1,8 +1,10 @@
+const { app } = require('electron');
 const { dialog } = require('electron');
 const { Worker } = require('node:worker_threads');
 const SlippiPlayer = require('./SlippiPlayer');
 
 const fs = require('fs/promises');
+const { join } = require('path');
 
 class MainModel {
 
@@ -22,6 +24,7 @@ class MainModel {
 
     #PAGINATION_LOWER_LIMIT = 100;
 
+    #appDataPath = "";
     #meleeIsoPath = "";
     #slippiPath = "";
 
@@ -35,15 +38,211 @@ class MainModel {
         this.createWorker();
     }
 
+    async checkPaths () {
+        // Set Up AppData
+        let actualAppDataPath, found;
+        const appDataPath = join(app.getPath("appData"), "pvstvDvtv");
+        try {
+            await fs.access(appDataPath);
+            actualAppDataPath = appDataPath;
+            found = true;
+        } catch {
+            try {
+                await fs.mkdir(appDataPath);
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        if (!found) {
+            try {
+                await fs.access(appDataPath);
+                actualAppDataPath = appDataPath;
+                return true;
+            } catch (err) {
+                console.l0og(err);
+            }
+        }
+
+        // Create appdata if it doesn't exist
+        let appData;
+        const appDataJSONPath = join(actualAppDataPath, "appData.json");
+        this.#appDataPath = appDataJSONPath;
+        try {
+            await fs.access(appDataJSONPath);
+            appData = await fs.readFile(appDataJSONPath);
+            appData = JSON.parse(appData.toString());
+        } catch {
+            try {
+                // Default app data
+                appData = {
+                    slippiPath: "",
+                    meleeISOpath: ""
+                }
+                await fs.writeFile(appDataJSONPath, JSON.stringify(appData, null, 2));
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        // Check if SLIPPI path exists
+        let updateAppData = false;
+        if (appData.slippiPath.length === 0) {
+            appData.slippiPath = join(app.getPath("appData"), "Slippi Launcher", "playback", "Slippi Dolphin.exe");
+        }
+
+        try {
+            await fs.access(appData.slippiPath);
+            updateAppData = true;
+        } catch {
+            // send message to main window asking for slippi path
+            this.#win.webContents.send("serverEvent", {
+                eventName: "askForSlippiPath",
+            });
+        }
+
+        if (updateAppData) {
+            // Check if Melee ISO exists
+            try {
+                await fs.access(appData.meleeISOpath);
+            } catch {
+                // Send message to main window asking for melee iso path
+                this.#win.webContents.send("serverEvent", {
+                    eventName: "askForMeleeIsoPath",
+                });
+            }
+        }
+
+        if (updateAppData) this.updateAppData(appData);
+    }
+
+    async updateAppData (appData) {
+        try {
+            await fs.writeFile(this.#appDataPath, JSON.stringify(appData, null, 2));
+            this.#slippiPath = appData.slippiPath;
+            this.#meleeIsoPath = appData.meleeISOpath;
+        } catch (err) {
+            console.log("could not write to appData: " + err);
+        }
+    }
+
+    async browserForSlippiPath (event) {
+        const appDataPath = app.getPath("appData");
+        const filename = await dialog.showOpenDialog({
+            defaultPath: appDataPath,
+            properties: [
+                "openFile"
+            ],
+            filters: [
+                {name: 'Executables', extensions: ['exe']},
+                {name: 'All Files', extensions: ['*'] }
+            ]
+        });
+
+        let success = false;
+        if (!filename.canceled) {
+            success = true;
+        }
+
+        event.sender.send("receiveSlippiPath",{
+            eventName: "receiveSlippiPath",
+            args: {
+                success: success,
+                path: filename.filePaths[0]
+            }
+        });
+    }
+
+    async browserForMeleeIsoPath (event) {
+        const appDataPath = app.getPath("appData");
+        const documentsPath = app.getPath("documents");
+        const filename = await dialog.showOpenDialog({
+            defaultPath: documentsPath,
+            properties: [
+                "openFile"
+            ],
+            filters: [
+                {name: 'ISO files', extensions: ['iso']},
+                {name: 'All Files', extensions: ['*'] }
+            ]
+        });
+
+        let success = false;
+        if (!filename.canceled) {
+            success = true;
+        }
+
+        event.sender.send("receiveSlippiPath",{
+            eventName: "receiveSlippiPath",
+            args: {
+                success: success,
+                path: filename.filePaths[0]
+            }
+        });
+    } 
+
+    async updateSlippiPath (event, args) {
+        let appData;
+        if (args.success) {
+            try {
+                await fs.access(this.#appDataPath);
+                appData = await fs.readFile(this.#appDataPath);
+                appData = JSON.parse(appData.toString());
+            } catch (err) {
+                console.log("could not update slippi path: " + err);
+            }
+            try {
+                appData.slippiPath = args.path;
+                await fs.writeFile(this.#appDataPath, JSON.stringify(appData, null, 2));
+                this.#slippiPath = args.path;
+
+                // Check if Melee ISO exists
+                try {
+                    await fs.access(appData.meleeISOpath);
+                } catch {
+                    // Send message to main window asking for melee iso path
+                    this.#win.webContents.send("serverEvent", {
+                        eventName: "askForMeleeIsoPath",
+                    });
+                }
+            } catch (err) {
+                console.log(err);
+            }
+
+        }
+    }
+
+    async updateMeleeIsoPath (event, args) {
+        let appData;
+        if (args.success) {
+            try {
+                await fs.access(this.#appDataPath);
+                appData = await fs.readFile(this.#appDataPath);
+                appData = JSON.parse(appData.toString());
+            } catch (err) {
+                console.log("could not update melee ISO: " + err);
+            }
+            try {
+                appData.meleeISOpath = args.path;
+                await fs.writeFile(this.#appDataPath, JSON.stringify(appData, null, 2));
+                this.#meleeIsoPath = args.path;
+            } catch (err) {
+                console.log(err);
+            }
+        }
+    }
+
     async processDirectoryForSlippiFilesWithUI ( event, buttonID ) {
 
-        const filename = dialog.showOpenDialogSync({
+        const file = await dialog.showOpenDialog({
             properties: [
                 "openDirectory"
             ]
         });
-    
-        this.processDirectoryForSlippiFiles(event, buttonID, filename);
+        
+        if (!file.canceled) {
+            this.processDirectoryForSlippiFiles(event, buttonID, file.filePaths);
+        }
     }
 
     async processDirectoryForSlippiFilesWithoutUI (event, buttonID, fileName) {

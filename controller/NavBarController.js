@@ -17,7 +17,9 @@ class NavBarController extends EventEmitter {
         "updatePanelOneFilesTable",
         "updatePanelOneAccordionJustAccordion",
         "updatePanelThreeDirectoryInput",
-        "updatePanelThreeComboButton"
+        "updatePanelThreeComboButton",
+        "askForSlippiPath",
+        "askForMeleeIsoPath"
     ]
 
     #FindComboController = null;
@@ -35,6 +37,7 @@ class NavBarController extends EventEmitter {
 
     setUpListeners () {
         const that = this;
+        let data;
         ipcRenderer.on("serverEvent", (evt, args) => {
             // Handle returns
             let response = args.args;
@@ -59,12 +62,30 @@ class NavBarController extends EventEmitter {
                             break;
                     }
                     break;
+                case "askForSlippiPath":
+                    data = { modalTitle: "Where does your Slippi Playback Emulator Live?", flavor: 0 };
+                    this.emit("askForSlippiPath", data);
+                    break;
+                case "askForMeleeIsoPath":
+                    data = { modalTitle: "Where does your Melee 1.02 ISO Live?", flavor: 1 };
+                    this.emit("askForMeleeIsoPath", data);
+                    break;
             }
         });
     }
 
     getEvents () {
         return this.events;
+    }
+
+    async emitStartupEvent () {
+        try {
+            ipcRenderer.send("clientEvent", {
+                eventName: "checkPaths"
+            });
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     async cb_emitButtonEvent (sourceID, eventName, evtData) {

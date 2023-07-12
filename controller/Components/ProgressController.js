@@ -1,4 +1,3 @@
-// const Utility = require("../Utility");
 const {ipcRenderer} = require("electron");
 const {EventEmitter} = require("events");
 

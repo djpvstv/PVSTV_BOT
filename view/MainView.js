@@ -1,27 +1,32 @@
 const NavBarView = require("./NavBarView");
 const {EventEmitter} = require("events");
 const {ProgressView} = require("./Components/ProgressView");
+const {FindSlippiModal} = require("./Components/FindSlippiModal");
 
 class MainView extends EventEmitter {
 
     #NavBar = null;
     #Spinner = null;
+    #SlippiPathSpinner = null;
     #controllers = null;
 
     constructor( controllers, appState ) {
         super();
         this.#controllers = controllers;
         this.createNavBar( controllers.getNavBarController(), controllers.getProgressController(), appState);
-        this.createSpinner( controllers.getProgressController(), appState );
+        this.createSpinners( controllers, appState );
         this.createEventListeners();
+
+        controllers.getNavBarController().emitStartupEvent();
     }
 
     createNavBar (controller, progressController, appState ) {
         this.#NavBar = new NavBarView( controller, progressController, appState );
     }
 
-    createSpinner( controller, appState ) {
-        this.#Spinner = new ProgressView( controller, appState );
+    createSpinners( controller, appState ) {
+        this.#Spinner = new ProgressView( controller.getProgressController(), appState );
+        this.#SlippiPathSpinner = new FindSlippiModal( controller.getSlippiPathController(), appState );
     }
 
     createEventListeners() {
@@ -87,6 +92,26 @@ class MainView extends EventEmitter {
                     case "updateSpinnerCount":
                         controller.on(eventName, (event) => {
                             this.#Spinner.updateCount(event);
+                        });
+                        break;
+                    case "askForSlippiPath":
+                        controller.on(eventName, (event) => {
+                            this.#SlippiPathSpinner.show(event);
+                        })
+                        break;
+                    case "newSlippiPath":
+                        controller.on(eventName, (event) => {
+                            this.#SlippiPathSpinner.newPath(event);
+                        });
+                        break;
+                    case "askForMeleeIsoPath":
+                        controller.on(eventName, (event) => {
+                            this.#SlippiPathSpinner.show(event);
+                        });
+                        break;
+                    case "newMeleeIsoPath":
+                        controller.on(eventName, (event) => {
+
                         });
                         break;
                 }

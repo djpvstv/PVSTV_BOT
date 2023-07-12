@@ -1,6 +1,5 @@
 require('v8-compile-cache');
-
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const MainModel = require('./model/MainModel');
 
@@ -34,13 +33,12 @@ const createWindow = async () => {
     createModel(win);
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
     createWindow();
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
     })
-
 });
 
 app.on('window-all-closed', () => {
@@ -77,6 +75,30 @@ ipcMain.on("clientEvent", async (event, args) => {
                 break;
             case "playCombo":
                 model.playCombo(event, args.sourceID, extraData);
+                break;
+            case "checkPaths":
+                model.checkPaths();
+                break;
+            case "findSlippiModal":
+                switch (extraData.flavor) {
+                    case 0:
+                        model.browserForSlippiPath(event);
+                        break;
+                    case 1:
+                        model.browserForMeleeIsoPath(event);
+                        break;
+                }
+                break;
+            case "updateSlippiPathFromClient":
+                switch (extraData.flavor) {
+                    case 0:
+                        model.updateSlippiPath(event, extraData);
+                        break;
+                    case 1:
+                        model.updateMeleeIsoPath(event, extraData);
+                        break;
+                }
+                
                 break;
             default:
                 console.log(`Cannot match event ${args.eventName}`);
