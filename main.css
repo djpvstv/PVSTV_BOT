@@ -154,10 +154,20 @@
     align-items: center;
     border-radius: 5px;
     padding: 0 5px 0 10px;
+    transition: 0.3s;
 }
 
 .content .context-item:hover {
     background-color: #d3d3d375;
+}
+
+.content .context-item-disabled {
+    color: rgba(0,0,0,0.2);
+}
+
+.content .context-item-disabled:hover {
+    color: rgba(0,0,0,0.2);
+    background-color: #d3d3d325;
 }
 
 .icon {
@@ -205,4 +215,21 @@
     scroll-behavior: smooth;
     overflow: auto;
     max-height: 250px;
+}
+
+.btn-filter {
+    background-color: lavender;
+}
+.p-move {
+    margin: 0.25rem 1rem 0.25rem 1rem;
+}
+
+.meatballs-div {
+    position: absolute;
+    right: 2rem;
+}
+
+.meatballs-icon {
+    height: 2rem;
+    width: 2rem;
 }

@@ -1,5 +1,6 @@
 const { EventEmitter } = require("events");
 const {ipcRenderer} = require("electron");
+const Utility = require("../Utility");
 
 class FindComboController extends EventEmitter {
     events = [
@@ -76,7 +77,7 @@ class FindComboController extends EventEmitter {
         const contextDiv = document.getElementById(this.idMap.get("c1"));
 
         let xPos = event.clientX + window.scrollX;
-        let yPos = event.clienty + window.scrollY;
+        let yPos = event.clientY + window.scrollY;
 
         xPos = window.innerWidth < xPos + 250 ? xPos - 250 : xPos;
         yPos = window.innerHeight < yPos + 198 ? yPos - 198 : yPos;
@@ -101,7 +102,12 @@ class FindComboController extends EventEmitter {
             contextDiv.classList.add("hidden-context");
             contextDiv.classList.remove("show-context");
             this.#contextShowing = false;
+            if (event) event.stopPropagation();
         }
+    }
+
+    isContextShowing () {
+        return this.#contextShowing;
     }
 
     cb_playCombo () {
@@ -137,13 +143,18 @@ class FindComboController extends EventEmitter {
         return Number.isInteger(newChar) && newChar >= 0 && newChar < this.#charUpperLimit;
     }
 
+    cb_validateTargetColor (newColor, currentChar) {
+        return Number.isInteger(newColor) && newColor <= Utility.getMaxCostumesByCharacter(currentChar);
+    }
+
     validateAllWidgetsForBigButton () {
         const flavor = parseInt(this.getElementById("i2").value);
 
-        const isTagValid = /^[A-Z]{1,10}#\d{1,3}$/.test(this.getElementById("i3").value);
+        const isTagValid = this.getElementById("i3") ? /^[A-Z]{1,10}#\d{1,3}$/.test(this.getElementById("i3").value) : false;
         const isDirInputValid = this.getElementById("i1").classList.contains("is-valid");
-        const isCharValid = this.getElementById("i4b1") ? parseInt(this.getElementById("i4b1").value) > 0 && parseInt(this.getElementById("i4b1").value) < this.#charUpperLimit: false;
-        const isColorValid = false;
+        const charValue = this.getElementById("i4b1") ? parseInt(this.getElementById("i4b1").value) : null;
+        const isCharValid = this.getElementById("i4b1") ? charValue > 0 && charValue < this.#charUpperLimit : false;
+        const isColorValid = this.getElementById("i5b1") ? parseInt(this.getElementById("i5b1").value) <= Utility.getMaxCostumesByCharacter(charValue) : false;
 
         switch (flavor) {
             case 1: // TAG

@@ -1,5 +1,6 @@
 const ParseViewBase = require('./PanelViewBase');
 const { AccordionView, AccordionTypes } = require("./Components/AccordionView");
+const Utility = require("../Utility");
 
 class FindComboView extends ParseViewBase {
 
@@ -7,6 +8,7 @@ class FindComboView extends ParseViewBase {
     #controller = null;
     #selectorRow = null;
     #currentFlavor = 4;
+    #currentCharacter = null;
     #appState = null;
     #fileNum = 0;
 
@@ -60,13 +62,13 @@ class FindComboView extends ParseViewBase {
                                     </svg>
                                     <span>Play this combo</span>
                                 </li>
-                                <li class="context-item">
+                                <li class="context-item context-item-disabled">
                                     <svg class="icon">
                                         <image xlink:href="./Bootstrap/svg/pencil-square.svg" width="20" height="20" x="4" y="2"/>
                                     </svg>
                                     <option value="1">Open notes</option>
                                 </li>
-                                <li class="context-item">
+                                <li class="context-item context-item-disabled">
                                     <svg class="icon">
                                         <image xlink:href="./Bootstrap/svg/x.svg" width="30" height="30" y="-2"/>
                                     </svg>
@@ -107,6 +109,7 @@ class FindComboView extends ParseViewBase {
         this.idMap.set("i4", "comboSlippi_input_targetCharacter");
         this.idMap.set("i4b1", "comboSlippi_input_targetCharacter_dropdownbutton");
         this.idMap.set("i5", "comboSlippi_input_targetColor");
+        this.idMap.set("i5b1", "comboSlippi_input_targetColor_dropdownbutton");
         this.idMap.set("p1", "comboSlippi_pagination_div");
         this.idMap.set("c1", "comboSlippi_context_menu");
         this.idMap.set("c1l1", "comboSlippi_context_play_combo");
@@ -155,7 +158,7 @@ class FindComboView extends ParseViewBase {
 
         // Color
         if (flavor === 3 || flavor === 5) {
-            params.targetColor = parseInt(this.getElementById("i5").value);
+            params.targetColor = parseInt(this.getElementById("i5b1").value);
         }
 
         return params;
@@ -218,9 +221,13 @@ class FindComboView extends ParseViewBase {
             });
         }
 
-        controlDiv = this.getElementById("i5");
+        this._addColorDropdownCallback();
+    }
+
+    _addColorDropdownCallback () {
+        const controlDiv = this.getElementById("i5");
         if (controlDiv) {
-            controlDiv.addEventListener("change", (evt) => {
+            controlDiv.addEventListener("click", (evt) => {
                 this.validateInput("i5", evt);
             });
         }
@@ -243,7 +250,7 @@ class FindComboView extends ParseViewBase {
     validateInput (tag, evt) {
         this.getButtonDivTwo().setAttribute("disabled","");
         const controlDiv = this.getElementById(tag);
-        let isValid;
+        let isValid, selectedItem;
         switch (tag) {
             case "i3":
                 const newTag = evt.target.value;
@@ -256,12 +263,15 @@ class FindComboView extends ParseViewBase {
                 }
                 break;
             case "i4":
-                const selectedItem = evt.srcElement.closest(".dropdown-item")
+                selectedItem = evt.srcElement.closest(".dropdown-item")
                 if (selectedItem) {
                     const newChar = selectedItem.value;
                     isValid = this.getController().cb_validateTargetChar(newChar);
                     if (isValid) {
                         // set inner html for char selector
+                        this.#currentCharacter = newChar;
+                        this.renderColorOptions(newChar);
+                        this._addColorDropdownCallback();
                         this.getElementById("i4b1").value = newChar;
                         this.getElementById("i4b1").innerHTML = controlDiv.children[newChar + 1].innerHTML;
                         if (this.getController().validateAllWidgetsForBigButton()) {
@@ -269,6 +279,23 @@ class FindComboView extends ParseViewBase {
                         }
                     }
                 }
+                break;
+            case "i5":
+                selectedItem = evt.srcElement.closest(".dropdown-item");
+                if (selectedItem) {
+                    const newColor = selectedItem.value;
+                    const currentChar = this.#currentCharacter;
+                    isValid = this.getController().cb_validateTargetColor(newColor, currentChar);
+                    if (isValid) {
+                        // set inner html for color selector
+                        this.getElementById("i5b1").value = newColor;
+                        this.getElementById("i5b1").innerHTML = controlDiv.children[newColor + 1].innerHTML;
+                        if (this.getController().validateAllWidgetsForBigButton()) {
+                            this.getButtonDivTwo().removeAttribute("disabled");
+                        }
+                    }
+                }
+
                 break;
         }
     }
@@ -292,7 +319,7 @@ class FindComboView extends ParseViewBase {
                 html = `
                     ${this.getTargetType(flavor)}
                     ${this.getTargetCharacter()}
-                    ${this.getTargetColor()}
+                    ${this.getTargetColor(-1)}
                 `;
                 break;
             case 4:
@@ -307,7 +334,7 @@ class FindComboView extends ParseViewBase {
                     ${this.getTargetType(flavor)}
                     ${this.getTargetTag()}
                     ${this.getTargetCharacter()}
-                    ${this.getTargetColor()}
+                    ${this.getTargetColor(-1)}
                 `;
                 break;
         }
@@ -360,6 +387,7 @@ class FindComboView extends ParseViewBase {
     }
 
     getTargetCharacter () {
+        this.#currentCharacter = -1;
         return `
         <div class="col-md">
             <div class="dropdown">
@@ -490,16 +518,47 @@ class FindComboView extends ParseViewBase {
         `;
     }
 
-    getTargetColor () {
+    getTargetColor (charID) {
+        let dropDowns = `
+        <li class="dropdown-item" value="0">
+            <img src="./img/si_${charID}.png" width="20" height="20">
+            - 0
+        </li>
+        `;
+
+        const numAltCostumes = Utility.getMaxCostumesByCharacter(charID);
+        let i = 1;
+        while (i <= numAltCostumes) {
+            dropDowns = `${dropDowns}
+            <li class="dropdown-item" value="${i}">
+                <img src="./img/si_${charID}_${i}.png" width="20" height="20">
+                - ${String(i)}
+            </li>
+            `;
+            i++;
+        }
+
         return `
         <div class="col-md">
-            <div class="input-group has-validation input-group-match-select">
-                <div class="form-floating">
-                    <input type="text" class="form-control" id="${this.idMap.get("i5")}" placeholder="Color">
-                    <label for="${this.idMap.get("i5")}">Color</label>
-                </div>
+            <div class="dropdown">
+                <button class="btn dropdown-toggle target-dropdown w-100" value="null" type="button" id="${this.idMap.get("i5b1")}" data-bs-toggle="dropdown" aria-expanded="false">
+                    Choose Color:
+                </button>
+                <ul class="has-validation dropdown-menu dropdown-scroll" aria-labeledby="${this.idMap.get("i5b1")}" id="${this.idMap.get("i5")}"">
+                    <li selected><h6 class="dropdown-header">Choose Color:</h6></li>
+                    ${dropDowns}
+                </ul>
             </div>
-        </div>`;
+        </div>
+        `;
+    }
+
+    renderColorOptions(newChar) {
+        if (document.getElementById(this.idMap.get("i5"))) {
+            const targetDiv = document.getElementById(this.idMap.get("i5")).closest(".col-md");
+            const innerHtml = this.getTargetColor(newChar);
+            targetDiv.innerHTML = innerHtml;
+        }
     }
 
     getInputDivOne () {

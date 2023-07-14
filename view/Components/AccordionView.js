@@ -19,6 +19,7 @@ class AccordionView {
     #collapseIDMap = null;
     #collapseMap = null;
     #collapseList = null;
+    #playAllID = "";
 
     // I need a finite number of things that can be open in an accordion
     // This is a performance limitation
@@ -33,6 +34,7 @@ class AccordionView {
             case AccordionTypes.FINDCOMBOS:
                 this.#outerAccordionID = "comboSlippi_combos_outmostAccordion";
                 this.#paginationID = "comboSlippi_pagination_div";
+                this.#playAllID = "comboSlippi_play_all_combos";
                 break;
         }
         this.#appState = appState;
@@ -77,9 +79,21 @@ class AccordionView {
 
     createLimitedBootstrapObjects () {
         this.#idList.forEach((ID) => {
-            document.getElementById(ID).addEventListener("click", async () => {
+            document.getElementById(ID).addEventListener("click", async (evt) => {
+                if (this.#controller.isContextShowing()) {
+                    this.#controller.cb_hideContextMenu(evt);
+                    evt.stopPropagation();
+                    return;
+                }
                 const collapsedIDStruct = this.#collapseIDMap.get(ID);
                 const collapseID = collapsedIDStruct.collapseID;
+
+                const isMeatballsEvt = evt.srcElement.closest(".meatballs-div");
+                if (isMeatballsEvt) {
+                    evt.stopPropagation();
+                    this.#controller.cb_handleRightClick(evt);
+                    return;
+                }
 
                 let bsCollapse;
                 if (this.#collapseMap.has(ID)) {
@@ -243,111 +257,144 @@ class AccordionView {
     _createPaginationSection (activePage, totalPages) {
         const paginationID = this.#paginationID;
         const pagDiv = document.getElementById(paginationID);
-        let pageSkeletonInternal;
-        if (totalPages <= 3) {
-            pageSkeletonInternal = `
-            <nav>
-                <ul class="pagination justify-content-center">
-                    <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
-                        <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
-                    </li>
-                    <li id="${this.#paginationID + "_left"}" class="page-item${activePage === 1 ? ' disabled' : ''}"><a class="page-link" href="#">1</a></li>
-                    <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' disabled' : ''}"><a class="page-link" href="#">2</a></li>
-                    <li id="${this.#paginationID + "_right"}" class="page-item${activePage === 3 ? ' disabled' : ''}"><a class="page-link" href="#">3</a></li>
-                    <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === 3 ? ' disabled' : ''}">
-                        <a class="page-link" href="#"${activePage === 3 ? ' aria-disabled="true"' : ''}>Next</a>
-                    </li>
-                </ul>
-            </nav>`;
-        } else {
-            const leftDistance = activePage - 1;
-            const rightDistance = totalPages - activePage;
+        let navDiv = '';
 
-            pageSkeletonInternal = `
-            <nav>
-                <ul class="pagination justify-content-center">
-                    <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
-                        <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
-                    </li>
-                    ${leftDistance <= 1 ? `
-                        <li id="${this.#paginationID + "_left"}"  class="page-item${activePage === 1 ? ' active' : ''}"><a class="page-link" href="#">1</a></li>
-                        <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' active' : ''}"><a class="page-link" href="#">2</a></li>
-                        <li id="${this.#paginationID + "_right"}" class="page-item${activePage === 3 ? ' active' : ''}"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
-                        <li id="${this.#paginationID + "_end"}" class="page-item"><a class="page-link" href="#">${String(totalPages)}</a></li>
-                    ` : rightDistance <= 1 ? `
-                        <li id="${this.#paginationID + "_start"}" class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
-                        <li id="${this.#paginationID + "_left"}"  class="page-item${activePage === totalPages - 2 ? ' active' : ''}"><a class="page-link" href="#">${String(totalPages)-2}</a></li>
-                        <li id="${this.#paginationID + "_center"}" class="page-item${activePage === totalPages - 1 ? ' active' : ''}"><a class="page-link" href="#">${String(totalPages)-1}</a></li>
-                        <li id="${this.#paginationID + "_right"}" class="page-item${activePage === totalPages ? ' active' : ''}"><a class="page-link" href="#">${String(totalPages)}</a></li>
-                    ` : `
-                        <li id="${this.#paginationID + "_start"}" class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
-                        <li id="${this.#paginationID + "_left"}"  class="page-item"><a class="page-link" href="#">${String(activePage-1)}</a></li>
-                        <li id="${this.#paginationID + "_center"}" class="page-item active"><a class="page-link" href="#">${String(activePage)}</a></li>
-                        <li id="${this.#paginationID + "_right"}" class="page-item"><a class="page-link" href="#">${String(activePage+1)}</a></li>
-                        <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
-                        <li id="${this.#paginationID + "_end"}"class="page-item"><a class="page-link" href="#">${String(totalPages)}</a></li>
-                    `}
-                    <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === totalPages ? ' disabled' : ''}">
-                        <a class="page-link" href="#"${activePage === totalPages ? ' aria-disabled="true"' : ''}>Next</a>
-                    </li>
-                </ul>
-            </nav>`;
+        if (activePage > 0 && totalPages > 0) {
+            let pageSkeletonInternal;
+            if (totalPages <= 3) {
+                pageSkeletonInternal = `
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
+                            <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
+                        </li>
+                        <li id="${this.#paginationID + "_left"}" class="page-item${activePage === 1 ? ' disabled' : ''}"><a class="page-link" href="#">1</a></li>
+                        <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' disabled' : ''}"><a class="page-link" href="#">2</a></li>
+                        <li id="${this.#paginationID + "_right"}" class="page-item${activePage === 3 ? ' disabled' : ''}"><a class="page-link" href="#">3</a></li>
+                        <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === 3 ? ' disabled' : ''}">
+                            <a class="page-link" href="#"${activePage === 3 ? ' aria-disabled="true"' : ''}>Next</a>
+                        </li>
+                    </ul>
+                </nav>`;
+            } else {
+                const leftDistance = activePage - 1;
+                const rightDistance = totalPages - activePage;
 
+                pageSkeletonInternal = `
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
+                            <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
+                        </li>
+                        ${leftDistance <= 1 ? `
+                            <li id="${this.#paginationID + "_left"}"  class="page-item${activePage === 1 ? ' active' : ''}"><a class="page-link" href="#">1</a></li>
+                            <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' active' : ''}"><a class="page-link" href="#">2</a></li>
+                            <li id="${this.#paginationID + "_right"}" class="page-item${activePage === 3 ? ' active' : ''}"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
+                            <li id="${this.#paginationID + "_end"}" class="page-item"><a class="page-link" href="#">${String(totalPages)}</a></li>
+                        ` : rightDistance <= 1 ? `
+                            <li id="${this.#paginationID + "_start"}" class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
+                            <li id="${this.#paginationID + "_left"}"  class="page-item${activePage === totalPages - 2 ? ' active' : ''}"><a class="page-link" href="#">${String(totalPages)-2}</a></li>
+                            <li id="${this.#paginationID + "_center"}" class="page-item${activePage === totalPages - 1 ? ' active' : ''}"><a class="page-link" href="#">${String(totalPages)-1}</a></li>
+                            <li id="${this.#paginationID + "_right"}" class="page-item${activePage === totalPages ? ' active' : ''}"><a class="page-link" href="#">${String(totalPages)}</a></li>
+                        ` : `
+                            <li id="${this.#paginationID + "_start"}" class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
+                            <li id="${this.#paginationID + "_left"}"  class="page-item"><a class="page-link" href="#">${String(activePage-1)}</a></li>
+                            <li id="${this.#paginationID + "_center"}" class="page-item active"><a class="page-link" href="#">${String(activePage)}</a></li>
+                            <li id="${this.#paginationID + "_right"}" class="page-item"><a class="page-link" href="#">${String(activePage+1)}</a></li>
+                            <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
+                            <li id="${this.#paginationID + "_end"}"class="page-item"><a class="page-link" href="#">${String(totalPages)}</a></li>
+                        `}
+                        <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === totalPages ? ' disabled' : ''}">
+                            <a class="page-link" href="#"${activePage === totalPages ? ' aria-disabled="true"' : ''}>Next</a>
+                        </li>
+                    </ul>
+                </nav>`;
+
+            }
+            navDiv = pageSkeletonInternal;
         }
-        pagDiv.innerHTML = pageSkeletonInternal;
+        let buttonDiv = '';
+        if (this.#type === AccordionTypes.FINDCOMBOS) {
+            buttonDiv = `
+                <div class="d-gap justify-content-md-end">
+                    <button id="filter" type="button" class="btn btn-filter" disabled>Filter</button>
+                    <button id="${this.#playAllID}" type="button" class="btn btn-primary">Play All</button>
+                </div>
+            `;
+        }
+
+        pagDiv.innerHTML = `
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-6">
+                    ${navDiv}
+                </div>
+                <div class="col-md-3">
+                    ${buttonDiv}
+                </div>
+            </div>
+        `;
     }
 
     _attachPaginationCallbacks(activePage, totalPages) {
-        document.getElementById(this.#paginationID + "_backwards").addEventListener("click", async (evt) => {
-            if (!evt.srcElement.classList.contains('disabled')) {
-                await this.#controller.cb_emitButtonEvent(this.#paginationID + "_backwards", this.getUpdatePaginationEventName(), activePage - 1);
-            }
-        });
-
-        document.getElementById(this.#paginationID + "_forwards").addEventListener("click", async (evt) => {
-            if (!evt.srcElement.classList.contains('disabled')) {
-                await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), activePage + 1);
-            }
-        });
-
-        document.getElementById(this.#paginationID + "_left").addEventListener("click", async (evt) => {
-            if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
-                const labelVal = parseInt(evt.srcElement.innerHTML);
-                await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
-            }
-        })
-
-        document.getElementById(this.#paginationID + "_center").addEventListener("click", async (evt) => {
-            if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
-                const labelVal = parseInt(evt.srcElement.innerHTML);
-                await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
-            }
-        });
-
-        document.getElementById(this.#paginationID + "_right").addEventListener("click", async (evt) => {
-            if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
-                const labelVal = parseInt(evt.srcElement.innerHTML);
-                await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
-            }
-        });
-
-        const startEl = document.getElementById(this.#paginationID + "_start");
-        const endEl = document.getElementById(this.#paginationID + "_end");
-        if (startEl) {
-            startEl.addEventListener("click", async (evt) => {
+        if (activePage > 0 && totalPages > 0) {
+            document.getElementById(this.#paginationID + "_backwards").addEventListener("click", async (evt) => {
                 if (!evt.srcElement.classList.contains('disabled')) {
-                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_start", this.getUpdatePaginationEventName(), 1);
+                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_backwards", this.getUpdatePaginationEventName(), activePage - 1);
                 }
             });
-        }
-        if (endEl) {
-            endEl.addEventListener("click", async (evt) => {
+
+            document.getElementById(this.#paginationID + "_forwards").addEventListener("click", async (evt) => {
                 if (!evt.srcElement.classList.contains('disabled')) {
-                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_end", this.getUpdatePaginationEventName(), totalPages);
+                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), activePage + 1);
                 }
+            });
+
+            document.getElementById(this.#paginationID + "_left").addEventListener("click", async (evt) => {
+                if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
+                    const labelVal = parseInt(evt.srcElement.innerHTML);
+                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
+                }
+            })
+
+            document.getElementById(this.#paginationID + "_center").addEventListener("click", async (evt) => {
+                if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
+                    const labelVal = parseInt(evt.srcElement.innerHTML);
+                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
+                }
+            });
+
+            document.getElementById(this.#paginationID + "_right").addEventListener("click", async (evt) => {
+                if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
+                    const labelVal = parseInt(evt.srcElement.innerHTML);
+                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
+                }
+            });
+
+            const startEl = document.getElementById(this.#paginationID + "_start");
+            const endEl = document.getElementById(this.#paginationID + "_end");
+            if (startEl) {
+                startEl.addEventListener("click", async (evt) => {
+                    if (!evt.srcElement.classList.contains('disabled')) {
+                        await this.#controller.cb_emitButtonEvent(this.#paginationID + "_start", this.getUpdatePaginationEventName(), 1);
+                    }
+                });
+            }
+            if (endEl) {
+                endEl.addEventListener("click", async (evt) => {
+                    if (!evt.srcElement.classList.contains('disabled')) {
+                        await this.#controller.cb_emitButtonEvent(this.#paginationID + "_end", this.getUpdatePaginationEventName(), totalPages);
+                    }
+                });
+            }
+        }
+
+        if (document.getElementById(this.#playAllID)) {
+            document.getElementById(this.#playAllID).addEventListener("click", async (evt) => {
+                await this.#controller.cb_emitButtonEvent(this.#playAllID, "playAllCombos");
             });
         }
     }
@@ -371,6 +418,9 @@ class AccordionView {
 
             const playerChar = combo.target_char;
             const opponentChar = combo.opponent_char;
+
+            const playerColor = combo.target_color;
+            const opponentColor = combo.target_color;
 
             // Loop over moves
             let moveHTML = `
@@ -417,21 +467,28 @@ class AccordionView {
             const moveHeaderID = "combo_" + comboID + "_heading";
             const moveHeaderButtonID = moveHeaderID + "_button";
             const moveCollapseID = "combo_" + comboID + "_collapse";
+            const moveMeatballsButtonID = "combo_" + comboID + "_meatballs";
             this.#idList.push(moveHeaderID);
             this.#collapseIDMap.set(moveHeaderID, {
                 collapseID: moveCollapseID,
                 buttonID: moveHeaderButtonID
             });
 
+            const playerColorString = playerColor === "0" ? playerChar : playerChar + "_" + playerColor;
+            const opponentColorString = opponentColor === "0" ? opponentChar : opponentChar + "_" + opponentColor;
+
             skeletonInternal = `
                 ${skeletonInternal}
                     <div class="accordion-item outer-accordion-item">
                         <h2 class="accordion-header outer-accordion-header" id="${moveHeaderID}">
                             <button id="${moveHeaderButtonID}" class="accordion-button collapsed collapsed-icon">
-                            <img src="./img/si_${String(parseInt(playerChar))}.png" width="20" height="20">
-                                ${playerTag} combos
-                                <img src="./img/si_${String(parseInt(opponentChar))}.png" width="20" height="20">
-                                ${opponentTag} on ${stageID} (${combo.combo.moves.length} moves)
+                                <img src="./img/si_${String(parseInt(playerColorString))}.png" width="20" height="20">
+                                <p class="p-move">${playerTag} combos</p>
+                                <img src="./img/si_${String(parseInt(opponentColorString))}.png" width="20" height="20">
+                                <p class="p-move">${opponentTag} on ${stageID} (${combo.combo.moves.length} moves)</p>
+                                <div id="${moveMeatballsButtonID}" class="meatballs-div">
+                                    <img src="./Bootstrap/svg/three-dots.svg" class="meatballs-icon">
+                                </div>
                             </button>
                         </h2>
                         <div id="${moveCollapseID}" class="accordion-collapse collapse">
@@ -452,6 +509,9 @@ class AccordionView {
             const totalPages = event.totalPage;
             this._createPaginationSection(activePage, totalPages);
             this._attachPaginationCallbacks(activePage, totalPages);
+        } else {
+            this._createPaginationSection(0, 0);
+            this._attachPaginationCallbacks(0, 0);
         }
         
         accordDiv.innerHTML = skeletonInternal;

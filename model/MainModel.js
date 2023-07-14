@@ -542,11 +542,26 @@ class MainModel {
         const comboIndex = this.#fileComboMap.get(game + "_" + comboNum);
 
         const combos = [{
-            startFrame: parseInt(this.#comboInfo[comboIndex].combo.startFrame),
+            startFrame: parseInt(this.#comboInfo[comboIndex].combo.startFrame) - 120, // buffering for more time
             endFrame: parseInt(this.#comboInfo[comboIndex].combo.endFrame),
             filePath: this.#comboInfo[comboIndex].file
         }];
     
+        await this.#slippiPlayer.playCombos(combos);
+    }
+
+    async playAllCombos (event, sourceID) {
+        const combos = [];
+        let i = 0;
+        while (i < this.#comboInfo.length) {
+            combos.push({
+                startFrame: parseInt(this.#comboInfo[i].combo.startFrame) - 120,
+                endFrame: parseInt(this.#comboInfo[i].combo.endFrame),
+                filePath: this.#comboInfo[i].file
+            });
+            i++;
+        }
+
         await this.#slippiPlayer.playCombos(combos);
     }
 

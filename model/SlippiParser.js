@@ -280,7 +280,7 @@ parentPort.on('message', (message) => {
             processDirectoryForCombosByCharTag(message.files, message.dir, message.chunk, message.char, message.tag);
             break;
         case 'processForComboCharTagColor':
-            processDirectoryForCombosByCharTagColor(message.files, message.dir, message.chunk, message.char, message.color, message.tag);
+            processDirectoryForCombosByCharTagColor(message.files, message.dir, message.chunk, message.char, message.tag, message.color);
             break;
         case 'isCancelled':
             parentPort.postMessage({

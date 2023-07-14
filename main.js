@@ -1,7 +1,10 @@
 require('v8-compile-cache');
+const { env } = require('node:process');
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const MainModel = require('./model/MainModel');
+const { join } = require('path');
+const mainModulePath = path.join(__dirname, 'model', 'MainModel');
+const MainModel = require(mainModulePath);
 
 // Communications from Controllers
 const createModel = (win) => {
@@ -12,6 +15,8 @@ const createModel = (win) => {
 
 const createWindow = async () => {
     console.log(path.resolve(app.getAppPath(), 'preload.js'));
+    const isDebug = env.NODE_ENV === 'development';
+    const isProduction = env.NODE_ENV === 'production';
     const win = new BrowserWindow({
         width: 800,
         height: 600,
@@ -24,10 +29,19 @@ const createWindow = async () => {
         }
     });
 
-    win.loadFile('index.html');
+    if (isDebug) { 
+        win.loadFile('indexDebug.html');
+    } else {
+        win.loadFile('index.html');
+    
+    }
     win.setMenu(null);
 
-    win.webContents.openDevTools();
+    if (isDebug) {
+        win.webContents.openDevTools();
+    }
+    const iconPath = join(__dirname, 'img', 'noodles.ico');
+    win.setIcon(iconPath);
     win.setTitle("PVSTVBOT.exe");
 
     createModel(win);
@@ -75,6 +89,9 @@ ipcMain.on("clientEvent", async (event, args) => {
                 break;
             case "playCombo":
                 model.playCombo(event, args.sourceID, extraData);
+                break;
+            case "playAllCombos":
+                model.playAllCombos(event, args.sourceID);
                 break;
             case "checkPaths":
                 model.checkPaths();
