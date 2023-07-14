@@ -55,6 +55,9 @@ class ProgressView {
 
     renderDiv () {
         const percValue = Math.round(this.#numCurrentFiles / this.#numTotalFiles * 100);
+        const subtitle = this.#numCurrentFiles === this.#numTotalFiles
+            ? `<p style="margin-top: 10;">Rendering results</p>` 
+            : `<p style="margin-top: 10;">${this.#numCurrentFiles} out of ${this.#numTotalFiles} processed</p>`;
         this.#progressDiv.innerHTML = `
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -65,7 +68,7 @@ class ProgressView {
                     <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="${percValue}" aria-valuemin="0" aria-valuemax="100" style="margin-top: 10;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: ${percValue}%">${percValue}%</div>
                     </div>
-                    <p style="margin-top: 10;">${this.#numCurrentFiles} out of ${this.#numTotalFiles} processed</p>
+                    ${subtitle}
                 </div>
                 <div class="modal-footer">
                     <button id="cancelProgress" type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancel</button>
