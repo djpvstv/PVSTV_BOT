@@ -140,7 +140,29 @@ napi_value SimpleParse(napi_env env, napi_callback_info info) {
     }
 
     // Compute parsing
-    parser.basicParseSlippiFromPaths(cppVec);
+    try {
+      parser.basicParseSlippiFromPaths(cppVec);
+      }
+    catch (const std::overflow_error& e) {
+      std::string errMsg = "Overflow Error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::runtime_error& e) {
+      std::string errMsg = "Runtime error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::exception& e) {
+      std::string errMsg = "Standard exception: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (...) {
+      napi_throw_type_error(env, nullptr, "Unknown error");
+      return NULL;
+    }
+    
     return NULL;
 }
 
@@ -196,7 +218,28 @@ napi_value ComboParseByTag(napi_env env, napi_callback_info info) {
 
     tp.targetTag = tag_str;
 
-    parser.parseSlippiFromPaths(cppVec, tp);
+    try {
+      parser.parseSlippiFromPaths(cppVec, tp);
+    }
+    catch (const std::overflow_error& e) {
+      std::string errMsg = "Overflow Error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::runtime_error& e) {
+      std::string errMsg = "Runtime error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::exception& e) {
+      std::string errMsg = "Standard exception: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (...) {
+      napi_throw_type_error(env, nullptr, "Unknown error");
+      return NULL;
+    }
 
     return NULL;
 }
@@ -233,7 +276,28 @@ napi_value ComboParseByChar(napi_env env, napi_callback_info info) {
 
     tp.char_id = intValue;
 
-    parser.parseSlippiFromPaths(cppVec, tp);
+    try {
+      parser.parseSlippiFromPaths(cppVec, tp);
+    }
+    catch (const std::overflow_error& e) {
+      std::string errMsg = "Overflow Error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::runtime_error& e) {
+      std::string errMsg = "Runtime error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::exception& e) {
+      std::string errMsg = "Standard exception: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (...) {
+      napi_throw_type_error(env, nullptr, "Unknown error");
+      return NULL;
+    }
 
     return NULL;
 }
@@ -279,7 +343,28 @@ napi_value ComboParseByCharColor(napi_env env, napi_callback_info info) {
     tp.char_id = charInt;
     tp.targetColor = colorInt;
 
-    parser.parseSlippiFromPaths(cppVec, tp);
+    try {
+      parser.parseSlippiFromPaths(cppVec, tp);
+    }
+    catch (const std::overflow_error& e) {
+      std::string errMsg = "Overflow Error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::runtime_error& e) {
+      std::string errMsg = "Runtime error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::exception& e) {
+      std::string errMsg = "Standard exception: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (...) {
+      napi_throw_type_error(env, nullptr, "Unknown error");
+      return NULL;
+    }
 
     return NULL;
 }
@@ -334,7 +419,28 @@ napi_value ComboParseByCharTag(napi_env env, napi_callback_info info) {
     tp.targetTag = tag_str;
     tp.char_id = charInt;
 
-    parser.parseSlippiFromPaths(cppVec, tp);
+    try {
+      parser.parseSlippiFromPaths(cppVec, tp);
+    }
+    catch (const std::overflow_error& e) {
+      std::string errMsg = "Overflow Error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::runtime_error& e) {
+      std::string errMsg = "Runtime error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::exception& e) {
+      std::string errMsg = "Standard exception: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (...) {
+      napi_throw_type_error(env, nullptr, "Unknown error");
+      return NULL;
+    }
 
     return NULL;
 }
@@ -398,7 +504,28 @@ napi_value ComboParseByCharTagColor(napi_env env, napi_callback_info info) {
     tp.char_id = charInt;
     tp.targetColor = colorInt;
 
-    parser.parseSlippiFromPaths(cppVec, tp);
+    try {
+      parser.parseSlippiFromPaths(cppVec, tp);
+    }
+    catch (const std::overflow_error& e) {
+      std::string errMsg = "Overflow Error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::runtime_error& e) {
+      std::string errMsg = "Runtime error: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (const std::exception& e) {
+      std::string errMsg = "Standard exception: " + static_cast<std::string>(e.what());
+      napi_throw_type_error(env, nullptr, errMsg.c_str());
+      return NULL;
+    }
+    catch (...) {
+      napi_throw_type_error(env, nullptr, "Unknown error");
+      return NULL;
+    }
 
     return NULL;
 }

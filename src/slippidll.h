@@ -30,10 +30,12 @@ extern "C" {
 			void reset();
 			void resetParseWork();
 			void resetComboWork();
+			void resetMoveWork();
 			void basicParseSlippiFromPaths(std::vector<std::string> paths);
 			std::string printBasicParseSlippiFromPaths();
 			void parseSlippiFromPaths(std::vector<std::string> paths, slip::TargetParams& t);
 			std::string printSlippiCombosFromPaths();
+			std::string printSlippiMovesFromPaths();
 		private:
 			std::shared_ptr<slip::ParserInterfaceImp> m_p;
 		};

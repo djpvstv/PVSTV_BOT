@@ -82,6 +82,15 @@ namespace slip {
 		int                    lastHitBy = -1;
 	};
 
+	struct Moves {
+		int  actionState = -1;
+		float damage =     -1;
+		bool didHit =      false;
+		bool didKill =     false;
+		int  frame = -1;
+		int opponentCharID = -1;
+	};
+
 	struct ComboState {
 		Combo               combo;
 		ComboMove           move;
@@ -100,19 +109,27 @@ namespace slip {
 
 	struct IndividualAnalysis {
 		std::string                   fileName;
+		int                           stage_id;
 		int                           target_char;
 		int                           target_color;
 		std::string                   target_tag;
 		int                           opponent_char;
 		int                           opponent_color;
-		int                           stage_id;
+		std::string                   opponent_tag;
 		std::vector<slip::Combo>      comboVec;    //Vector of connecting moves
 		std::vector<slip::Conversion> convoVec;    //Vector of converting moves
+		std::vector<slip::Moves>      moveVec;     //Vector of moves for counting
 	};
 
 	struct AggregateComboAnalysis {
 		std::vector<IndividualAnalysis> combos;
 		std::vector<std::string>        filePath;
+	};
+
+	struct AggregateMoveAnalysis {
+		int successfullFiles = 0;
+		std::vector<IndividualAnalysis>     moves;
+		std::vector<std::string>			filePath;
 	};
 }
 

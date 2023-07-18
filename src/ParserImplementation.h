@@ -14,11 +14,15 @@ namespace slip {
 		~ParserInterfaceImp(void);
 
 		void reset(void);
+		void resetPrework(void);
+		void resetWork(void);
+		void resetMoveWork(void);
 		void basicParseSlippiFromPaths(std::vector<std::string> paths);
 		std::string printBasicParseSlippiFromPaths(void);
 
 		void parseSlippiFromPaths(std::vector<std::string> paths, slip::TargetParams& t);
 		std::string printSlippiCombosFromPaths(void);
+		std::string printSlippiMovesFromPaths(void);
 
 	private:
 		class ParserImpl;

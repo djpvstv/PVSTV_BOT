@@ -31,6 +31,10 @@ class NavBarController extends EventEmitter {
         this.setUpListeners();
     }
 
+    isContextShowing () {
+        return false;
+    }
+
     getFindComboController () {
         return this.#FindComboController;
     }

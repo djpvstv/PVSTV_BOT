@@ -436,7 +436,6 @@ class MainModel {
     }
 
     async findCombos (event, buttonID, params) {
-        console.log(params);
 
         switch (params.flavor) {
             case 1:

@@ -10,7 +10,7 @@
     "start": "set NODE_ENV=development&& webpack && electron .",
     "startProd": "set NODE_ENV=production&& webpack && electron .",
     "buildcpp": "node-gyp rebuild --target=24.0.0 --dist-url=https://electronjs.org/headers",
-    "package": "electron-packager . --platform=win32 --arch=x64 PVSTVBOT --icon=img/noodles.ico"
+    "package": "set NODE_ENV=production&& webpack && electron-packager . --platform=win32 --arch=x64 PVSTVBOT --icon=img/noodles.ico"
   },
   "author": "",
   "license": "ISC",
