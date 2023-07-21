@@ -112,6 +112,10 @@
     padding-bottom: 5px;
 }
 
+.select {
+    outline: none;
+}
+
 .ofs {
     overflow-y: scroll
 }
@@ -138,6 +142,21 @@
     width: 250px;
     border-radius: 10px;
     box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+}
+
+.accordion-combo-data {
+    text-align: center;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.accordion-combo-data:hover {
+    background-color: rgba(127,255,212,0.4);
+}
+
+.accordion-combo-data-extra-space {
+    margin-top: 10px;
 }
 
 .wrapper .context-menu {
@@ -185,8 +204,16 @@
     transition: 0.3s;
 }
 
-.add-rule-icon:hover {
+.enabled-icon .add-rule-icon:hover {
     opacity: 0.7;
+}
+
+.disabled-icon {
+    transition: 0.3s;
+}
+
+.disabled-icon:hover {
+    opacity: 0.4;
 }
 
 .play-icon {

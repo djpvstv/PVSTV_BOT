@@ -2,12 +2,14 @@ const NavBarView = require("./NavBarView");
 const {EventEmitter} = require("events");
 const {ProgressView} = require("./Components/ProgressView");
 const {FindSlippiModal} = require("./Components/FindSlippiModal");
+const {ComboFilterModal} = require("./Components/ComboFilterModal");
 
 class MainView extends EventEmitter {
 
     #NavBar = null;
     #Spinner = null;
     #SlippiPathSpinner = null;
+    #ComboFilterModal = null;
     #controllers = null;
 
     constructor( controllers, appState ) {
@@ -27,6 +29,7 @@ class MainView extends EventEmitter {
     createSpinners( controller, appState ) {
         this.#Spinner = new ProgressView( controller.getProgressController(), appState );
         this.#SlippiPathSpinner = new FindSlippiModal( controller.getSlippiPathController(), appState );
+        this.#ComboFilterModal = new ComboFilterModal( controller.getComboFilterController(), appState );
     }
 
     createEventListeners() {
@@ -92,6 +95,26 @@ class MainView extends EventEmitter {
                     case "updateSpinnerCount":
                         controller.on(eventName, (event) => {
                             this.#Spinner.updateCount(event);
+                        });
+                        break;
+                    case "showFilterModal":
+                        controller.on(eventName, (event) => {
+                            this.#ComboFilterModal.show(event.args);
+                        });
+                        break;
+                    case "hideFilterModal":
+                        controller.on(eventName, (event) => {
+                            this.#ComboFilterModal.hide(event);
+                        });
+                        break;
+                    case "changeModalInput":
+                        controller.on(eventName, (event) => {
+                            this.#ComboFilterModal.changeModalInput(event);
+                        });
+                        break;
+                    case "validateModalInput":
+                        controller.on(eventName, (event) => {
+                            this.#ComboFilterModal.applyValidationOnModalInput(event);
                         });
                         break;
                     case "askForSlippiPath":

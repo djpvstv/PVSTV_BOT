@@ -86,7 +86,7 @@ class FindSlippiModal {
         });
 
         document.getElementById("cancelFile").addEventListener("click", async () => {
-            await this.#controller.cb_emitAcceptButtonEvent(false);
+            await this.#controller.cb_emitAcceptButtonEvent(flavor, false);
         });
     }
 

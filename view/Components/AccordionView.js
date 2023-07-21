@@ -432,10 +432,43 @@ class AccordionView {
 
             // Loop over moves
             let moveHTML = `
-            <div>
-                Killed? ${combo.combo.didKill} Start: ${combo.combo.startFrame} End: ${combo.combo.endFrame} Dmg: ${combo.combo.endPercent - combo.combo.startPercent}
-            </div><div>
-                ${cleanFile}
+            <div class="accordion-combo-data">
+                <div class="row">
+                    <div class="col col-md-3">
+                        <b>Did Kill?</b>
+                    </div>
+                    <div class="col col-md-3">
+                        <b>Start</b>:
+                    </div>
+                    <div class="col col-md-3">
+                        <b>End</b>:
+                    </div>
+                    <div class="col col-md-3">
+                        <b>Damage</b>:
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col col-md-3">
+                        ${combo.combo.didKill}
+                    </div>
+                    <div class="col col-md-3">
+                        ${combo.combo.startFrame}
+                    </div>
+                    <div class="col col-md-3">
+                        ${combo.combo.endFrame}
+                    </div>
+                    <div class="col col-md-3">
+                        ${(combo.combo.endPercent - combo.combo.startPercent).toFixed(2)}
+                    </div>
+                </div>
+                <div class="row accordion-combo-data-extra-space">
+                    <div class="col-md-2">
+                        <b>Game:</b>
+                    </div>
+                    <div class="col-md-10" style="text-align: left;">
+                        ${cleanFile}
+                    </div>
+                </div>
             </div>
             `;
 
@@ -461,10 +494,46 @@ class AccordionView {
                     </h2>
                     <div id="${moveCollapseID}" class="accordion-collapse collapse">
                         <div class="accordion-body">
-                            Damage: ${move.damage}
-                            Coords: X: ${move.xPos}, Y: ${move.yPos}
-                            frame: ${move.frame}
-                            hit: ${move.hitCount}
+                            <div class="row">
+                                <div class="col col-md-2">
+                                    <b>Damage</b>:
+                                </div>
+                                <div class="col col-md-2">
+                                    <b>X Coord</b>:
+                                </div>
+                                <div class="col col-md-2">
+                                    <b>Y Coord</b>:
+                                </div>
+                                <div class="col col-md-2">
+                                    <b>Frame</b>:
+                                </div>
+                                <div class="col col-md-2">
+                                    <b>Hit</b>:
+                                </div>
+                                <div class="col col-md-2">
+                                    <b>Action</b>:
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col col-md-2">
+                                    ${parseFloat(move.damage).toFixed(2)}
+                                </div>
+                                <div class="col col-md-2">
+                                    ${move.xPos}
+                                </div>
+                                <div class="col col-md-2">
+                                    ${move.yPos}
+                                </div>
+                                <div class="col col-md-2">
+                                    ${move.frame}
+                                </div>
+                                <div class="col col-md-2">
+                                    ${move.hitCount}
+                                </div>
+                                <div class="col col-md-2">
+                                    ${utility.getActionNameFromID(playerChar, move.actionID)}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

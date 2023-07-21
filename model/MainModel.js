@@ -125,7 +125,7 @@ class MainModel {
         if (updateAppData) this.updateAppData(appData);
 
         // Just to get this to show up faster
-        this.getFilterParams();
+        // this.getFilterParams();
     }
 
     async initiateLogger (actualAppDataPath) {
@@ -371,6 +371,7 @@ class MainModel {
         this.#fileComboMap.clear();
         const parsedData = JSON.parse(data.args.replaceAll('\\', '/').replaceAll('/"','\\\"'));
         const files = Object.keys(parsedData);
+
         const numFiles = files.length;
         let numCombos = 0;
         let comboData = [];
@@ -389,7 +390,8 @@ class MainModel {
                     target_color: parsedData[files[i]].target_color,
                     opponent_tag: parsedData[files[i]].opponent_tag,
                     opponent_char: parsedData[files[i]].opponent_char,
-                    opponent_color: parsedData[files[i]].opponent_color
+                    opponent_color: parsedData[files[i]].opponent_color,
+                    is_manually_hidden: false
                 }
                 this.#fileComboMap.set(files[i].substring(files[i].lastIndexOf("/") + 1).replace(/\.[^/.]+$/,"") + "_" + String(j), numCombos + j);
                 j++;
@@ -398,6 +400,46 @@ class MainModel {
             i++;
         }
 
+        this.processedComboParse(numCombos, comboData, data.eventName);
+    }
+
+    async updateComboFilterRules ( event, buttonID, rules ) {
+        this.#comboFilterParams = rules;
+
+        const tempCombos = this.#comboInfo.filter((combo) => {
+            let isValid = true;
+            if (rules.minNumMoves > combo.combo.moves.length) isValid = false;
+            
+            if (rules.maxNumMoves < combo.combo.moves.length) isValid = false;
+
+            if (combo.is_manually_hidden) isValid = false;
+
+            let i = 0;
+            while (i < rules.ruleList.length) {
+                const option = rules.ruleList[i].option;
+                const id = option.replace(/(^\d+)(.+$)/i,'$1');
+                switch (parseInt(rules.ruleList[i].flavor)) {
+                    case 0:
+                        if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
+                        break;
+                    case 1:
+                        if (combo.combo.moves.filter(m => m.actionID === id).length === 0) isValid = false;
+                        break;
+                    case 2:
+                        break;
+                }
+                i++;
+            }
+
+            return isValid;
+        });
+
+        const numCombos = tempCombos.length;
+        
+        this.processedComboParse(numCombos, tempCombos, "findCombosComplete");
+    }
+
+    processedComboParse (numCombos, comboData, eventName) {
         const totalNumPages = Math.ceil(numCombos / this.#PAGINATION_LOWER_LIMIT); 
         const bNeedsPagination = numCombos > this.#PAGINATION_LOWER_LIMIT;
         const page = 1;
@@ -410,7 +452,7 @@ class MainModel {
         }
 
         this.#win.webContents.send("findComboEvent", {
-            eventName: data.eventName,
+            eventName: eventName,
             args: {
                 combos: comboData,
                 totalCombos: numCombos,

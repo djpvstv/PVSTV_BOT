@@ -345,7 +345,7 @@ class FindComboView extends ParseViewBase {
         return `
         <div class="col-md">
             <label for="${this.idMap.get("i2")}" class="form-label">Target Type</label>
-            <select class="form-select-sm w-100 target-border" id="${this.idMap.get("i2")}">
+            <select class="form-select-sm w-100 target-border select" id="${this.idMap.get("i2")}">
                 <option ${flavor == 1 ? 'selected' : ''} value="1" id="${this.idMap.get("i2s1")}">By Tag</option>
                 <option ${flavor == 2 ? 'selected' : ''} value="2" id="${this.idMap.get("i2s2")}">By Character</option>
                 <option ${flavor == 3 ? 'selected' : ''} value="3" id="${this.idMap.get("i2s3")}">By Character and Color</option>

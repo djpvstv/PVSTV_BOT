@@ -81,6 +81,9 @@ ipcMain.on("clientEvent", async (event, args) => {
             case "updateComboPagination":
                 model.updateComboPagination(event, args.sourceID, extraData);
                 break;
+            case "updateComboFilterRules":
+                model.updateComboFilterRules(event, args.sourceID, extraData);
+                break;
             case "cancelComputation":
                 model.cancelComputation(event, args.sourceID);
                 break;
