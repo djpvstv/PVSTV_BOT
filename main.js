@@ -93,6 +93,9 @@ ipcMain.on("clientEvent", async (event, args) => {
             case "playAllCombos":
                 model.playAllCombos(event, args.sourceID);
                 break;
+            case "getFilterParams":
+                model.getFilterParams(event, args.sourceID);
+                break;
             case "checkPaths":
                 model.checkPaths();
                 break;

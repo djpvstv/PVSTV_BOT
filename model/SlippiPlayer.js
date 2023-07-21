@@ -3,24 +3,30 @@ const { app } = require('electron');
 const { join } = require('path');
 const fs = require('fs').promises;
 
-// const exp = require('constants'); ???
-
 class SlippiPlayer {
     #isBusy = null;
     #isSetUp = null;
     #isoPath = null;
     #dolphinPath = null;
     #appDataPath = null;
+    #APP_NAME = null;
 
-    constructor (slippiPath, meleeIsoPath) {
+    constructor (appName) {
         this.#isBusy = false;
-        this.#dolphinPath = slippiPath;
-        this.#isoPath = meleeIsoPath;
         this.#isSetUp = false;
+        this.#APP_NAME = appName;
+    }
+
+    setSlippiPath (val) {
+        this.#dolphinPath = val;
+    }
+
+    setIsoPath (val) {
+        this.#isoPath = val;
     }
 
     async setup() {
-        const appDataPath = join(app.getPath("appData"), "pvstvDvtv");
+        const appDataPath = join(app.getPath("appData"), this.#APP_NAME);
         try {
             await fs.access(appDataPath);
             this.#isSetUp = true;

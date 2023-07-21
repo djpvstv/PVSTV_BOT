@@ -177,6 +177,18 @@
     margin-right: 5px;
 }
 
+.add-rule-icon {
+    margin: 4px;
+    width: 34px;
+    height: 34px;
+    opacity: 0.4;
+    transition: 0.3s;
+}
+
+.add-rule-icon:hover {
+    opacity: 0.7;
+}
+
 .play-icon {
     background: url("./Bootstrap/svg/play-fill.svg");
 }
@@ -232,4 +244,8 @@
 .meatballs-icon {
     height: 2rem;
     width: 2rem;
+}
+
+.buffer-right-slightly {
+    margin-right: 0.5rem;
 }

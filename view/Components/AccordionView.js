@@ -20,6 +20,7 @@ class AccordionView {
     #collapseMap = null;
     #collapseList = null;
     #playAllID = "";
+    #filterID = '';
 
     // I need a finite number of things that can be open in an accordion
     // This is a performance limitation
@@ -35,6 +36,7 @@ class AccordionView {
                 this.#outerAccordionID = "comboSlippi_combos_outmostAccordion";
                 this.#paginationID = "comboSlippi_pagination_div";
                 this.#playAllID = "comboSlippi_play_all_combos";
+                this.#filterID = "comboSlippi_filter_combos";
                 break;
         }
         this.#appState = appState;
@@ -320,7 +322,7 @@ class AccordionView {
         if (this.#type === AccordionTypes.FINDCOMBOS) {
             buttonDiv = `
                 <div class="d-gap justify-content-md-end">
-                    <button id="filter" type="button" class="btn btn-filter" disabled>Filter</button>
+                    <button id="${this.#filterID}" type="button" class="btn btn-filter">Filter</button>
                     <button id="${this.#playAllID}" type="button" class="btn btn-primary">Play All</button>
                 </div>
             `;
@@ -397,6 +399,12 @@ class AccordionView {
                 await this.#controller.cb_emitButtonEvent(this.#playAllID, "playAllCombos");
             });
         }
+
+        if (document.getElementById(this.#filterID)) {
+            document.getElementById(this.#filterID).addEventListener("click", async () => {
+                await this.#controller.cb_emitButtonEvent(this.#filterID, "getFilterParams");
+            });
+        }
     }
 
     async renderCombos (event) {
@@ -420,7 +428,7 @@ class AccordionView {
             const opponentChar = combo.opponent_char;
 
             const playerColor = combo.target_color;
-            const opponentColor = combo.target_color;
+            const opponentColor = combo.opponent_color;
 
             // Loop over moves
             let moveHTML = `
@@ -482,9 +490,9 @@ class AccordionView {
                     <div class="accordion-item outer-accordion-item">
                         <h2 class="accordion-header outer-accordion-header" id="${moveHeaderID}">
                             <button id="${moveHeaderButtonID}" class="accordion-button collapsed collapsed-icon">
-                                <img src="./img/si_${String(parseInt(playerColorString))}.png" width="20" height="20">
+                                <img src="./img/si_${playerColorString}.png" width="20" height="20">
                                 <p class="p-move">${playerTag} combos</p>
-                                <img src="./img/si_${String(parseInt(opponentColorString))}.png" width="20" height="20">
+                                <img src="./img/si_${opponentColorString}.png" width="20" height="20">
                                 <p class="p-move">${opponentTag} on ${stageID} (${combo.combo.moves.length} moves)</p>
                                 <div id="${moveMeatballsButtonID}" class="meatballs-div">
                                     <img src="./Bootstrap/svg/three-dots.svg" class="meatballs-icon">

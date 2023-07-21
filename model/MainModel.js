@@ -17,6 +17,7 @@ class MainModel {
     #parseInfo = null;
     #comboInfo = null;
     #fileComboMap = null;
+    #comboFilterParams = null;
 
     #slippiPlayer = null;
 
@@ -27,12 +28,12 @@ class MainModel {
     #appDataPath = "";
     #meleeIsoPath = "";
     #slippiPath = "";
+    #APP_NAME = "pvstvbot.exe";
 
     constructor( mainWindow ) {
-        this.#meleeIsoPath = "C:\\Users\\garre\\Documents\\My Games\\Dolphin ISOs\\ANIMELEE - COMPLETE EDITION Nabooru.iso";
-        this.#slippiPath = "C:\\Users\\garre\\AppData\\Roaming\\Slippi Launcher\\playback\\Slippi Dolphin.exe";
-        this.#slippiPlayer = new SlippiPlayer(this.#slippiPath, this.#meleeIsoPath);
+        this.#slippiPlayer = new SlippiPlayer(this.#APP_NAME);
         this.#fileComboMap = new Map();
+        this.#comboFilterParams = [];
         this.#win = mainWindow;
         this.#usePagination = [false, false, false];
         this.createWorker();
@@ -41,7 +42,7 @@ class MainModel {
     async checkPaths () {
         // Set Up AppData
         let actualAppDataPath, found;
-        const appDataPath = join(app.getPath("appData"), "pvstvDvtv");
+        const appDataPath = join(app.getPath("appData"), this.#APP_NAME);
         try {
             await fs.access(appDataPath);
             actualAppDataPath = appDataPath;
@@ -49,6 +50,8 @@ class MainModel {
         } catch {
             try {
                 await fs.mkdir(appDataPath);
+                actualAppDataPath = appDataPath;
+                found = true;
             } catch (err) {
                 console.log(err);
             }
@@ -114,6 +117,9 @@ class MainModel {
         }
 
         if (updateAppData) this.updateAppData(appData);
+
+        // Just to get this to show up faster
+        this.getFilterParams();
     }
 
     async updateAppData (appData) {
@@ -121,6 +127,8 @@ class MainModel {
             await fs.writeFile(this.#appDataPath, JSON.stringify(appData, null, 2));
             this.#slippiPath = appData.slippiPath;
             this.#meleeIsoPath = appData.meleeISOpath;
+            this.#slippiPlayer.setSlippiPath(this.#slippiPath);
+            this.#slippiPlayer.setIsoPath(this.#meleeIsoPath);
         } catch (err) {
             console.log("could not write to appData: " + err);
         }
@@ -195,6 +203,7 @@ class MainModel {
                 appData.slippiPath = args.path;
                 await fs.writeFile(this.#appDataPath, JSON.stringify(appData, null, 2));
                 this.#slippiPath = args.path;
+                this.#slippiPlayer.setSlippiPath(this.#slippiPath);
 
                 // Check if Melee ISO exists
                 try {
@@ -226,6 +235,7 @@ class MainModel {
                 appData.meleeISOpath = args.path;
                 await fs.writeFile(this.#appDataPath, JSON.stringify(appData, null, 2));
                 this.#meleeIsoPath = args.path;
+                this.#slippiPlayer.setIsoPath(this.#meleeIsoPath);
             } catch (err) {
                 console.log(err);
             }
@@ -562,6 +572,13 @@ class MainModel {
         }
 
         await this.#slippiPlayer.playCombos(combos);
+    }
+
+    async getFilterParams (event, sourceID) {
+        this.#win.webContents.send("showFilterModal", {
+            eventName: "showFilterModal",
+            args: this.#comboFilterParams
+        });
     }
 
     createWorker () {
