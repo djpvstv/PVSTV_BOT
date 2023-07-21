@@ -400,13 +400,15 @@ class MainModel {
             i++;
         }
 
-        this.processedComboParse(numCombos, comboData, data.eventName);
+        this.processedComboParse(numCombos, comboData, true, data.eventName);
     }
 
     async updateComboFilterRules ( event, buttonID, rules ) {
         this.#comboFilterParams = rules;
 
-        const tempCombos = this.#comboInfo.filter((combo) => {
+        const allCombos = [...this.#comboInfo];
+
+        const tempCombos = allCombos.filter((combo) => {
             let isValid = true;
             if (rules.minNumMoves > combo.combo.moves.length) isValid = false;
             
@@ -435,17 +437,17 @@ class MainModel {
         });
 
         const numCombos = tempCombos.length;
-        
-        this.processedComboParse(numCombos, tempCombos, "findCombosComplete");
+
+        this.processedComboParse(numCombos, tempCombos, false, "findCombosComplete");
     }
 
-    processedComboParse (numCombos, comboData, eventName) {
+    processedComboParse (numCombos, comboData, updateComboInfo, eventName) {
         const totalNumPages = Math.ceil(numCombos / this.#PAGINATION_LOWER_LIMIT); 
         const bNeedsPagination = numCombos > this.#PAGINATION_LOWER_LIMIT;
         const page = 1;
 
         this.#usePagination[2] = bNeedsPagination;
-        this.#comboInfo = [...comboData];
+        if (updateComboInfo) this.#comboInfo = [...comboData];
         if (bNeedsPagination) {
             const startIdx = this.#PAGINATION_LOWER_LIMIT * (page-1);
             comboData = comboData.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);

@@ -1,6 +1,6 @@
 {
   "name": "pvstvbot.exe",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The front end for clippi replacement",
   "main": "main.js",
   "type": "commonjs",
