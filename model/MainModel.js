@@ -28,6 +28,7 @@ class MainModel {
     #appDataPath = "";
     #meleeIsoPath = "";
     #slippiPath = "";
+    #loggerPath = "";
     #APP_NAME = "pvstvbot.exe";
 
     constructor( mainWindow ) {
@@ -63,7 +64,7 @@ class MainModel {
                 actualAppDataPath = appDataPath;
                 return true;
             } catch (err) {
-                console.l0og(err);
+                console.log(err);
             }
         }
 
@@ -71,6 +72,11 @@ class MainModel {
         let appData;
         const appDataJSONPath = join(actualAppDataPath, "appData.json");
         this.#appDataPath = appDataJSONPath;
+        try {
+            await this.initiateLogger(actualAppDataPath);
+        } catch (err) {
+            console.log(err);
+        }
         try {
             await fs.access(appDataJSONPath);
             appData = await fs.readFile(appDataJSONPath);
@@ -120,6 +126,14 @@ class MainModel {
 
         // Just to get this to show up faster
         this.getFilterParams();
+    }
+
+    async initiateLogger (actualAppDataPath) {
+        const logPath = join(actualAppDataPath, "log.txt");
+        const logHeader = "Log starting at: " + JSON.stringify(new Date().toJSON()) + "\n\n";
+        await fs.writeFile(logPath, logHeader);
+        this.#loggerPath = logPath;
+        this.#slippiPlayer.setLoggerPath(logPath);
     }
 
     async updateAppData (appData) {
@@ -430,6 +444,12 @@ class MainModel {
             value: false
         });
 
+        this.writeWorkerLog("Process for Parse", JSON.stringify({
+            dir: this.#directory,
+            files: this.#currentFiles,
+            chunk: chunk
+        }));
+
         this.#worker.postMessage({
             evt: 'processForParse',
             dir: this.#directory,
@@ -472,6 +492,11 @@ class MainModel {
             value: false
         });
 
+        this.writeWorkerLog("Process for Combos, Tag", JSON.stringify({
+            tag: tag,
+            chunk: chunk
+        }));
+
         this.#worker.postMessage({
             evt: 'processForComboTag',
             dir: this.#directory,
@@ -487,6 +512,11 @@ class MainModel {
             value: false
         });
 
+        this.writeWorkerLog("Process for Combos, Char", JSON.stringify({
+            char: char,
+            chunk: chunk
+        }));
+
         this.#worker.postMessage({
             evt: 'processForComboChar',
             dir: this.#directory,
@@ -501,6 +531,12 @@ class MainModel {
             evt: 'stop',
             value: false
         });
+
+        this.writeWorkerLog("Process for Combos, Char, Color", JSON.stringify({
+            char: char,
+            color: color,
+            chunk: chunk
+        }));
 
         this.#worker.postMessage({
             evt: 'processForComboCharColor',
@@ -518,6 +554,12 @@ class MainModel {
             value: false
         });
 
+        this.writeWorkerLog("Process for Combos, Char, Tag", JSON.stringify({
+            char: char,
+            tag: tag,
+            chunk: chunk
+        }));
+
         this.#worker.postMessage({
             evt: 'processForComboCharTag',
             dir: this.#directory,
@@ -533,6 +575,13 @@ class MainModel {
             evt: 'stop',
             value: false
         });
+
+        this.writeWorkerLog("Process for Combos, Char, Tag, Color", JSON.stringify({
+            char: char,
+            tag: tag,
+            color: color,
+            chunk: chunk
+        }));
 
         this.#worker.postMessage({
             evt: 'processForComboCharTagColor',
@@ -579,6 +628,16 @@ class MainModel {
             eventName: "showFilterModal",
             args: this.#comboFilterParams
         });
+    }
+
+    async writeWorkerLog (commandHeader, command) {
+        try {
+            const commandLine = " [" + command + "]\n\n";
+            await fs.appendFile(this.#loggerPath, `${commandHeader}:\n`);
+            await fs.appendFile(this.#loggerPath, commandLine);
+        } catch (err) {
+            console.log("could not write to logger: " + err);
+        }
     }
 
     createWorker () {

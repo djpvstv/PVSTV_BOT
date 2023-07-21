@@ -9,6 +9,7 @@ class SlippiPlayer {
     #isoPath = null;
     #dolphinPath = null;
     #appDataPath = null;
+    #loggerPath = null;
     #APP_NAME = null;
 
     constructor (appName) {
@@ -23,6 +24,10 @@ class SlippiPlayer {
 
     setIsoPath (val) {
         this.#isoPath = val;
+    }
+
+    setLoggerPath (val) {
+        this.#loggerPath = val;
     }
 
     async setup() {
@@ -61,7 +66,7 @@ class SlippiPlayer {
 
     _playCombo () {
         if (!this.#isBusy) {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 const params = ["-i"]; 
                 params.push(join(this.#appDataPath, "queue.json"));
                 params.push("-e");
@@ -71,6 +76,13 @@ class SlippiPlayer {
                 params.push("--hide-seekbar");
 
                 this.#isBusy = true;
+                try {
+                    const command = this.#dolphinPath + " [" + params + "]\n\n";
+                    await fs.appendFile(this.#loggerPath, "Play combo:\n");
+                    await fs.appendFile(this.#loggerPath, command);
+                } catch (err) {
+                    console.log("could not write to logger: " + err);
+                }
                 const slpProcess = child_process.spawn(this.#dolphinPath, params);
                 slpProcess.on("exit", () => {
                     this.#isBusy = false;
