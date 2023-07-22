@@ -1,6 +1,10 @@
+const FindComboController = require("./FindComboController");
+
 const Utility = require("../Utility");
 const {ipcRenderer} = require("electron");
 const {EventEmitter} = require("events");
+
+
 
 class NavBarController extends EventEmitter {
 
@@ -10,26 +14,66 @@ class NavBarController extends EventEmitter {
         "hideSpinner",
         "updatePanelOneAccordion",
         "updatePanelOneDirectoryInput",
-        "updatePanelOneFilesTable"
+        "updatePanelOneFilesTable",
+        "updatePanelOneAccordionJustAccordion",
+        "updatePanelThreeDirectoryInput",
+        "updatePanelThreeComboButton",
+        "askForSlippiPath",
+        "askForMeleeIsoPath"
     ]
+
+    #FindComboController = null;
 
     constructor () {
         super();
         this.#timeoutStr = `${this.#timeout/1000}s`;
+        this.#FindComboController = new FindComboController();
         this.setUpListeners();
+    }
+
+    isContextShowing () {
+        return false;
+    }
+
+    getFindComboController () {
+        return this.#FindComboController;
     }
 
     setUpListeners () {
         const that = this;
+        let data;
         ipcRenderer.on("serverEvent", (evt, args) => {
             // Handle returns
-            const response = args.args;
-            if (args.eventName === "parseDirectoryComplete") {
-                const parsedData = JSON.parse(response.replaceAll('\\', '/'));
-                this.emit("updatePanelOneAccordion", parsedData);
-                this.emit("hideSpinner");
-            } else if (args.eventName === "parseDirectoryForSlippiFiles") {
-                this.cb_receiveParsedDirectoryFromSlippi(response.valid, response.files, response.srcID, response.dir);
+            let response = args.args;
+            switch (args.eventName) {
+                case "parseDirectoryComplete":
+                    response = {...response, ...args};
+                    this.emit("updatePanelOneAccordion", response);
+                    break;
+                case "updatePanelOneAccordionJustAccordion":
+                    response = {...response, ...args};
+                    this.emit("updatePanelOneAccordionJustAccordion", response);
+                    break;
+                case "parseDirectoryForSlippiFiles":
+                    switch (args.srcID) {
+                        case "parseSlippi_input":
+                        case "parseSlippi_choose_button":
+                            this.cb_receiveParsedDirectoryFromSlippi(response.valid, response.files, response.srcID, response.dir, 0, response.errMsg);
+                            break;
+                        case "comboSlippi_input":
+                        case "comboSlippi_choose_button":
+                            this.cb_receiveParsedDirectoryFromSlippi(response.valid, response.files, response.srcID, response.dir, 2, response.errMsg);
+                            break;
+                    }
+                    break;
+                case "askForSlippiPath":
+                    data = { modalTitle: "Where does your Slippi Playback Emulator Live?", flavor: 0 };
+                    this.emit("askForSlippiPath", data);
+                    break;
+                case "askForMeleeIsoPath":
+                    data = { modalTitle: "Where does your Melee 1.02 ISO Live?", flavor: 1 };
+                    this.emit("askForMeleeIsoPath", data);
+                    break;
             }
         });
     }
@@ -38,45 +82,13 @@ class NavBarController extends EventEmitter {
         return this.events;
     }
 
-    async cb_navbarSkeletonOnClick (args)  {
-        const targetNav = args.target;
-        const panelOwner = document.getElementById("navpanel_skeleton").querySelector(".panel-owner");
-        const targetID = targetNav.getAttribute("aria-controls");
-        const targetDiv = document.getElementById(targetID);
-        const firstDiv = panelOwner.children[0];
-
-        const activeNav = targetNav.parentElement.parentElement.querySelector(".active");
-        activeNav.classList.remove("active");
-        activeNav.setAttribute("aria-selected", "false");
-
-        targetNav.classList.add("active");
-        targetNav.setAttribute("aria-selected","true");
-
-        if (firstDiv.id !== targetDiv.id) {
-            firstDiv.classList.remove("active", "show", "h-100");
-            // firstDiv.classList.add("h-0");
-
-            firstDiv.style.transition = this.#timeoutStr;
-            firstDiv.style.opacity = '0';
-            firstDiv.style.visibility = 'hidden';
-
-            await Utility.waitTimeout(this.#timeout);
-
-            panelOwner.insertBefore(targetDiv, firstDiv);
-            
-            firstDiv.removeAttribute("style");
-            targetDiv.classList.add("active", "show", "h-100");
-            // targetDiv.classList.remove("h-0");
-            
-            targetDiv.style.transition = this.timeoutStr;
-            targetDiv.style.opacity = '0';
-
-            await Utility.waitTimeout(this.#timeout);
-            targetDiv.style.opacity = '1';
-
-            await Utility.waitTimeout(this.#timeout);
-
-            targetDiv.removeAttribute("style");
+    async emitStartupEvent () {
+        try {
+            ipcRenderer.send("clientEvent", {
+                eventName: "checkPaths"
+            });
+        } catch (err) {
+            console.log(err);
         }
     }
 
@@ -96,17 +108,29 @@ class NavBarController extends EventEmitter {
 
     // Methods for reacting to model
 
-    cb_receiveParsedDirectoryFromSlippi (bIsValid, files, sourceID, dir) {
+    cb_receiveParsedDirectoryFromSlippi (bIsValid, files, sourceID, dir, panelID, errorMsg) {
 
         const eventData = {};
         eventData.isValid = bIsValid;
         eventData.dir = dir;
-        this.emit("updatePanelOneDirectoryInput", eventData);
+        eventData.errorMsg = errorMsg;
+        let inputDirEventName, successEventName;
+        switch (panelID) {
+            case 0:
+                inputDirEventName = "updatePanelOneDirectoryInput";
+                successEventName = "updatePanelOneFilesTable";
+                break;
+            case 2:
+                inputDirEventName = "updatePanelThreeDirectoryInput";
+                successEventName = "updatePanelThreeComboButton";
+                break;
+        }
+        this.emit(inputDirEventName, eventData);
 
         if (bIsValid) {
             eventData.sourceID = sourceID;
             eventData.files = files;
-            this.emit("updatePanelOneFilesTable", eventData);
+            this.emit(successEventName, eventData);
         }
     }
 

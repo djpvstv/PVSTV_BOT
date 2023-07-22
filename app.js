@@ -1,5 +1,8 @@
 const MainView = require("./view/MainView");
 const MainController = require("./controller/MainController");
+const AppState = require("./appState");
 
-const controller = new MainController();
-const view = new MainView(controller);
+const appState = new AppState();
+
+const controller = new MainController(appState);
+const view = new MainView(controller, appState);

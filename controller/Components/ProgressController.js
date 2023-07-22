@@ -1,4 +1,3 @@
-// const Utility = require("../Utility");
 const {ipcRenderer} = require("electron");
 const {EventEmitter} = require("events");
 
@@ -19,6 +18,9 @@ class ProgressController extends EventEmitter {
         // Listeners from Model
         const that = this;
         ipcRenderer.on("parseDirectoryUpdateCount", (evt, args) => {
+            that.emit("updateSpinnerCount", args);
+        });
+        ipcRenderer.on("findCombosUpdateCount", (evt, args) => {
             that.emit("updateSpinnerCount", args);
         });
     }

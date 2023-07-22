@@ -1,9 +1,10 @@
 const ParsePanelView = require("./ParsePanelView");
+const ComboPanelView = require("./FindComboView");
 
 class NavBarView {
 
     #navBarTitles = [`Parse Slippi`, `Count Moves`, `Find Combos`];
-    #navPanels = [];
+    #navPanelIDs = [];
     #controller = null;
 
     // Every panel, only one shown at a time
@@ -14,15 +15,13 @@ class NavBarView {
 
     #navBarListItemCount = 0;
 
-    constructor( controller, spinnerController ) {
+    constructor( controller, spinnerController, appState ) {
         this.#controller = controller;
 
         this.createPageSkeleton();
 
-        this.createNavBar();
-        this.createPanelForNavBar();
-
-        this.#parseViewPanel = new ParsePanelView(controller, spinnerController, this.#navPanels[0]);
+        this.#parseViewPanel = new ParsePanelView(controller, spinnerController, this.#navPanelIDs[0], appState);
+        this.#comboViewPanel = new ComboPanelView(controller, spinnerController, this.#navPanelIDs[2], appState);
 
     }
 
@@ -30,108 +29,81 @@ class NavBarView {
         return this.#parseViewPanel;
     }
 
+    getComboViewPanel () {
+        return this.#comboViewPanel;
+    }
+
     createPageSkeleton () {
         document.body.classList.add("container-fluid","h-100");
-        const topColumn = document.createElement("div");
-        topColumn.classList.add("h-100","d-flex", "flex-column");
-        document.body.appendChild(topColumn);
-
-        // Create Two main rows, one for the navbar and one for everything else
-        const navDiv = document.createElement("div");
-        const paneDiv = document.createElement("div");
-
-        navDiv.classList.add("row");
-        paneDiv.classList.add("row","flex-grow-1");
-
-        topColumn.appendChild(navDiv);
-        topColumn.appendChild(paneDiv);
-
-        navDiv.innerHTML = `
-        <div class="col-12">
-            <div id="navbar_skeleton"></div>
-        </div>
-        `;
-
-        paneDiv.innerHTML = `
-        <div class="h-100" id="navpanel_skeleton">
-        </div>
-        `;
-    }
-    
-
-    createNavBar() {
-        const navBar = document.createElement("ul");
-        navBar.classList.add("nav", "nav-tabs", "nav-justified","mb-3", "nav-item-owner");
-
-        let bSelected = true;
-
-        this.#navBarTitles.forEach(title => {
-            const listItem = this.createNavBarListItem(bSelected, title);
-            navBar.appendChild(listItem);
-            bSelected = false;
-            this.#navBarListItemCount++;
-        });
-        
-        const skeletonDiv = document.getElementById("navbar_skeleton");
-        skeletonDiv.appendChild(navBar);
-
-        skeletonDiv.addEventListener("click", (args) => {
-            this.#controller.cb_navbarSkeletonOnClick(args);
-        });
-    }
-
-    createNavBarListItem(bSelected, sTitle) {
-        const listItem = document.createElement("li");
-        listItem.classList.add("nav-item");
-        listItem.setAttribute("role", "presentation");
-
-        const link = document.createElement("a");
-        link.classList.add("nav-link");
-        if (bSelected) {
-            link.classList.add("active");
-        }
-        link.setAttribute("data-mdb-toggle", "tab");
-        link.id = `nav_tab${this.#navBarListItemCount}`;
-        link.setAttribute("href",`#tab_content_tab${this.#navBarListItemCount}`);
-        link.setAttribute("role", "tab");
-        link.setAttribute("aria-controls", `tab_content_tab${this.#navBarListItemCount}`);
-        link.setAttribute("aria-selected",`${bSelected}`);
-        link.innerText = sTitle;
-        listItem.appendChild(link);
-        return listItem;
-    }
-
-    createPanelForNavBar () {
-        const navPanel = document.getElementById("navpanel_skeleton");
-
-        navPanel.innerHTML = `
-        <div class="tab-content h-100">
-            <div class="panel-owner h-100" old-class="container-fluid"> 
+        document.body.innerHTML = `
+        <div class="h-100 d-flex flex-column">
+            <div class="row">
+                <div class="col-12">
+                    <div id="navbar_skeleton">
+                        <nav>
+                            <div class="nav nav-tabs nav-justified mb-3 nav-item-owner" id="nav-tab" role="tablist">
+                                ${this.createNavBarButtons()}
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <div class="row flex-grow-1">
+                <div class="h-100" id="navpanel_skeleton">
+                    <div class="tab-content h-100">
+                        <div class="h-100">
+                            ${this.createPanelsForNavBar()}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         `;
+    }
 
-        const panelOwner = navPanel.querySelector("div > .panel-owner");
-
-        this.#navBarListItemCount = 0;
-        let bSelected = true;
-        this.#navBarTitles.forEach( () => {
-            const paneDiv = document.createElement("div");
-            paneDiv.classList.add("tab-pane", "fade");
-            if (bSelected) {
-                paneDiv.classList.add("active", "show", "h-100");
+    createNavBarButtons () {
+        let buttonHTML = ``;
+        let isFirst = true;
+        this.#navBarTitles.forEach(title => {
+            const titleID = title.replaceAll(' ', '_');
+            if (isFirst) {
+            buttonHTML = `${buttonHTML}
+                <button class="nav-link active id="nav_${titleID}" data-bs-toggle="tab" data-bs-target="#panel_${titleID}" type="button" role="tab" aria-controls="panel_${titleID}" aria-selected="true">${title}</button>
+            `;
+            } else {
+            buttonHTML = `${buttonHTML}
+                <button class="nav-link" id="nav_${titleID}" data-bs-toggle="tab" data-bs-target="#panel_${titleID}" type="button" role="tab" aria-controls="panel_${titleID}" aria-selected="false">${title}</button>
+            `;
             }
-            paneDiv.classList.add("d-flex", "flex-column");
-            paneDiv.id = `tab_content_tab${this.#navBarListItemCount}`;
-            paneDiv.setAttribute("role", "tabpanel");
-            paneDiv.setAttribute("aria-labelledby", `nav_tab${this.#navBarListItemCount}`);
+            isFirst = false;
+        });
+        return buttonHTML;
+    }
 
-            panelOwner.appendChild(paneDiv);
-            this.#navPanels.push(paneDiv);
+    createPanelsForNavBar () {
+        let panelHTML = ``;
+        this.#navBarListItemCount = 0;
+        let isFirst = true;
+        this.#navBarTitles.forEach((title) => {
+            const titleID = title.replaceAll(' ', '_');
+            if (isFirst) {
+                panelHTML = `${panelHTML}
+                <div class="tab-pane fade d-flex flex-column show active panel-height" id="panel_${titleID}" role="tabpanel" aria-labeledby="nav_${titleID}" tabindex="0">
+                </div>
+                `;
+            } else {
+                panelHTML = `${panelHTML}
+                <div class="tab-pane fade d-flex flex-column panel-height" id="panel_${titleID}" role="tabpanel" aria-labeledby="nav_${titleID}" tabindex="0">
+                </div>
+                `;
+            }
+            this.#navPanelIDs.push("panel_" + titleID);
 
-            bSelected = false;
+            isFirst = false;
             this.#navBarListItemCount++;
         });
+
+        return panelHTML;
     }
 
 }
