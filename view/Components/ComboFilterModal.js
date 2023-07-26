@@ -17,6 +17,7 @@ class ComboFilterModal {
     #currentRules = {
         minNumMoves: 0,
         maxNumMoves: 99,
+        doesKill: false,
         ruleList: []
     };
     
@@ -160,6 +161,10 @@ class ComboFilterModal {
     _applyCallbacks () {
         document.getElementById(this.#applyButtonID).addEventListener("click", async () => {
             await this.#controller.cb_emitAcceptButtonEvent(true, this.#currentRules);
+        });
+
+        document.getElementById('doesKill').addEventListener("click", (evt) => {
+            this.#currentRules.doesKill = evt.target.value === 'on';
         });
 
         document.getElementById('minNumMoves').addEventListener("change", (evt) => {

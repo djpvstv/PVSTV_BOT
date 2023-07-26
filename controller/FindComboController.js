@@ -71,7 +71,7 @@ class FindComboController extends EventEmitter {
 
         const gameAndCombo = closestParent.querySelector(".outer-accordion-header").id.replace("combo_","").replace("_heading","");
         const parts = gameAndCombo.split("").reverse().join("").split("_");
-        const comboNum = parseInt(parts.shift());
+        const comboNum = parseInt(parts.shift().split("").reverse().join(""));
         const game = parts.join("_").split("").reverse().join("");
 
         const contextDiv = document.getElementById(this.idMap.get("c1"));

@@ -446,9 +446,9 @@ class Utility {
     }
 
     static getSpecialActionNameFromID(playerChar, actionID) {
-        const charData = this.#idMap.get(playerChar);
+        const charData = this.#idMap.get(parseInt(playerChar));
         const found = charData.actionIDs.find(el => el === parseInt(actionID));
-        if (found) return DataTransfer.actionNames[found];
+        if (found) return charData.actionNames[found];
 
         return `Unknown ${charData.name} ID: ${actionID}`;
     }

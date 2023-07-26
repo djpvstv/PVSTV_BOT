@@ -93,6 +93,9 @@ class ComboFilterController extends EventEmitter {
                 }
                 break;
             case 2:
+            case 3:
+                // I'm not convinced you can enter an invalid string into a numeric input
+                isValid = true;
                 break;
         }
 

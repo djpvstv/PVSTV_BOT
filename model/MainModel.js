@@ -18,6 +18,7 @@ class MainModel {
     #comboInfo = null;
     #fileComboMap = null;
     #comboFilterParams = null;
+    #isFilterOn = null;
 
     #slippiPlayer = null;
 
@@ -34,6 +35,7 @@ class MainModel {
     constructor( mainWindow ) {
         this.#slippiPlayer = new SlippiPlayer(this.#APP_NAME);
         this.#fileComboMap = new Map();
+        this.isFilterOn = false;
         this.#comboFilterParams = [];
         this.#win = mainWindow;
         this.#usePagination = [false, false, false];
@@ -124,7 +126,7 @@ class MainModel {
 
         if (updateAppData) this.updateAppData(appData);
 
-        // Just to get this to show up faster
+        // Debug: uncomment to show filter window immediately
         // this.getFilterParams();
     }
 
@@ -368,6 +370,7 @@ class MainModel {
     }
 
     handleProcessedComboParse (data) {
+        this.#isFilterOn = false;
         this.#fileComboMap.clear();
         const parsedData = JSON.parse(data.args.replaceAll('\\', '/').replaceAll('/"','\\\"'));
         const files = Object.keys(parsedData);
@@ -404,38 +407,10 @@ class MainModel {
     }
 
     async updateComboFilterRules ( event, buttonID, rules ) {
+        this.#isFilterOn = true;
         this.#comboFilterParams = rules;
 
-        const allCombos = [...this.#comboInfo];
-
-        const tempCombos = allCombos.filter((combo) => {
-            let isValid = true;
-            if (rules.minNumMoves > combo.combo.moves.length) isValid = false;
-            
-            if (rules.maxNumMoves < combo.combo.moves.length) isValid = false;
-
-            if (combo.is_manually_hidden) isValid = false;
-
-            let i = 0;
-            while (i < rules.ruleList.length) {
-                const option = rules.ruleList[i].option;
-                const id = option.replace(/(^\d+)(.+$)/i,'$1');
-                switch (parseInt(rules.ruleList[i].flavor)) {
-                    case 0:
-                        if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
-                        break;
-                    case 1:
-                        if (combo.combo.moves.filter(m => m.actionID === id).length === 0) isValid = false;
-                        break;
-                    case 2:
-                        break;
-                }
-                i++;
-            }
-
-            return isValid;
-        });
-
+        const tempCombos = this.getFileredCombosFromAll();
         const numCombos = tempCombos.length;
 
         this.processedComboParse(numCombos, tempCombos, false, "findCombosComplete");
@@ -465,11 +440,62 @@ class MainModel {
         });
     }
 
+    getFileredCombosFromAll () {
+        const allCombos = [...this.#comboInfo];
+        const rules = this.#comboFilterParams;
+        const tempCombos = allCombos.filter((combo) => {
+            let isValid = true;
+            if (rules.minNumMoves > combo.combo.moves.length) isValid = false;
+            
+            if (rules.maxNumMoves < combo.combo.moves.length) isValid = false;
+
+            if (rules.doesKill && (combo.combo.didKill === 'false')) isValid = false;
+
+            if (combo.is_manually_hidden) isValid = false;
+
+            const comboDamage = parseFloat(combo.combo.endPercent) - parseFloat(combo.combo.startPercent);
+
+            let i = 0;
+            while (i < rules.ruleList.length) {
+                const option = rules.ruleList[i].option;
+                const id = option.replace(/(^\d+)(.+$)/i,'$1');
+                switch (parseInt(rules.ruleList[i].flavor)) {
+                    case 0:
+                        if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
+                        break;
+                    case 1:
+                        if (combo.combo.moves.filter(m => m.actionID === id).length === 0) isValid = false;
+                        break;
+                    case 2:
+                        // Total Damage > X
+                        if (comboDamage <= parseFloat(option)) isValid = false;
+                        break;
+                    case 3:
+                        // Total Damage < X
+                        if (comboDamage >= parseFloat(option)) isValid = false;
+                        break;
+                }
+                i++;
+            }
+
+            return isValid;
+        });
+
+        return tempCombos;
+    }
+
     async updateComboPagination ( event, buttonID, targetPage ) {
-        const numCombos = this.#comboInfo.length;
+        let parsedData;
+        if (this.#isFilterOn) {
+            parsedData = this.getFileredCombosFromAll();
+        } else {
+            parsedData = [...this.#comboInfo];
+        }
+
+        const numCombos = parsedData.length;
         const totalNumPages = Math.ceil(numCombos / this.#PAGINATION_LOWER_LIMIT); 
         const startIdx = this.#PAGINATION_LOWER_LIMIT * (targetPage-1);
-        let parsedData = [...this.#comboInfo];
+
         parsedData = parsedData.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);
         this.#win.webContents.send("findComboEvent", {
             eventName: "updatePanelThreeAccordionJustAccordion",
