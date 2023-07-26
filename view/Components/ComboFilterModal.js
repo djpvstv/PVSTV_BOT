@@ -73,6 +73,14 @@ class ComboFilterModal {
                             </div>
                         </div>
                         <div class="row">
+                            <div class="col-md-6 dropped-label">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="doesKill">
+                                    <label class="form-check-label" for="doesKill">Combos must Kill</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="form-col col-md-12">
                                 <label class="dropped-label">Filters</label>
                                 <div id=${this.#ruleRowID} class="row">
@@ -111,7 +119,8 @@ class ComboFilterModal {
                         <option disabled value> Rule </option>
                         <option ${rule.flavor === '0' ? 'selected ' : ''}value="0">Has Move ID</option>
                         <option ${rule.flavor === '1' ? 'selected ' : ''}value="1">Has Action ID</option>
-                        <option ${rule.flavor === '2' ? 'selected ' : ''}value="2">Does damage ><option>
+                        <option ${rule.flavor === '2' ? 'selected ' : ''}value="2">Total Damage ><option>
+                        <option ${rule.flavor === '3' ? 'selected ' : ''}value="3">Total Damage <</option>
                     </select>
                     <input class="form-control" value="${rule.option}" id="form-${i}-input" disabled>
                     <div id="rule${i}_remove" class="enabled-icon" value="${i-1}">
@@ -134,7 +143,8 @@ class ComboFilterModal {
                     <option hidden disabled selected value=""> -Add Rule- </option>
                     <option value="0">Has Move ID</option>
                     <option value="1">Has Action ID</option>
-                    <option value="2">Does damage ></option>
+                    <option value="2">Total Damage ></option>
+                    <option value="3">Total Damage <</option>
                 </select>
                 <input class="form-control" list="form-0-datalist" id="form-0-input" disabled>
                 <datalist type="datalistOptions" id="form-0-datalist"></datalist>
@@ -243,6 +253,10 @@ class ComboFilterModal {
                     `;
                     i++;
                 }
+                break;
+            case 2:
+            case 3:
+                inputDiv.setAttribute('type', "number");
                 break;
         }
 

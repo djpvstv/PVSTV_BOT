@@ -41,8 +41,9 @@ const createWindow = async () => {
         win.webContents.openDevTools();
     }
     const iconPath = join(__dirname, 'img', 'noodles.ico');
+    const appVersion = app.getVersion();
     win.setIcon(iconPath);
-    win.setTitle("PVSTVBOT.exe");
+    win.setTitle("PVSTVBOT.exe - v" + appVersion);
 
     createModel(win);
 }

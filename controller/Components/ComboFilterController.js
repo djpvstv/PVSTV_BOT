@@ -70,6 +70,10 @@ class ComboFilterController extends EventEmitter {
                 break;
             // Damage
             case 2:
+            case 3:
+                this.emit("changeModalInput", {
+                    flavor: flavor
+                });
                 break;
         }
 

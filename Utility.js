@@ -1,31 +1,222 @@
 class Utility {
     static #commonMoveIDs = [2,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,50,51,52,53,54,55,56];
     static #commonMoveNames = ["Jab 1","Dash Attack","Forward Tilt","Up Tilt","Down Tilt","Forward Smash","Up Smash","Down Smash","Nair","Fair","Bair","Uair","Dair","Neutral Special","Side Special","Up Special","Down Special","Get Up Attack (Back)","Get Up Attack (Front)","Pummel","Forward Throw","Back Throw","Up Throw","Down Throw"];
-    static #commonActionIDs = [44,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,187,212,217,219,220,221,222];
-    static #commonActionNames = ["Jab 1","Dash Attack","Forward Tilt","Up Tilt","Down Tilt","Forward Smash","Up Smash","Down Smash","Nair","Fair","Bair","Uair","Dair","Pummel","Forward Throw","Back Throw","Up Throw","Down Throw"];
+    static #commonActionIDs = [44,50,53,56,57,60,63,64,65,66,67,68,69,187,217,219,220,221,222];
+    static #commonActionNames = ["Jab 1","Dash Attack","Mid Forward Tilt","Up Tilt","Down Tilt","Mid Forward Smash","Up Smash","Down Smash","Nair","Fair","Bair","Uair","Dair","Getup Attack","Pummel","Forward Throw","Back Throw","Up Throw","Down Throw"];
     static #idMap = new Map([
         [0, {
             name: "Captain Falcon",
             moveIDs: this.#commonMoveIDs.concat([3, 4, 5]),
-            moveNames: this.#commonMoveNames.concat(["Jab 2", "Jab 3", "Rapid Jabs"])
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Jab 3", "Rapid Jabs"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
         }],
         [1, {
             name: "DK",
             moveIDs: this.#commonMoveIDs.concat([3]),
-            moveNames: this.#commonMoveNames.concat(["Jab 2"])
+            moveNames: this.#commonMoveNames.concat(["Jab 2"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
         }],
         [2, {
             name: "Fox",
+            moveIDs: this.#commonMoveIDs.concat([3, 5]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Rapid Jabs"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [3, {
+            name: "Mr. Game & Watch",
+            moveIDs: this.#commonMoveIDs.concat([5]),
+            moveNames: this.#commonMoveNames.concat(["Rapid Jabs"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [4, {
+            name: "Kirby",
+            moveIDs: this.#commonMoveIDs.concat([3, 5]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Rapid Jabs"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [5, {
+            name: "Bowser",
+            moveIDs: this.#commonMoveIDs.concat([3]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [6, {
+            name: "Link",
             moveIDs: this.#commonMoveIDs.concat([3, 4, 5]),
-            moveNames: this.#commonMoveNames.concat(["Jab 2", "Jab 3", "Rapid Jabs"])
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Jab 3", "Rapid Jabs"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [7, {
+            name: "Luigi",
+            moveIDs: this.#commonMoveIDs.concat([3, 4]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Jab 3"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [8, {
+            name: "Mario",
+            moveIDs: this.#commonMoveIDs.concat([3, 4]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Jab 3"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [9, {
+            name: "Marth",
+            moveIDs: this.#commonMoveIDs.concat([3]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [10, {
+            name: "Mewtwo",
+            moveIDs: this.#commonMoveIDs.concat([5]),
+            moveNames: this.#commonMoveNames.concat(["Rapid Jabs"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [11, {
+            name: "Ness",
+            moveIDs: this.#commonMoveIDs.concat([3, 4]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Jab 3"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [12, {
+            name: "Peach",
+            moveIDs: this.#commonMoveIDs.concat([3]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [13, {
+            name: "Pikachu",
+            moveIDs: this.#commonMoveIDs,
+            moveNames: this.#commonMoveNames,
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [14, {
+            name: "Ice Climbers",
+            moveIDs: this.#commonMoveIDs.concat([3]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [15, {
+            name: "Jigglypuff",
+            moveIDs: this.#commonMoveIDs.concat([3]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [16, {
+            name: "Samus",
+            moveIDs: this.#commonMoveIDs.concat([3]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [17, {
+            name: "Yoshi",
+            moveIDs: this.#commonMoveIDs.concat([3]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [18, {
+            name: "Zelda",
+            moveIDs: this.#commonMoveIDs,
+            moveNames: this.#commonMoveNames,
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [19, {
+            name: "Sheik",
+            moveIDs: this.#commonMoveIDs.concat([3, 5]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Rapid Jabs"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [20, {
+            name: "Falco",
+            moveIDs: this.#commonMoveIDs.concat([3, 5]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Rapid Jabs"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [21, {
+            name: "Young Link",
+            moveIDs: this.#commonMoveIDs.concat([3, 4, 5]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Jab 3", "Rapid Jabs"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [22, {
+            name: "Dr. Mario",
+            moveIDs: this.#commonMoveIDs.concat([3, 4]),
+            moveNames: this.#commonMoveNames.concat(["Jab 2", "Jab 3"]),
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
         }],
         [23, {
             name: "Roy",
-            moveIDs: this.#commonMoveIDs.concat([3]),
-            moveNames: this.#commonMoveNames.concat(["Jab 2"]),
-            actionIDs: this.#commonActionIDs.concat([341,342,343,344,345,346,347,348,349,350,351,352,353,354,355,356,357,358,359,360,361,362,363,364,365,366,367,368,369,370,371,372]),
-            actionNames: this.#commonActionNames.concat(["Flare Blade Ground Start Charge","Flare Blade Ground Charge Loop","Flare Blade Ground Early Release","Flare Blade Ground Fully Charged","Flare Blade Air Start Charge","Flare Blade Air Charge Loop","Flare Blade Air Early Release","Flare Blade Air Fully Charged","Double Edge Dance 1 Ground","Double Edge Dance 2 Up Ground","Double Edge Dance 2 Side Ground","Double Edge Dance 3 Up Ground","Double Edge Dance 3 Side Ground","Double Edge Dance 3 Down Ground","Double Edge Dance 4 Up Ground","Double Edge Dance 4 Side Ground","Double Edge Dance 4 Down Ground","Double Edge Dance 1 Air","Double Edge Dance 2 Up Air","Double Edge Dance 2 Side Air","Double Edge Dance 3 Up Air","Double Edge Dance 3 Side Air","Double Edge Dance 3 Down Air","Double Edge Dance 4 Up Air","Double Edge Dance 4 Side Air","Double Edge Dance 4 Down Air","Blazer Ground","Blazer Air","Counter Ground","Counter Ground Hit","Counter Air","Counter Air Hit"])
-        }]
+            moveIDs: this.#commonMoveIDs,
+            moveNames: this.#commonMoveNames,
+            actionIDs: this.#commonActionIDs.concat([343,344,347,348,349,350,351,352,353,354,355,356,357,358,359,360,361,362,363,364,365,366,367,368,370,372]),
+            actionNames: this.#commonActionNames.concat(["Flare Blade Ground Early Release","Flare Blade Ground Fully Charged","Flare Blade Air Early Release","Flare Blade Air Fully Charged","Double Edge Dance 1 Ground","Double Edge Dance 2 Up Ground","Double Edge Dance 2 Side Ground","Double Edge Dance 3 Up Ground","Double Edge Dance 3 Side Ground","Double Edge Dance 3 Down Ground","Double Edge Dance 4 Up Ground","Double Edge Dance 4 Side Ground","Double Edge Dance 4 Down Ground","Double Edge Dance 1 Air","Double Edge Dance 2 Up Air","Double Edge Dance 2 Side Air","Double Edge Dance 3 Up Air","Double Edge Dance 3 Side Air","Double Edge Dance 3 Down Air","Double Edge Dance 4 Up Air","Double Edge Dance 4 Side Air","Double Edge Dance 4 Down Air","Blazer Ground","Blazer Air","Counter Ground","Counter Air"])
+        }],
+        [24, {
+            name: "Pichu",
+            moveIDs: this.#commonMoveIDs,
+            moveNames: this.#commonMoveNames,
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+        [25, {
+            name: "Ganondorf",
+            moveIDs: this.#commonMoveIDs,
+            moveNames: this.#commonMoveNames,
+            actionIDs: this.#commonActionIDs,
+            actionNames: this.#commonActionNames
+        }],
+    ]);
+    static #stageIDMap = new Map([
+        [2, {name: "Fountain of Dreams"}],
+        [3, {name: "Pokemon Stadium"}],
+        [4, {name: "Princess Peach's Castle"}],
+        [5, {name: "Kongo Jungle"}],
+        [6, {name: "Brinstar"}],
+        [7, {name: "Corneria"}],
+        [8, {name: "Yoshi's Story"}],
+        [9, {name: "Onett"}],
+        [10, {name: "Mute City"}],
+        [11, {name: "Rainbow Cruise"}],
+        [12, {name: "Jungle Japes"}],
+        [13, {name: "Great Bay"}],
+        [14, {name: "Hyrule Temple"}],
+        [15, {name: "Brinstar Depths"}],
+        [16, {name: "Yoshi's Island"}],
+        [17, {name: "Green Greens"}],
+        [18, {name: "Fourside"}],
+        [19, {name: "Mushroom Kingdom I"}],
+        [20, {name: "Mushroom Kingdom II"}],
+        [21, {name: "Akaneia"}],
+        [22, {name: "Venom"}],
+        [23, {name: "Poke Floats"}],
+        [26, {name: "Icetop"}],
+        [27, {name: "Flat Zone"}],
+        [28, {name: "Dream Land N64"}],
+        [29, {name: "Yoshi's Island N64"}],
+        [30, {name: "Kongo Jungle N64"}],
+        [31, {name: "Battlefield"}],
+        [32, {name: "Final Destination"}]
     ]);
 
     static getMoveNameFromAttackID(id) {
@@ -255,90 +446,13 @@ class Utility {
     }
 
     static getSpecialActionNameFromID(playerChar, actionID) {
-        switch (parseInt(playerChar)) {
-            case 23:
-                return this.getRoySpecialActionNameFromID(actionID);
-        }
+        const charData = this.#idMap.get(playerChar);
+        const found = charData.actionIDs.find(el => el === parseInt(actionID));
+        if (found) return DataTransfer.actionNames[found];
 
-        return `Unknown ID: ${actionID}`;
+        return `Unknown ${charData.name} ID: ${actionID}`;
     }
 
-    static getRoySpecialActionNameFromID (actionID) {
-        const royData = this.#idMap.get(23);
-        const found = royData.actionIDs.find(el => el === parseInt(actionID));
-        if (found) {
-            return royData.actionNames[found];
-        }
-        // }
-        // switch (parseInt(actionID)) {
-        //     case 341:
-        //         return "Flare Blade Ground Start Charge";
-        //     case 342:
-        //         return "Flare Blade Ground Charge Loop";
-        //     case 343:
-        //         return "Flare Blade Ground Early Release";
-        //     case 344:
-        //         return "Flare Blade Ground Fully Charged";
-        //     case 345:
-        //         return "Flare Blade Air Start Charge";
-        //     case 346:
-        //         return "Flare Blade Air Charge Loop";
-        //     case 347:
-        //         return "Flare Blade Early Release";
-        //     case 348:
-        //         return "Flare Blade Air Fully Charged";
-        //     case 349:
-        //         return "Double-Edge Dance 1 Ground";
-        //     case 350:
-        //         return "Double-Edge Dance 2 Up Ground";
-        //     case 351:
-        //         return "Double-Edge Dance 2 Side Ground";
-        //     case 352:
-        //         return "Double-Edge Dance 3 Up Ground";
-        //     case 353:
-        //         return "Double-Edge Dance 3 Side Ground";
-        //     case 354:
-        //         return "Double-Edge Dance 3 Down Ground";
-        //     case 355:
-        //         return "Double-Edge Dance 4 Up Ground";
-        //     case 356:
-        //         return "Double-Edge Dance 4 Side Ground";
-        //     case 357:
-        //         return "Double-Edge Dance 4 Down Ground";
-        //     case 358:
-        //         return "Double-Edge Dance 1  Air";
-        //     case 359:
-        //         return "Double-Edge Dance 2 Up Air";
-        //     case 360:
-        //         return "Double-Edge Dance 2 Side Air";
-        //     case 361:
-        //         return "Double-Edge Dance 3 Up Air";
-        //     case 362:
-        //         return "Double-Edge Dance 3 Side Air";
-        //     case 363:
-        //         return "Double-Edge Dance 3 Down Air";
-        //     case 364:
-        //         return "Double-Edge Dance 4 Up Air";
-        //     case 365:
-        //         return "Double-Edge Dance 4 Side Air";
-        //     case 366:
-        //         return "Double-Edge Dance 4 Down Air";
-        //     case 367:
-        //         return "Blazer Ground";
-        //     case 368:
-        //         return "Blazer Air";
-        //     case 369:
-        //         return "Counter Ground";
-        //     case 370:
-        //         return "Counter Ground Hit";
-        //     case 371:
-        //         return "Counter Air";
-        //     case 372:
-        //         return "Counter Air Hit";
-        // }
-
-        return `Unknown ROY ID: ${actionID}`;
-    }
 }
 
 module.exports = Utility;
