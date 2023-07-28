@@ -489,7 +489,7 @@ class AccordionView {
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="${moveHeaderID}">
                         <button id="${moveHeaderButtonID}" class="accordion-button accordion-button-sub collapsed collapsed-icon">
-                            Move ${move.moveID}: ${utility.getMoveNameFromAttackID(move.moveID)}
+                            Move ${move.moveID}: ${utility.getMoveNameFromAttackID(move.moveID, playerChar)}
                         </button>
                     </h2>
                     <div id="${moveCollapseID}" class="accordion-collapse collapse">
@@ -531,7 +531,7 @@ class AccordionView {
                                     ${move.hitCount}
                                 </div>
                                 <div class="col col-md-2">
-                                    ${utility.getActionNameFromID(playerChar, move.actionID)}
+                                    ${utility.getActionNameFromID(move.actionID, playerChar)}
                                 </div>
                             </div>
                         </div>
@@ -562,7 +562,7 @@ class AccordionView {
                                 <img src="./img/si_${playerColorString}.png" width="20" height="20">
                                 <p class="p-move">${playerTag} combos</p>
                                 <img src="./img/si_${opponentColorString}.png" width="20" height="20">
-                                <p class="p-move">${opponentTag} on ${stageID} (${combo.combo.moves.length} moves)</p>
+                                <p class="p-move">${opponentTag} on ${utility.getStageNameFromID(stageID)} (${combo.combo.moves.length} moves)</p>
                                 <div id="${moveMeatballsButtonID}" class="meatballs-div">
                                     <img src="./Bootstrap/svg/three-dots.svg" class="meatballs-icon">
                                 </div>

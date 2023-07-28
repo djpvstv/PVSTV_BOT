@@ -276,3 +276,52 @@
 .buffer-right-slightly {
     margin-right: 0.5rem;
 }
+
+.inner-addon {
+    background-color: var(--bs-form-control-disabled-bg);
+    position: relative;
+    margin: 0px;
+    height: 42px;
+}
+
+.inner-addon .gliphicon {
+    margin: 5px;
+    pointer-events: none;
+    position: absolute;
+}
+
+.replace-input-width {
+    flex: 1 1 auto;
+}
+
+.gliphicon-box {
+    cursor: default;
+    background-color: -internal-light-dark(rgba(239, 239, 239, 0.3), rgba(59, 59, 59, 0.3));
+    color: -internal-light-dark(rgb(84, 84, 84), rgb(170, 170, 170));
+    border-color: rgba(118, 118, 118, 0.3);
+    width: 45px;
+}
+
+.inner-addon .x {
+    position: absolute;
+    margin-left: 24px;
+    margin-top: 5px;
+    width: 22px;
+    height: 22px;
+    opacity: 0.1;
+    transition: 0.3s;
+}
+
+.flex {
+    display: flex;
+}
+
+.char-box {
+    position: relative;
+    display: inline-flex;
+    margin-right: 10px;
+}
+
+.char-box:hover .x {
+    opacity: 1;
+}

@@ -75,6 +75,16 @@ class ComboFilterController extends EventEmitter {
                     flavor: flavor
                 });
                 break;
+            case 4:
+            case 5:
+                const characters = Utility.getCharacterNames();
+                const characterIDs = Utility.getCharacterIDs();
+                this.emit("changeModalInput", {
+                    flavor: flavor,
+                    charNames: characters,
+                    charIDs: characterIDs
+                });
+                break;
         }
 
     }
@@ -87,6 +97,8 @@ class ComboFilterController extends EventEmitter {
         switch (parseInt(flavor)) {
             case 0:
             case 1:
+            case 4:
+            case 5:
                 obj = listDiv.querySelector(`option[value="${newVal}"]`);
                 if (obj !== null) {
                     isValid = true;

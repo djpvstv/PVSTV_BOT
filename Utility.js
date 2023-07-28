@@ -219,68 +219,52 @@ class Utility {
         [32, {name: "Final Destination"}]
     ]);
 
-    static getMoveNameFromAttackID(id) {
-        switch (parseFloat(id)) {
-            case 0:
-                return "None";
-            case 1:
-                return "Non-Staling";
-            case 2:
-                return "Jab 1";
-            case 3:
-                return "Jab 2";
-            case 4:
-                return "Jab 3";
-            case 5:
-                return "Rapid Jabs";
-            case 6:
-                return "Dash Attack";
-            case 7:
-                return "Forward Tilt";
-            case 8:
-                return "Up Tilt";
-            case 9:
-                return "Down Tilt";
-            case 10:
-                return "Forward Smash";
-            case 11:
-                return "Up Smash";
-            case 12:
-                return "Down Smash";
-            case 13:
-                return "Nair";
-            case 14:
-                return "Fair";
-            case 15:
-                return "Bair";
-            case 16:
-                return "Uair";
-            case 17:
-                return "Dair";
-            case 18:
-                return "Neutral Special";
-            case 19:
-                return "Side Special";
-            case 20:
-                return "Up Special";
-            case 21:
-                return "Down Special";
-            case 50:
-                return "Get Up Attack (Back)";
-            case 51:
-                return "Get Up Attack (Front)";
-            case 52:
-                return "Pummel";
-            case 53:
-                return "Forward Throw";
-            case 54:
-                return "Back Throw";
-            case 55:
-                return "Up Throw";
-            case 56:
-                return "Down Throw";                                                                                                                                                                                              
+    static getMoveNameFromAttackID(moveID, charID) {
+        moveID = parseInt(moveID);
+        if (this.#commonMoveIDs.includes(moveID)) {
+            const idx = this.#commonMoveIDs.indexOf(moveID);
+            return this.#commonMoveNames[idx];
         }
-        return "";
+        
+        const charData = this.#idMap.get(parseInt(charID));
+        if (charData.moveIDs.includes(moveID)) {
+            const idx = charData.moveIDs.indexOf(moveID);
+            return charData.moveNames[idx];
+        }
+
+        return `Unknown Move for ${charID} move ${moveID}`;
+    }
+
+    static getActionNameFromID (actionID, charID) {
+        actionID = parseInt(actionID);
+        if (this.#commonActionIDs.includes(actionID)) {
+            const idx = this.#commonActionIDs.indexOf(actionID);
+            return this.#commonActionNames[idx];
+        }
+        
+        const charData = this.#idMap.get(parseInt(charID));
+        if (charData.actionIDs.includes(actionID)) {
+            const idx = charData.actionIDs.indexOf(actionID);
+            return charData.actionNames[idx];
+        }
+
+        return `Unknown Action for ${charID} action ${actionID}`;
+    }
+
+    static getCharacterNames () {
+        const chars = [];
+        this.#idMap.forEach(el => {
+            chars.push(el.name);
+        });
+        return chars;
+    }
+
+    static getCharacterIDs () {
+        return [...this.#idMap.keys()];
+    }
+
+    static getStageNameFromID(id) {
+        return this.#stageIDMap.get(parseInt(id)).name;
     }
 
     static getMaxCostumesByCharacter (id) {
@@ -347,80 +331,6 @@ class Utility {
         return -1;
     }
 
-    static getActionNameFromID (playerChar, actionID) {
-        switch (parseInt(actionID)) {
-            case 42:
-                return "None";
-            case 43:
-                return "Non-Staling";
-            case 44:
-                return "Jab 1";
-            case 45:
-                return "Jab 2";
-            case 46:
-                return "Jab 3";
-            case 47:
-                return "Rapid Jabs";
-            case 50:
-                return "Dash Attack";
-            case 51:
-                return "High Ftilt";
-            case 52:
-                return "High-Mid Ftilt";
-            case 53:
-                return "Mid Ftilt";
-            case 54:
-                return "Low-Mid Ftilt";
-            case 55:
-                return "Low Ftilt";
-            case 56:
-                return "Uptilt";
-            case 57:
-                return "Downtilt";
-            case 58:
-                return "High Fsmash";
-            case 59:
-                return "High-Mid Fsmash";
-            case 60:
-                return "Mid Fsmash";
-            case 61:
-                return "Low-Mid Fsmash";
-            case 62:
-                return "Low Fsmash";
-            case 63:
-                return "Upsmash";
-            case 64:
-                return "Downsmash";
-            case 65:
-                return "Nair";
-            case 66:
-                return "Fair";
-            case 67:
-                return "Bair";
-            case 68:
-                return "Uair";
-            case 69:
-                return "Dair";
-            case 187:
-                return "Getup Attack";
-            case 212:
-                return "Grab";
-            case 217:
-                return "Pummel";
-            case 219:
-                return "Forward Throw";
-            case 220:
-                return "Back Throw";
-            case 221:
-                return "Up Throw";
-            case 222:
-                return "Down Throw";     
-        }
-
-        return this.getSpecialActionNameFromID(playerChar, actionID);
-                                                                                                                                                                                                          
-    }
-
     static getMoveIDsForChar(playerChar) {
         const charData = this.#idMap.get(parseInt(playerChar));
         if (Object.hasOwnProperty.call(charData, "moveIDs")) return charData.moveIDs;
@@ -443,14 +353,6 @@ class Utility {
         const charData = this.#idMap.get(parseInt(playerChar));
         if (Object.hasOwnProperty.call(charData, "actionNames")) return charData.actionNames;
         return [];
-    }
-
-    static getSpecialActionNameFromID(playerChar, actionID) {
-        const charData = this.#idMap.get(parseInt(playerChar));
-        const found = charData.actionIDs.find(el => el === parseInt(actionID));
-        if (found) return charData.actionNames[found];
-
-        return `Unknown ${charData.name} ID: ${actionID}`;
     }
 
 }

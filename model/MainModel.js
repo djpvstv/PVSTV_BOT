@@ -370,6 +370,7 @@ class MainModel {
     }
 
     handleProcessedComboParse (data) {
+        this.#comboFilterParams = [];
         this.#isFilterOn = false;
         this.#fileComboMap.clear();
         const parsedData = JSON.parse(data.args.replaceAll('\\', '/').replaceAll('/"','\\\"'));
@@ -455,27 +456,39 @@ class MainModel {
 
             const comboDamage = parseFloat(combo.combo.endPercent) - parseFloat(combo.combo.startPercent);
 
-            let i = 0;
-            while (i < rules.ruleList.length) {
-                const option = rules.ruleList[i].option;
-                const id = option.replace(/(^\d+)(.+$)/i,'$1');
-                switch (parseInt(rules.ruleList[i].flavor)) {
-                    case 0:
-                        if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
-                        break;
-                    case 1:
-                        if (combo.combo.moves.filter(m => m.actionID === id).length === 0) isValid = false;
-                        break;
-                    case 2:
-                        // Total Damage > X
-                        if (comboDamage <= parseFloat(option)) isValid = false;
-                        break;
-                    case 3:
-                        // Total Damage < X
-                        if (comboDamage >= parseFloat(option)) isValid = false;
-                        break;
+            if (isValid) {
+                let i = 0;
+                while (i < rules.ruleList.length) {
+                    const option = rules.ruleList[i].option;
+                    let id;
+                    if (!Array.isArray(option)) {
+                        id = option.replace(/(^\d+)(.+$)/i,'$1');
+                    }
+
+                    switch (parseInt(rules.ruleList[i].flavor)) {
+                        case 0:
+                            if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
+                            break;
+                        case 1:
+                            if (combo.combo.moves.filter(m => m.actionID === id).length === 0) isValid = false;
+                            break;
+                        case 2:
+                            // Total Damage > X
+                            if (comboDamage <= parseFloat(option)) isValid = false;
+                            break;
+                        case 3:
+                            // Total Damage < X
+                            if (comboDamage >= parseFloat(option)) isValid = false;
+                            break;
+                        case 4:
+                            if (!option.includes(parseInt(combo.opponent_char))) isValid = false;
+                            break;
+                        case 5:
+                            if (option.includes(parseInt(combo.opponent_char))) isValid = false;
+                            break;
+                    }
+                    i++;
                 }
-                i++;
             }
 
             return isValid;

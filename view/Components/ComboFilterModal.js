@@ -1,3 +1,4 @@
+const { include } = require('node-addon-api');
 const bootstrapBundleMin = require('../../Bootstrap/js/bootstrap.bundle.min');
 const boostrap =require('../../Bootstrap/js/bootstrap.bundle.min');
 
@@ -13,6 +14,10 @@ class ComboFilterModal {
     #inputID = null;
     #applyButtonID = null;
     #isShowing = false;
+
+    // Rules that affect other rules
+    #disableIncludeCharacter = false;
+    #disableExcludeCharacter = false;
 
     #currentRules = {
         minNumMoves: 0,
@@ -114,16 +119,47 @@ class ComboFilterModal {
         let i = 1;
         while (i < this.#currentRules.ruleList.length + 1) {
             const rule = this.#currentRules.ruleList[i-1];
+            let inputDiv = '';
+
+            switch (parseInt(rule.flavor)) {
+                case 4:
+                case 5:
+                    let imageDiv = ``;
+                    let j = 0;
+                    rule.option.forEach(f => {
+                        imageDiv = `${imageDiv}
+                        <div class="char-box" value="${f}">
+                            <img class="gliphicon" src="./img/si_${f}.png" width="20" height="20">
+                            <svg class="x">
+                                <image href="./Bootstrap/svg/x.svg" heigth="20" width="20">
+                            </svg>
+                            <input class="gliphicon-box" value="" id="form-${i}-input" disabled></input>
+                        </div>`;
+                        j++;
+                    });
+
+                    inputDiv = `
+                    <div class="flex form-control inner-addon left-addon replace-input-width" flavor="${rule.flavor}" id="form-${i}-input">
+                        ${imageDiv}
+                    </div>`;
+                    break;
+                default:
+                    inputDiv = `<input class="form-control" value="${rule.option}" id="form-${i}-input" disabled></input>`;
+                    break;
+            }
+
             returnTemplate = `${returnTemplate}
                 <div class="input-group mb-3">
                     <select name="rule" id="filter_combos_rule_${i}" class="buffer-right-slightly select" disabled>
                         <option disabled value> Rule </option>
                         <option ${rule.flavor === '0' ? 'selected ' : ''}value="0">Has Move ID</option>
                         <option ${rule.flavor === '1' ? 'selected ' : ''}value="1">Has Action ID</option>
+                        <option ${rule.flavor === '4' ? 'selected ' : ''}value="4">Has Opponent</option>
+                        <option ${rule.flavor === '5' ? 'selected ' : ''}value="5">Exclude Opponent</option>
                         <option ${rule.flavor === '2' ? 'selected ' : ''}value="2">Total Damage ><option>
                         <option ${rule.flavor === '3' ? 'selected ' : ''}value="3">Total Damage <</option>
                     </select>
-                    <input class="form-control" value="${rule.option}" id="form-${i}-input" disabled>
+                    ${inputDiv}
                     <div id="rule${i}_remove" class="enabled-icon" value="${i-1}">
                         <svg class="add-rule-icon">
                             <image xlink:href="./Bootstrap/svg/dash-circle.svg" width="34" height="34"/>
@@ -144,6 +180,8 @@ class ComboFilterModal {
                     <option hidden disabled selected value=""> -Add Rule- </option>
                     <option value="0">Has Move ID</option>
                     <option value="1">Has Action ID</option>
+                    <option value="4" ${this.#disableIncludeCharacter ? 'disabled' : ''}>Has Opponent</option>
+                    <option value="5" ${this.#disableExcludeCharacter ? 'disabled' : ''}>Exclude Opponent</option>
                     <option value="2">Total Damage ></option>
                     <option value="3">Total Damage <</option>
                 </select>
@@ -199,11 +237,7 @@ class ComboFilterModal {
 
         document.getElementById("rule0_add").addEventListener("click", (evt) => {
             if (evt.target.closest("div").classList.contains("enabled-icon")) {
-                this.#currentRules.ruleList.unshift({
-                    flavor: this.#inputFlavor,
-                    option: document.getElementById("form-0-input").value
-                });
-                this.updateRulesRow();
+                this.handleRuleAddition();
             }
         });
 
@@ -211,9 +245,30 @@ class ComboFilterModal {
         while (i < this.#currentRules.ruleList.length) {
             document.getElementById(`rule${i+1}_remove`).addEventListener("click", (evt) => {
                 const index = parseInt(evt.target.closest("div").getAttribute('value'));
-                this.#currentRules.ruleList.splice(index, 1);
-                this.updateRulesRow();
+                this.handleRuleDeletion(index);
             });
+
+            // Handle deletion of individual characters in rule
+            if ((this.#currentRules.ruleList[i].flavor == 4) || this.#currentRules.ruleList[i].flavor == 5) {
+                const flavorNum = (this.#currentRules.ruleList[i].flavor == 4) ? 4 : 5;
+                const ruleContainer = document.getElementById(`form-${i+1}-input`);
+                ruleContainer.querySelectorAll('div.char-box').forEach(c => {
+                    const value = parseInt(c.getAttribute('value'));
+                    c.addEventListener("click", (evt) => {
+                        const idx = this.#currentRules.ruleList.findIndex(el => {return parseInt(el.flavor) === flavorNum });
+                        const currentChars = this.#currentRules.ruleList[idx].option;
+                        if (currentChars.length > 1) {
+                            const charIdx = currentChars.indexOf(value);
+                            if (charIdx !== -1) {
+                                currentChars.splice(charIdx, 1);
+                            }
+                            this.updateRulesRow();
+                        } else {
+                            this.handleRuleDeletion(idx);
+                        }
+                    }, value);
+                });
+            }
             i++;
         }
     }
@@ -263,6 +318,15 @@ class ComboFilterModal {
             case 3:
                 inputDiv.setAttribute('type', "number");
                 break;
+            case 4:
+            case 5:
+                while (i < args.charIDs.length) {
+                    dataListHTML = `${dataListHTML}
+                        <option value="${args.charIDs[i]} - ${args.charNames[i]}">
+                    `;
+                    i++;
+                }
+                break;
         }
 
         inputDiv.removeAttribute("disabled");
@@ -285,6 +349,55 @@ class ComboFilterModal {
             buttonDiv.classList.remove("enabled-icon");
             buttonDiv.classList.add("disabled-icon");
         }
+    }
+
+    handleRuleAddition () {
+        let addRule = true;
+        if (this.#inputFlavor == 4) this.#disableExcludeCharacter = true;
+        if (this.#inputFlavor == 5) this.#disableIncludeCharacter = true;
+
+        let option = document.getElementById("form-0-input").value;
+        if ((this.#inputFlavor == 4) || (this.#inputFlavor == 5)) {
+            option = [parseInt(option.split('-')[0])];
+        }
+        
+
+        if (this.#inputFlavor == 4) {
+            const includeCharList = this.#currentRules.ruleList.filter(r => r.flavor == 4);
+            if (includeCharList.length > 0) {
+                if (!includeCharList[0].option.includes(option[0])) {
+                    includeCharList[0].option.push(option[0]);
+                }
+                addRule = false;
+            }
+        }
+
+        if (this.#inputFlavor == 5) {
+            const includeCharList = this.#currentRules.ruleList.filter(r => r.flavor == 5);
+            if (includeCharList.length > 0) {
+                if (!includeCharList[0].option.includes(option[0])) {
+                    includeCharList[0].option.push(option[0]);
+                }
+                addRule = false;
+            }
+        }
+
+        if (addRule) {
+            this.#currentRules.ruleList.unshift({
+                flavor: this.#inputFlavor,
+                option: option
+            });
+        }
+
+        this.updateRulesRow();
+    }
+
+    handleRuleDeletion (index) {
+        const flavor = this.#currentRules.ruleList[index].flavor;
+        if (flavor == 4) this.#disableExcludeCharacter = false;
+        if (flavor == 5) this.#disableIncludeCharacter = false;
+        this.#currentRules.ruleList.splice(index, 1);
+        this.updateRulesRow();
     }
 
     
