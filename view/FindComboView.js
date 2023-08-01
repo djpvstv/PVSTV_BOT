@@ -263,7 +263,7 @@ class FindComboView extends ParseViewBase {
                 }
                 break;
             case "i4":
-                selectedItem = evt.srcElement.closest(".dropdown-item")
+                selectedItem = evt.srcElement.closest(".dropdown-item");
                 if (selectedItem) {
                     const newChar = selectedItem.value;
                     isValid = this.getController().cb_validateTargetChar(newChar);

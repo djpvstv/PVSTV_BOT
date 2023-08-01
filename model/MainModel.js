@@ -127,7 +127,7 @@ class MainModel {
         if (updateAppData) this.updateAppData(appData);
 
         // Debug: uncomment to show filter window immediately
-        // this.getFilterParams();
+        this.getFilterParams();
     }
 
     async initiateLogger (actualAppDataPath) {
@@ -485,6 +485,11 @@ class MainModel {
                             break;
                         case 5:
                             if (option.includes(parseInt(combo.opponent_char))) isValid = false;
+                            break;
+                        case 6:
+                            const joinedIDs = combo.combo.moves; // want to join all the IDs and then search if the joined 
+                            break;
+                        case 7:
                             break;
                     }
                     i++;
