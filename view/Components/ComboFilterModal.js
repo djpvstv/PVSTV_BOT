@@ -176,8 +176,8 @@ class ComboFilterModal {
         }
 
         return `<div class="dropdown">
-            <button class="btn dropdown-toggle target-dropdown w-100" value="null" type="button" id="filterComboSlippiModal_input_targetCharacter_dropdownbutton" data-bs-toggle="dropdown" aria-expanded="false">
-                Choose Character:
+            <button class="btn dropdown-toggle target-dropdown w-100" value="${this.#currentCharTarget}" type="button" id="filterComboSlippiModal_input_targetCharacter_dropdownbutton" data-bs-toggle="dropdown" aria-expanded="false">
+                ${this.#currentCharTarget ? `<img src="./img/si_${this.#currentCharTarget}.png" width="20" height="20"> ${Utility.getCharacterNames()[this.#currentCharTarget]}` : 'Choose Character:'}
             </button>
             <ul class="has-validation dropdown-menu dropdown-scroll" aria-labeledby="filterComboSlippiModal_input_targetCharacter_dropdownbutton" id="filterComboSlippiModali_input_targetCharacter" "="">
                 ${dropdownHTML}
@@ -201,59 +201,13 @@ class ComboFilterModal {
         let i = 1;
         while (i < this.#currentRules.ruleList.length + 1) {
             const rule = this.#currentRules.ruleList[i-1];
-            let inputDiv = rule.getHTMLForInputOnExistingRule(i);
-            let j, imageDiv;
-
-            switch (rule.flavor) {
-                case 4:
-                case 5:
-                    break;
-                case 6:
-                case 7:
-                    imageDiv = ``;
-                    j = 0;
-                    rule.option.forEach(f => {
-                        let preFix = `${j+1}: `;
-                        if (j === 0) {
-                            preFix = "Start: ";
-                        } else if (j === rule.option.length-1) {
-                            preFix = "End: ";
-                        }
-                        imageDiv = `${imageDiv}
-                        <div class="id-box-container" value="${f}">
-                            <div class="id-box" data-toggle="tooltip" data-placement="top" title="${Utility.getActionNameFromID(f, this.#currentCharTarget)}" id="form-${i}-input" disabled>${preFix}${f}</div>
-                            <svg class="x">
-                                <image href="./Bootstrap/svg/x.svg" heigth="20" width="20">
-                            </svg>
-                        </div>`;
-                        j++;
-                    });
-
-                    inputDiv = `
-                    <div class="flex form-control inner-addon left-addon replace-input-width" flavor="${rule.flavor}" id="form-${i}-input">
-                        ${imageDiv}
-                    </div>`;
-                    break;
-                // default:
-                //     inputDiv = `<input class="form-control" value="${rule.option}" id="form-${i}-input" disabled></input>`;
-                //     break;
-            }
+            let inputDiv = rule.getHTMLForInputOnExistingRule(i, this.#currentCharTarget);
 
             let dropdownHTML = ``;
-            j = 0;
             this.getFlavorOrder().forEach(f => {
                 dropdownHTML = `${dropdownHTML}<option ${rule.getFlavorType() === f ? 'selected ' : ''}value="${f}">${this.getOptionNameFromFlavorMap(f)}</option>
                 `;
             });
-
-            // <option ${rule.getFlavorType() === 0 ? 'selected ' : ''}value="0">Has Move ID</option>
-            // <option ${rule.getFlavorType() === 1 ? 'selected ' : ''}value="1">Has Action ID</option>
-            // <option ${rule.getFlavorType() === 4 ? 'selected ' : ''}value="4">Has Opponent</option>
-            // <option ${rule.getFlavorType() === 5 ? 'selected ' : ''}value="5">Exclude Opponent</option>
-            // <option ${rule.getFlavorType() === 6 ? 'selected ' : ''}value="6">Has Action String</option>
-            // <option ${rule.getFlavorType() === 7 ? 'selected ' : ''}value="7">Exclude Action String</option>
-            // <option ${rule.getFlavorType() === 2 ? 'selected ' : ''}value="2">Total Damage ></option>
-            // <option ${rule.getFlavorType() === 3 ? 'selected ' : ''}value="3">Total Damage <</option>
 
             returnTemplate = `${returnTemplate}
                 <div class="input-group mb-3">
@@ -282,16 +236,6 @@ class ComboFilterModal {
                 <option ${this.getFlavor() === f ? 'selected ' : ''}value="${f}">${this.getOptionNameFromFlavorMap(f)}</option>
             `;
         });
-
-        // Replaces:
-        // <option ${this.#inputFlavor === 0 ? 'selected ' : ''}value="0">Has Move ID</option>
-        // <option ${this.#inputFlavor === 1 ? 'selected ' : ''}value="1">Has Action ID</option>
-        // <option ${this.#inputFlavor === 4 ? 'selected ' : ''}value="4" ${this.#disableIncludeCharacter ? 'disabled' : ''}>Has Opponent</option>
-        // <option ${this.#inputFlavor === 5 ? 'selected ' : ''}value="5" ${this.#disableExcludeCharacter ? 'disabled' : ''}>Exclude Opponent</option>
-        // <option ${this.#inputFlavor === 6 ? 'selected ' : ''}value="6">Has Action String</option>
-        // <option ${this.#inputFlavor === 7 ? 'selected ' : ''}value="7">Exclude Action String</option>
-        // <option ${this.#inputFlavor === 2 ? 'selected ' : ''}value="2">Total Damage ></option>
-        // <option ${this.#inputFlavor === 3 ? 'selected ' : ''}value="3">Total Damage <</option>
 
         return dropdownHTML;
     }
@@ -351,7 +295,7 @@ class ComboFilterModal {
             document.getElementById("filterComboSlippiModal_input_targetCharacter_dropdownbutton").innerHTML = controlDiv.children[newChar + 1].innerHTML;
 
             // In the case we have existing rules that depend on character action IDs, we need to kill them
-            const newRules = this.#currentRules.ruleList.filter(r => r).filter(r => !r.dependsOnActionStates);
+            const newRules = this.#currentRules.ruleList.filter(r => !this.getFromFlavorMap(r.getFlavorType()).dependsOnActionStates);
             this.#currentRules.ruleList = newRules;
             this.updateRulesRow();
         });
@@ -388,15 +332,21 @@ class ComboFilterModal {
             // Handle deletion of individual characters in rule
             if (ruleObj.hasDeleteableMiniRules) {
                 const ruleContainer = document.getElementById(`form-${i+1}-input`);
-                ruleContainer.querySelectorAll('div.char-box').forEach(c => {
+                ruleContainer.querySelectorAll(ruleObj.miniRuleSelectCSS).forEach(c => {
                     const value = parseInt(c.getAttribute('value'));
                     c.addEventListener("click", (evt) => {
                         const ruleRow = evt.target.closest('div.input-group');
                         const ruleIdx = Array.prototype.indexOf.call(ruleRow.parentNode.children, ruleRow) - 1;
                         // const flavorNum = this.#currentRules.ruleList[ruleIdx].getFlavorType();
                         const currentOptions = this.#currentRules.ruleList[ruleIdx].option;
+                        const ruleObj = this.getFromFlavorMap(this.#currentRules.ruleList[ruleIdx].getFlavorType());
+                        const optionIdx = currentOptions.indexOf(value);
+                        if (ruleObj.usesTooltips) {
+                            const tooltip = this.#tooltipList[optionIdx];
+                            tooltip.dispose();
+                            this.#tooltipList.splice(optionIdx, 1);
+                        }
                         if (currentOptions.length > 1) {
-                            const optionIdx = currentOptions.indexOf(value);
                             if (optionIdx !== -1) {
                                 currentOptions.splice(optionIdx, 1);
                             }
@@ -407,27 +357,6 @@ class ComboFilterModal {
                             this.handleRuleDeletion(ruleIdx);
                         }
                     }, value);
-                });
-                ruleContainer.querySelectorAll('div.id-box-container').forEach(c => {
-                    const value = parseInt(c.getAttribute('value'));
-                    c.addEventListener("click", (evt) => {
-                        const ruleRow = evt.target.closest('div.input-group');
-                        const ruleIdx = Array.prototype.indexOf.call(ruleRow.parentNode.children, ruleRow) - 1;
-                        const flavorNum = (this.#currentRules.ruleList[ruleIdx].flavor === 6) ? 6 : 7;
-                        const idx = this.#currentRules.ruleList.findIndex(el => {return parseInt(el.flavor) === flavorNum });
-                        const currentIDs = this.#currentRules.ruleList[idx].option;
-                        if (currentIDs.length > 1) {
-                            const idIdx = currentIDs.indexOf(value);
-                            if (idIdx !== -1) {
-                                currentIDs.splice(idIdx, 1);
-                            }
-                            this.updateRulesRow();
-                            this.#controller.cb_handleRuleFlavorSelection(this.#inputFlavor, this.#currentCharTarget);
-                        } else {
-                            this.setFlavor(null);
-                            this.handleRuleDeletion(idx);
-                        }
-                    });
                 });
             }
             i++;
@@ -443,6 +372,9 @@ class ComboFilterModal {
 
     show (args) {
         this.#isShowing = true;
+        if (args.lastChar) {
+            this.#currentCharTarget = parseInt(args.lastChar);
+        }
         this.renderDiv();
         this._applyCallbacks();
         this.#modal.show();
@@ -471,22 +403,6 @@ class ComboFilterModal {
         const altAttributes = ruleObj.alterInputElementForFlavor(inputDiv, dataListDiv, dataListHTML);
         dataListDiv = altAttributes.dataListDiv;
         dataListHTML = altAttributes.dataListHTML;
-
-        switch (newFlavor) {
-            case 6:
-            case 7:
-                while (i < args.actionIDs.length) {
-                    dataListHTML = `${dataListHTML}
-                        <option value="${args.actionIDs[i]} - ${args.actionNames[i]}">
-                    `;
-                    i++;
-                }
-                break;
-            case 2:
-            case 3:
-                inputDiv.setAttribute('type', "number");
-                break;
-        }
 
         inputDiv.removeAttribute("disabled");
         dataListDiv.innerHTML = dataListHTML;
@@ -573,7 +489,6 @@ class ComboFilterModal {
         const ruleObj = this.getFromFlavorMap(flavor);
 
         let option = this.getFromFlavorMap(flavor).getValuesFromInputForRule();
-        // if ([4, 5, 6, 7].includes(flavor)) {
         if (this.doesFlavorAllowMultipleOptions(flavor)) {
             option = [parseInt(option.split('-')[0])];
 

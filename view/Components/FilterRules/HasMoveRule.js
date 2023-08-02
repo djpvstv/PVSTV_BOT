@@ -37,7 +37,7 @@ class HasMoveRule extends RuleBase {
         return inputVal;
     }
 
-    static validateInputForMainInput (listDiv, newVal) {
+    static validateInputForMainInput (newVal, listDiv) {
         let isValid = false;
         const obj = listDiv.querySelector(`option[value="${newVal}"]`);
         if (obj !== null) {

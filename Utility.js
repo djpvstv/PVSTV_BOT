@@ -3,6 +3,9 @@ class Utility {
     static #commonMoveNames = ["Jab 1","Dash Attack","Forward Tilt","Up Tilt","Down Tilt","Forward Smash","Up Smash","Down Smash","Nair","Fair","Bair","Uair","Dair","Neutral Special","Side Special","Up Special","Down Special","Get Up Attack (Back)","Get Up Attack (Front)","Pummel","Forward Throw","Back Throw","Up Throw","Down Throw"];
     static #commonActionIDs = [44,50,53,56,57,60,63,64,65,66,67,68,69,187,217,219,220,221,222];
     static #commonActionNames = ["Jab 1","Dash Attack","Mid Forward Tilt","Up Tilt","Down Tilt","Mid Forward Smash","Up Smash","Down Smash","Nair","Fair","Bair","Uair","Dair","Getup Attack","Pummel","Forward Throw","Back Throw","Up Throw","Down Throw"];
+    static #stageIDs = [2, 3, 8, 28, 31, 32, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25, 27, 29, 30];
+    static #tournamentLegalStageIDs = [2, 3, 8, 28, 31, 32];
+    static #nonTournamentLegalStageIDs = [2, 3, 8, 28, 31, 32, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25, 27, 29, 30];
     static #idMap = new Map([
         [0, {
             name: "Captain Falcon",
@@ -210,6 +213,8 @@ class Utility {
         [21, {name: "Akaneia"}],
         [22, {name: "Venom"}],
         [23, {name: "Poke Floats"}],
+        [24, {name: "Big Blue"}],
+        [25, {name: "Icicle Mountain"}],
         [26, {name: "Icetop"}],
         [27, {name: "Flat Zone"}],
         [28, {name: "Dream Land N64"}],
@@ -218,6 +223,42 @@ class Utility {
         [31, {name: "Battlefield"}],
         [32, {name: "Final Destination"}]
     ]);
+
+    static getAllStages () {
+        const stages = this.#stageIDs;
+        let names = [];
+        stages.forEach(s => {
+            names.push(this.getStageNameFromID(s));
+        });
+        return {
+            IDs: stages,
+            names: names
+        }
+    }
+
+    static getTournamentLegalStages () {
+        const stages = this.#tournamentLegalStageIDs;
+        let names = [];
+        stages.forEach(s => {
+            names.push(this.getStageNameFromID(s));
+        });
+        return {
+            IDs: stages,
+            names: names
+        }
+    }
+
+    static getNonTournamentLegalStages () {
+        const stages = this.#nonTournamentLegalStageIDs;
+        let names = [];
+        stages.forEach(s => {
+            names.push(this.getStageNameFromID(s));
+        });
+        return {
+            IDs: stages,
+            names: names
+        }
+    }
 
     static getMoveNameFromAttackID(moveID, charID) {
         moveID = parseInt(moveID);

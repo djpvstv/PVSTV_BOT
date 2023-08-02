@@ -7,6 +7,7 @@ class HasOpponentRule extends RuleBase {
     static isSingleton = true;
     static dropdownRequiresEventListener = true;
     static hasDeleteableMiniRules = true;
+    static miniRuleSelectCSS = "div.char-box";
 
     constructor (option) {
         super(option);

@@ -21,6 +21,7 @@ class MainModel {
     #isFilterOn = null;
 
     #slippiPlayer = null;
+    #lastCharacter = null;
 
     #bIsCancelled = false;
 
@@ -127,7 +128,8 @@ class MainModel {
         if (updateAppData) this.updateAppData(appData);
 
         // Debug: uncomment to show filter window immediately
-        this.getFilterParams();
+        // this.#lastCharacter = 23;
+        // this.getFilterParams();
     }
 
     async initiateLogger (actualAppDataPath) {
@@ -460,12 +462,12 @@ class MainModel {
                 let i = 0;
                 while (i < rules.ruleList.length) {
                     const option = rules.ruleList[i].option;
-                    let id;
+                    let id, comboActionIDs;
                     if (!Array.isArray(option)) {
                         id = option.replace(/(^\d+)(.+$)/i,'$1');
                     }
 
-                    switch (parseInt(rules.ruleList[i].flavor)) {
+                    switch (parseInt(rules.ruleList[i].flavorType)) {
                         case 0:
                             if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
                             break;
@@ -484,12 +486,15 @@ class MainModel {
                             if (!option.includes(parseInt(combo.opponent_char))) isValid = false;
                             break;
                         case 5:
-                            if (option.includes(parseInt(combo.opponent_char))) isValid = false;
+                            if (!(option.includes(parseInt(combo.stage)))) isValid = false;
                             break;
                         case 6:
-                            const joinedIDs = combo.combo.moves; // want to join all the IDs and then search if the joined 
+                            comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
+                            if (!(this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
                             break;
                         case 7:
+                            comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
+                            if ((this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
                             break;
                     }
                     i++;
@@ -500,6 +505,18 @@ class MainModel {
         });
 
         return tempCombos;
+    }
+
+    _hasConsecutiveSubset (mainArray, targetArray) {
+        let mainIdx = 0;
+        const filteredArray = mainArray.filter(e => {
+            if (e === targetArray[mainIdx]) {
+                mainIdx++;
+                return true;
+            }
+            return false;
+        });
+        return filteredArray.length === targetArray.length;
     }
 
     async updateComboPagination ( event, buttonID, targetPage ) {
@@ -612,6 +629,7 @@ class MainModel {
             char: char,
             chunk: chunk
         });
+        this.#lastCharacter = char;
     }
 
     async findCombosFromCharColor(event, buttonID, char, color, chunk) {
@@ -634,6 +652,7 @@ class MainModel {
             color: color,
             chunk: chunk
         });
+        this.#lastCharacter = char;
     }
 
     async findCombosFromCharTag(event, buttonID, char, tag, chunk) {
@@ -656,6 +675,7 @@ class MainModel {
             tag: tag,
             chunk: chunk
         });
+        this.#lastCharacter = char;
     }
 
     async findCombosFromCharTagColor(event, buttonID, char, tag, color, chunk) {
@@ -680,16 +700,19 @@ class MainModel {
             color: color,
             chunk: chunk
         });
+        this.#lastCharacter = char;
     }
 
     async playCombo (event, sourceID, gameAndCombo) {
         const game = gameAndCombo.game;
         const comboNum = gameAndCombo.combo;
         const comboIndex = this.#fileComboMap.get(game + "_" + comboNum);
+        const bDidKill = this.#comboInfo[comboIndex].combo.didKill === 'true';
+        const endFrame = parseInt(this.#comboInfo[comboIndex].combo.endFrame);
 
         const combos = [{
             startFrame: parseInt(this.#comboInfo[comboIndex].combo.startFrame) - 120, // buffering for more time
-            endFrame: parseInt(this.#comboInfo[comboIndex].combo.endFrame),
+            endFrame: bDidKill ? endFrame + 240 : endFrame,
             filePath: this.#comboInfo[comboIndex].file
         }];
     
@@ -714,7 +737,10 @@ class MainModel {
     async getFilterParams (event, sourceID) {
         this.#win.webContents.send("showFilterModal", {
             eventName: "showFilterModal",
-            args: this.#comboFilterParams
+            args: {
+                params: this.#comboFilterParams,
+                lastChar: this.#lastCharacter
+            }
         });
     }
 

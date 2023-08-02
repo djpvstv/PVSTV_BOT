@@ -9,7 +9,9 @@ class RuleBase {
     static isSingleton = false;
     static skipValidation = false;
     static hasDeleteableMiniRules = false;
+    static miniRuleSelectCSS = "";
     static dependsOnActionStates = false;
+    static usesTooltips = false;
 
     flavorType = null;
 
@@ -47,12 +49,20 @@ class RuleBase {
     static getSkipValidation () {
         return this.skipValidation;
     }
+
     static getHasDeleteableMiniRules () {
         return this.hasDeleteableMiniRules;
     }
 
+    static getMiniRuleSelectCSS () {
+        return this.miniRuleSelectCSS;
+    }
+
     static getDependsOnActionStates () {
         return this.dependsOnActionStates;
+    }
+    static getUsesTooltips () {
+        return this.usesTooltips;
     }
 
     constructor (option) {

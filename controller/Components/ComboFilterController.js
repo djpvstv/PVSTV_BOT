@@ -6,6 +6,10 @@ const HasMoveRule = require("../../view/Components/FilterRules/HasMoveRule");
 const HasActionIDRule = require("../../view/Components/FilterRules/HasActionIDRule");
 const HasOpponentRule = require("../../view/Components/FilterRules/HasOpponentRule");
 const HasStageRule = require("../../view/Components/FilterRules/HasStageRule");
+const HasMinDamageRule = require("../../view/Components/FilterRules/HasMinDamageRule");
+const HasMaxDamageRule = require("../../view/Components/FilterRules/HasMaxDamageRule");
+const HasActionIDStringRule = require("../../view/Components/FilterRules/HasActionIDStringRule");
+const ExcludeActionIDStringRule = require("../../view/Components/FilterRules/ExcludeActionIDStringRule");
 
 class ComboFilterController extends EventEmitter {
 
@@ -32,7 +36,7 @@ class ComboFilterController extends EventEmitter {
         this.#flavorMap = new Map();
 
         let i = 0;
-        const rules = [HasMoveRule, HasActionIDRule, HasOpponentRule, HasStageRule];
+        const rules = [HasMoveRule, HasActionIDRule, HasOpponentRule, HasStageRule, HasMinDamageRule, HasMaxDamageRule, HasActionIDStringRule, ExcludeActionIDStringRule];
         while (i < rules.length) {
             this.#flavorMap.set(rules[i].getFlavor(), {
                 name: rules[i].getRuleName(),
@@ -47,8 +51,10 @@ class ComboFilterController extends EventEmitter {
                 dependsOnActionStates: rules[i].getDependsOnActionStates(),
                 getHTMLForInputOnExistingRule: rules[i].getHTMLForInputOnExistingRule,
                 hasDeleteableMiniRules: rules[i].getHasDeleteableMiniRules(),
+                usesTooltips: rules[i].getUsesTooltips(),
                 doesInputRequireEventListener: rules[i].getInputRequiresEventListener(),
                 doesDropdownRequireEventListener: rules[i].getDropdownRequireEventListener(),
+                miniRuleSelectCSS: rules[i].getMiniRuleSelectCSS(),
                 alterInputElementForFlavor: rules[i].alterInputElementForFlavor,
                 applyStaticCallbacksToModalInput: rules[i].applyStaticCallbacksToModalInput,
                 validateInputForMainInput: rules[i].validateInputForMainInput,
@@ -63,8 +69,10 @@ class ComboFilterController extends EventEmitter {
         const that = this;
         ipcRenderer.on("showFilterModal", (evt, args) => {
             this.emit("showFilterModal", {
-                success: args.args.success,
-                path: args.args.path
+                args: {
+                    params: args.args.params,
+                    lastChar: args.args.lastChar
+                }
             });
         });
     }
@@ -121,8 +129,8 @@ class ComboFilterController extends EventEmitter {
                     flavor: flavor
                 });
                 break;
+            // Has Characters
             case 4:
-            case 5:
                 const characters = Utility.getCharacterNames();
                 const characterIDs = Utility.getCharacterIDs();
                 this.emit("changeModalInput", {
@@ -131,61 +139,29 @@ class ComboFilterController extends EventEmitter {
                     charIDs: characterIDs
                 });
                 break;
+            // Has Stage
+            case 5:
+                const stages = Utility.getAllStages();
+                this.emit("changeModalInput", {
+                    flavor: flavor,
+                    stageNames: stages.names,
+                    stageIDs: stages.IDs
+                })
+                break;
         }
 
     }
 
     cb_handleInputValidation (target, listDiv, flavor) {
         const newVal = target.value;
-        let isValid = false;
-        let obj;
-        
-        switch (parseInt(flavor)) {
-            case 0:
-            case 1:
-            case 6:
-            case 7:
-                obj = listDiv.querySelector(`option[value="${newVal}"]`);
-                if (obj !== null) {
-                    isValid = true;
-                }
-                break;
-            case 2:
-            case 3:
-                // I'm not convinced you can enter an invalid string into a numeric input
-                isValid = true;
-                break;
-            case 4:
-            case 5:
-                if (this.getFlavorMap().get(parseInt(flavor)).validateInputForMainInput()) isValid = true;
-                break;
+        if (flavor) {
+            const isValid = this.getFlavorMap().get(parseInt(flavor)).validateInputForMainInput(newVal, listDiv);
+            this.emit("validateModalInput", isValid);
         }
-
-        this.emit("validateModalInput", isValid);
     }
 
     cb_handleInputForMainInputValidation (newVal, listDiv, flavor) {
-        let isValid = false;
-        let obj;
-
-        switch (parseInt(flavor)) {
-            case 4:
-            case 5:
-                if (this.getFlavorMap().get(parseInt(flavor)).validateInputForMainInput()) isValid = true;
-                break;
-            case 6:
-            case 7:
-                obj = listDiv.querySelector(`option[value="${newVal}"]`);
-                if (obj !== null) {
-                    isValid = true;
-                }
-                break;
-            default:
-                if (this.getFlavorMap().get(parseInt(flavor)).validateInputForMainInput(listDiv, newVal)) isValid = true;
-                break;
-        }
-
-        return isValid;
+        return this.getFlavorMap().get(parseInt(flavor)).validateInputForMainInput(newVal, listDiv);
     }
 
     showModal(args) {

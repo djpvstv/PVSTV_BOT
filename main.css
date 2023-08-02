@@ -357,6 +357,7 @@
     display: none;
 }
 
+#choose_stage_dropdown_dropdown,
 #choose_character_dropdown_dropdown {
     height: 300px;
     -webkit-column-count: 3;
