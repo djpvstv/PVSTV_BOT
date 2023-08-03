@@ -244,7 +244,7 @@ class AccordionView {
         if (bUsePagination) {
             const activePage = event.page;
             const totalPages = event.totalPage;
-            this._createPaginationSection(activePage, totalPages);
+            this._createPaginationSection(activePage, totalPages, event.hitsThisPage, event.hitsTotal);
             this._attachPaginationCallbacks(activePage, totalPages);
         }
 
@@ -256,14 +256,28 @@ class AccordionView {
         this.createLimitedBootstrapObjects();
     }
 
-    _createPaginationSection (activePage, totalPages) {
+    _createPaginationSection (activePage, totalPages, hitsThisPage, hitsTotal) {
         const paginationID = this.#paginationID;
         const pagDiv = document.getElementById(paginationID);
         let navDiv = '';
 
         if (activePage > 0 && totalPages > 0) {
             let pageSkeletonInternal;
-            if (totalPages <= 3) {
+            if (totalPages === 2) {
+                pageSkeletonInternal = `
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
+                            <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
+                        </li>
+                        <li id="${this.#paginationID + "_left"}" class="page-item${activePage === 1 ? ' disabled' : ''}"><a class="page-link" href="#">1</a></li>
+                        <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' disabled' : ''}"><a class="page-link" href="#">2</a></li>
+                        <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === 2 ? ' disabled' : ''}">
+                            <a class="page-link" href="#"${activePage === 3 ? ' aria-disabled="true"' : ''}>Next</a>
+                        </li>
+                    </ul>
+                </nav>`;
+            } else if (totalPages === 3) {
                 pageSkeletonInternal = `
                 <nav>
                     <ul class="pagination justify-content-center">
@@ -330,7 +344,9 @@ class AccordionView {
 
         pagDiv.innerHTML = `
             <div class="row">
-                <div class="col-md-3"></div>
+                <div class="showing-x-of-y col-md-3">
+                    Showing ${hitsThisPage} of (${hitsTotal})
+                </div>
                 <div class="col-md-6">
                     ${navDiv}
                 </div>
@@ -369,12 +385,15 @@ class AccordionView {
                 }
             });
 
-            document.getElementById(this.#paginationID + "_right").addEventListener("click", async (evt) => {
-                if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
-                    const labelVal = parseInt(evt.srcElement.innerHTML);
-                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
-                }
-            });
+            // RIght one doesn't exist if we have two pages
+            if (document.getElementById(this.#paginationID + "_right")) {
+                document.getElementById(this.#paginationID + "_right").addEventListener("click", async (evt) => {
+                    if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
+                        const labelVal = parseInt(evt.srcElement.innerHTML);
+                        await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), labelVal);
+                    }
+                });
+            }
 
             const startEl = document.getElementById(this.#paginationID + "_start");
             const endEl = document.getElementById(this.#paginationID + "_end");
@@ -584,10 +603,10 @@ class AccordionView {
         if (bUsePagination) {
             const activePage = event.page;
             const totalPages = event.totalPage;
-            this._createPaginationSection(activePage, totalPages);
+            this._createPaginationSection(activePage, totalPages, event.hitsThisPage, event.hitsTotal);
             this._attachPaginationCallbacks(activePage, totalPages);
         } else {
-            this._createPaginationSection(0, 0);
+            this._createPaginationSection(0, 0, 0, 0);
             this._attachPaginationCallbacks(0, 0);
         }
         

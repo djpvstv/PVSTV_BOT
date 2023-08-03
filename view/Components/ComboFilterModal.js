@@ -100,15 +100,6 @@ class ComboFilterModal {
         return this.#currentRules.ruleList.indexOf(validRules[0]);
     }
 
-    // <option ${rule.flavor === 0 ? 'selected ' : ''}value="0">Has Move ID</option>
-    // <option ${rule.flavor === 1 ? 'selected ' : ''}value="1">Has Action ID</option>
-    // <option ${rule.flavor === 4 ? 'selected ' : ''}value="4">Has Opponent</option>
-    // <option ${rule.flavor === 5 ? 'selected ' : ''}value="5">Exclude Opponent</option>
-    // <option ${rule.flavor === 6 ? 'selected ' : ''}value="6">Has Action String</option>
-    // <option ${rule.flavor === 7 ? 'selected ' : ''}value="7">Exclude Action String</option>
-    // <option ${rule.flavor === 2 ? 'selected ' : ''}value="2">Total Damage ></option>
-    // <option ${rule.flavor === 3 ? 'selected ' : ''}value="3">Total Damage <</option>
-
     // Provide HTML for main panel with options
     renderDiv () {
         const buttonLabel = "Filter Combo Results";
@@ -263,8 +254,10 @@ class ComboFilterModal {
             await this.#controller.cb_emitAcceptButtonEvent(true, this.#currentRules);
         });
 
+        document.getElementById('doesKill').checked = this.#currentRules.doesKill;
+
         document.getElementById('doesKill').addEventListener("click", (evt) => {
-            this.#currentRules.doesKill = evt.target.value === 'on';
+            this.#currentRules.doesKill = evt.target.checked;
         });
 
         document.getElementById('minNumMoves').addEventListener("change", (evt) => {
@@ -374,6 +367,25 @@ class ComboFilterModal {
         this.#isShowing = true;
         if (args.lastChar) {
             this.#currentCharTarget = parseInt(args.lastChar);
+        }
+        if (args.params) {
+            if (Object.hasOwnProperty.call(args.params, 'minNumMoves')) {
+                this.#currentRules.minNumMoves = args.params.minNumMoves;
+            }
+            if (Object.hasOwnProperty.call(args.params, 'maxNumMoves')) {
+                this.#currentRules.maxNumMoves = args.params.maxNumMoves;
+            }
+            if (Object.hasOwnProperty.call(args.params, 'doesKill')) {
+                this.#currentRules.doesKill = args.params.doesKill;
+            }
+            if (Object.hasOwnProperty.call(args.params, 'ruleList')) {
+                this.#currentRules.ruleList = [];
+                args.params.ruleList.forEach(r => {
+                    const constructor = this.getFromFlavorMap(r.flavorType).constructor;
+                    const newRule = new constructor(r.option);
+                    this.#currentRules.ruleList.unshift(newRule);
+                });
+            }
         }
         this.renderDiv();
         this._applyCallbacks();

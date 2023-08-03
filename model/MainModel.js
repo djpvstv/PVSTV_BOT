@@ -352,7 +352,9 @@ class MainModel {
             eventName: data.eventName,
             needsPagination: bNeedsPagination,
             page: page,
-            totalPage: totalNumPages
+            totalPage: totalNumPages,
+            hitsThisPage: parsedData.length,
+            hitsTotal: numPlayers
         });
     }
 
@@ -367,7 +369,9 @@ class MainModel {
             eventName: "updatePanelOneAccordionJustAccordion",
             needsPagination: true,
             page: targetPage,
-            totalPage: totalNumPages
+            totalPage: totalNumPages,
+            hitsThisPage: parsedData.length,
+            hitsTotal: numPlayers
         });
     }
 
@@ -438,7 +442,9 @@ class MainModel {
                 totalCombos: numCombos,
                 page: page,
                 needsPagination: bNeedsPagination,
-                totalPage: totalNumPages
+                totalPage: totalNumPages,
+                hitsThisPage: comboData.length,
+                hitsTotal: numCombos
             }
         });
     }
@@ -538,7 +544,9 @@ class MainModel {
                 combos: parsedData,
                 needsPagination: true,
                 page: targetPage,
-                totalPage: totalNumPages
+                totalPage: totalNumPages,
+                hitsThisPage: parsedData.length,
+                hitsTotal: numCombos
             }
         });
     }
