@@ -369,3 +369,27 @@
     text-align: center;
     margin-top: 8px;
 }
+
+#comboSlippi_settings_button,
+#parseSlippi_settings_button,
+img.gear-icon.settings-icon {
+    width: 1.75rem;
+    margin-left: 0.75rem;
+    transition: 0.3s;
+    opacity: 0.3;
+}
+
+#comboSlippi_settings_button:hover,
+#parseSlippi_settings_button:hover,
+img.gear-icon:hover {
+    opacity: 0.9;
+}
+
+.settingsInputWrapper {
+    text-align: center;
+}
+
+.settingsInput {
+    width: 100%;
+    margin-bottom: 5px;
+}

@@ -12,8 +12,8 @@ class FindComboView extends ParseViewBase {
     #appState = null;
     #fileNum = 0;
 
-    constructor (controller, spinnerController, panelDivID, appState) {
-        super(controller, spinnerController);
+    constructor (controller, spinnerController, settingsController, panelDivID, appState) {
+        super(controller, spinnerController, settingsController);
         this.#appState = appState;
         this.#controller = controller.getFindComboController();
 
@@ -39,7 +39,7 @@ class FindComboView extends ParseViewBase {
         panelDiv.appendChild(this.#selectorRow);
         panelDiv.appendChild(inputRow);
 
-        const formDiv = this.createImportFromDirectory(this.idMap.get("b1"), this.idMap.get("i1"), this.idMap.get("b2"), "Find Combos");
+        const formDiv = this.createImportFromDirectory(this.idMap.get("b1"), this.idMap.get("i1"), this.idMap.get("b2"), "Find Combos", this.idMap.get("sb1"));
 
         inputRow.appendChild(formDiv);
 
@@ -115,6 +115,7 @@ class FindComboView extends ParseViewBase {
         this.idMap.set("c1l1", "comboSlippi_context_play_combo");
         this.idMap.set("c1l2", "comboSlippi_context_edit_combo");
         this.idMap.set("c1l3", "comboSlippi_context_delete_combo");
+        this.idMap.set("sb1", "comboSlippi_settings_button");
 
         this.getController().setIDMap(this.idMap);
     }
@@ -138,8 +139,7 @@ class FindComboView extends ParseViewBase {
     getParamsForRequest () {
         const params = {};
         // Batch size
-        const batchDiv = document.getElementById(this.idMap.get("b2")+"_batchInput");
-        const batchNum = batchDiv.value === '' ? 20 :  parseInt(batchDiv.value);
+        const batchNum = this.#appState.getBatchSize();
         params.batchNum = Math.min(batchNum, this.getFileNum());
 
         // Flavor
@@ -194,6 +194,10 @@ class FindComboView extends ParseViewBase {
 
         this.getElementById("c1l1").addEventListener("click", async() => {
             this.#controller.cb_playCombo();
+        });
+
+        this.getElementById("sb1").addEventListener("click", async () => {
+            this.settingsController.showSpinner();
         });
 
         this._addDropdownCallback();

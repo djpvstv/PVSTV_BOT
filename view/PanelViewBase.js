@@ -2,18 +2,15 @@ class ParseViewBase {
 
     fileList = [];
 
-    constructor (controller, progressController) {
+    constructor (controller, progressController, settingsController) {
         this.controller = controller;
         this.progressController = progressController;
+        this.settingsController = settingsController;
         this.idMap = new Map();
     }
 
-    createImportFromDirectory ( openFolderButtonID, inputID, parseButtonID, parseButtonLabel ) {
+    createImportFromDirectory ( openFolderButtonID, inputID, parseButtonID, parseButtonLabel, settingsButtonID ) {
         const article = `
-        <div class="batchInputWrapper">
-            <label for="${openFolderButtonID}_batchButton">Batch Size</label>
-            <input type="number" class="form-control batchInput" id="${parseButtonID}_batchInput" placeholder="20">
-        </div>
         <label for="${openFolderButtonID}" class="dropped-label">Import from Directory</label>
         <div class="input-group mb-3">
             <button class="btn btn-light rm-1" id="${openFolderButtonID}">Choose...</button>
@@ -22,6 +19,7 @@ class ParseViewBase {
             <div class="invalid-feedback">
                 Please enter a directory with Slippi (.slp) replays.
             </div>
+            <img src="./Bootstrap/svg/gear.svg" class="gear-icon settings-icon" id=${settingsButtonID}>
             <div class="valid-feedback">
                 Valid directory
             </div>

@@ -25,7 +25,9 @@ class MainModel {
 
     #bIsCancelled = false;
 
-    #PAGINATION_LOWER_LIMIT = 100;
+    #paginationLowerLimit = 100;
+    #frameLeniency = 45;
+    #batchSize = 20;
 
     #appDataPath = "";
     #meleeIsoPath = "";
@@ -147,12 +149,38 @@ class MainModel {
             this.#meleeIsoPath = appData.meleeISOpath;
             this.#slippiPlayer.setSlippiPath(this.#slippiPath);
             this.#slippiPlayer.setIsoPath(this.#meleeIsoPath);
+            // Optional arguments
+            if (Object.hasOwnProperty.call(appData, 'paginationSize')) {
+                this.#paginationLowerLimit = appData.paginationSize;
+            }
+            if (Object.hasOwnProperty.call(appData, 'frameLeniency')) {
+                this.#frameLeniency = appData.frameLeniency;
+            }
+            if (Object.hasOwnProperty.call(appData, 'batchSize')) {
+                this.#batchSize = appData.batchSize;
+            }
+
         } catch (err) {
             console.log("could not write to appData: " + err);
         }
+        this.updateClientAppData();
     }
 
-    async browserForSlippiPath (event) {
+    updateClientAppData () {
+        // send appData to app window
+        this.#win.webContents.send("updateAppData", {
+            eventName: "updateAppData",
+            args: {
+                slippiPath: this.#slippiPath,
+                meleePath: this.#meleeIsoPath,
+                batchSize: this.#batchSize,
+                frameLeniency: this.#frameLeniency,
+                paginationLowerLimit: this.#paginationLowerLimit
+            }
+        });
+    }
+
+    async browserForSlippiPath (event, source) {
         const appDataPath = app.getPath("appData");
         const filename = await dialog.showOpenDialog({
             defaultPath: appDataPath,
@@ -170,8 +198,10 @@ class MainModel {
             success = true;
         }
 
-        event.sender.send("receiveSlippiPath",{
-            eventName: "receiveSlippiPath",
+        let evtName = "receiveSlippiPath";
+        if (source === "settings") evtName = "receiveSlippiPathForSettings";
+        event.sender.send(evtName,{
+            eventName: evtName,
             args: {
                 success: success,
                 path: filename.filePaths[0]
@@ -179,7 +209,7 @@ class MainModel {
         });
     }
 
-    async browserForMeleeIsoPath (event) {
+    async browserForMeleeIsoPath (event, source) {
         const appDataPath = app.getPath("appData");
         const documentsPath = app.getPath("documents");
         const filename = await dialog.showOpenDialog({
@@ -198,8 +228,10 @@ class MainModel {
             success = true;
         }
 
-        event.sender.send("receiveSlippiPath",{
-            eventName: "receiveSlippiPath",
+        let evtName = "receiveSlippiPath";
+        if (source === "settings") evtName = "receiveSlippiPathForSettings";
+        event.sender.send(evtName,{
+            eventName: evtName,
             args: {
                 success: success,
                 path: filename.filePaths[0]
@@ -257,6 +289,43 @@ class MainModel {
             } catch (err) {
                 console.log(err);
             }
+        }
+    }
+
+    async updateBothSlippiPaths (event, args) {
+        try {
+            let appData = await fs.readFile(this.#appDataPath);
+            appData = JSON.parse(appData.toString());
+
+            appData.slippiPath = args.slippiPath;
+            appData.meleeISOpath = args.isoPath;
+            this.updateAppData(appData);
+        } catch (err) {
+            console.log("could not update appdata from client");
+            console.log(err);
+        }
+    }
+
+    async updateNonPathSettings (event, args) {
+        try {
+            let appData = await fs.readFile(this.#appDataPath);
+            appData = JSON.parse(appData.toString());
+
+            const bUpdatePagination = appData.paginationSize !== args.paginationSize;
+
+            appData.batchSize = args.batchSize;
+            appData.frameLeniency = args.frameLeniency;
+            appData.paginationSize = args.paginationSize;
+
+            await this.updateAppData(appData);
+
+            if (bUpdatePagination) {
+                this.updateParsePagination(null, null, 1);
+                this.updateComboPagination(null, null, 1);
+            }
+        } catch (err) {
+            console.log("could not update appdata from client");
+            console.log(err);
         }
     }
 
@@ -327,8 +396,8 @@ class MainModel {
     handleProcessedSlippiParse(data) {
         const parsedData = JSON.parse(data.args.replaceAll('\\', '/').replaceAll('/"','\\\"'));
         const numPlayers = parsedData.players.length;
-        const totalNumPages = Math.ceil(numPlayers / this.#PAGINATION_LOWER_LIMIT); 
-        const bNeedsPagination = numPlayers > this.#PAGINATION_LOWER_LIMIT;
+        const totalNumPages = Math.ceil(numPlayers / this.#paginationLowerLimit); 
+        const bNeedsPagination = numPlayers > this.#paginationLowerLimit;
 
         const page = 1;
         
@@ -341,9 +410,9 @@ class MainModel {
         
         this.#usePagination[0] = bNeedsPagination;
         if (bNeedsPagination) {
-            const startIdx = this.#PAGINATION_LOWER_LIMIT * (page-1);
+            const startIdx = this.#paginationLowerLimit * (page-1);
             this.#parseInfo = Object.assign({}, parsedData);
-            parsedData.players = parsedData.players.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);
+            parsedData.players = parsedData.players.slice(startIdx, startIdx + this.#paginationLowerLimit);
         }
 
         this.#win.webContents.send("serverEvent", {
@@ -359,20 +428,24 @@ class MainModel {
     }
 
     async updateParsePagination ( event, buttonID, targetPage ) {
-        const numPlayers = this.#parseInfo.players.length;
-        const totalNumPages = Math.ceil(numPlayers / this.#PAGINATION_LOWER_LIMIT); 
-        const startIdx = this.#PAGINATION_LOWER_LIMIT * (targetPage-1);
-        const parsedData = Object.assign({}, this.#parseInfo);
-        parsedData.players = parsedData.players.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);
-        this.#win.webContents.send("serverEvent", {
-            args: parsedData,
-            eventName: "updatePanelOneAccordionJustAccordion",
-            needsPagination: true,
-            page: targetPage,
-            totalPage: totalNumPages,
-            hitsThisPage: parsedData.length,
-            hitsTotal: numPlayers
-        });
+        if (this.#parseInfo && this.#parseInfo.players) {
+            const numPlayers = this.#parseInfo.players.length;
+                if (numPlayers > 0) {
+                const totalNumPages = Math.ceil(numPlayers / this.#paginationLowerLimit); 
+                const startIdx = this.#paginationLowerLimit * (targetPage-1);
+                const parsedData = Object.assign({}, this.#parseInfo);
+                parsedData.players = parsedData.players.slice(startIdx, startIdx + this.#paginationLowerLimit);
+                this.#win.webContents.send("serverEvent", {
+                    args: parsedData,
+                    eventName: "updatePanelOneAccordionJustAccordion",
+                    needsPagination: true,
+                    page: targetPage,
+                    totalPage: totalNumPages,
+                    hitsThisPage: parsedData.length,
+                    hitsTotal: numPlayers
+                });
+            }
+        }
     }
 
     handleProcessedComboParse (data) {
@@ -424,15 +497,15 @@ class MainModel {
     }
 
     processedComboParse (numCombos, comboData, updateComboInfo, eventName) {
-        const totalNumPages = Math.ceil(numCombos / this.#PAGINATION_LOWER_LIMIT); 
-        const bNeedsPagination = numCombos > this.#PAGINATION_LOWER_LIMIT;
+        const totalNumPages = Math.ceil(numCombos / this.#paginationLowerLimit); 
+        const bNeedsPagination = numCombos > this.#paginationLowerLimit;
         const page = 1;
 
         this.#usePagination[2] = bNeedsPagination;
         if (updateComboInfo) this.#comboInfo = [...comboData];
         if (bNeedsPagination) {
-            const startIdx = this.#PAGINATION_LOWER_LIMIT * (page-1);
-            comboData = comboData.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);
+            const startIdx = this.#paginationLowerLimit * (page-1);
+            comboData = comboData.slice(startIdx, startIdx + this.#paginationLowerLimit);
         }
 
         this.#win.webContents.send("findComboEvent", {
@@ -526,29 +599,31 @@ class MainModel {
     }
 
     async updateComboPagination ( event, buttonID, targetPage ) {
-        let parsedData;
-        if (this.#isFilterOn) {
-            parsedData = this.getFileredCombosFromAll();
-        } else {
-            parsedData = [...this.#comboInfo];
-        }
-
-        const numCombos = parsedData.length;
-        const totalNumPages = Math.ceil(numCombos / this.#PAGINATION_LOWER_LIMIT); 
-        const startIdx = this.#PAGINATION_LOWER_LIMIT * (targetPage-1);
-
-        parsedData = parsedData.slice(startIdx, startIdx + this.#PAGINATION_LOWER_LIMIT);
-        this.#win.webContents.send("findComboEvent", {
-            eventName: "updatePanelThreeAccordionJustAccordion",
-            args: {
-                combos: parsedData,
-                needsPagination: true,
-                page: targetPage,
-                totalPage: totalNumPages,
-                hitsThisPage: parsedData.length,
-                hitsTotal: numCombos
+        if (this.#comboInfo && this.#comboInfo.length > 0) {
+            let parsedData;
+            if (this.#isFilterOn) {
+                parsedData = this.getFileredCombosFromAll();
+            } else {
+                parsedData = [...this.#comboInfo];
             }
-        });
+
+            const numCombos = parsedData.length;
+            const totalNumPages = Math.ceil(numCombos / this.#paginationLowerLimit); 
+            const startIdx = this.#paginationLowerLimit * (targetPage-1);
+
+            parsedData = parsedData.slice(startIdx, startIdx + this.#paginationLowerLimit);
+            this.#win.webContents.send("findComboEvent", {
+                eventName: "updatePanelThreeAccordionJustAccordion",
+                args: {
+                    combos: parsedData,
+                    needsPagination: true,
+                    page: targetPage,
+                    totalPage: totalNumPages,
+                    hitsThisPage: parsedData.length,
+                    hitsTotal: numCombos
+                }
+            });
+        }
     }
 
     async processDirectoryForParse ( event, buttonID, chunk ) {

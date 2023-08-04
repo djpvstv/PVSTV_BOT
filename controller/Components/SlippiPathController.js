@@ -20,7 +20,8 @@ class SlippiPathController extends EventEmitter {
         ipcRenderer.on("receiveSlippiPath", (evt, args) => {
             this.emit("newSlippiPath", {
                 success: args.args.success,
-                path: args.args.path
+                path: args.args.path,
+                src: "pathModal"
             });
         });
     }
@@ -32,7 +33,10 @@ class SlippiPathController extends EventEmitter {
     cb_emitChooseButtonEvent (flavor) {
         const data = {};
         data.eventName = "findSlippiModal";
-        data.val = {flavor: flavor};
+        data.val = {
+            flavor: flavor,
+            source: "pathModal"
+        };
         try {
             ipcRenderer.send("clientEvent", data);
         } catch (err) {

@@ -9,8 +9,8 @@ class ParsePanelView extends ParseViewBase {
     #dateTable = null;
     #foundPlayerAccordion = null;
 
-    constructor (controller, spinnerController, panelDivID, appState) {
-        super(controller, spinnerController);
+    constructor (controller, spinnerController, settingsController, panelDivID, appState) {
+        super(controller, spinnerController, settingsController);
         this.#appState = appState;
         // Add rows for 
         // 1. Input Directory
@@ -35,8 +35,9 @@ class ParsePanelView extends ParseViewBase {
         this.idMap.set("p1i1", "parseSlippi_input");
         this.idMap.set("p1b2", "parseSlippi_parse_button");
         this.idMap.set("p1a1", "parseSlippi_players_outmostAccordion");
+        this.idMap.set("sb1", "parseSlippi_settings_button");
 
-        const formDiv = this.createImportFromDirectory(this.idMap.get("p1b1"), this.idMap.get("p1i1"), this.idMap.get("p1b2"), "Parse Directory");
+        const formDiv = this.createImportFromDirectory(this.idMap.get("p1b1"), this.idMap.get("p1i1"), this.idMap.get("p1b2"), "Parse Directory", this.idMap.get("sb1"));
 
         inputRow.appendChild(formDiv);
 
@@ -124,10 +125,13 @@ class ParsePanelView extends ParseViewBase {
                 modalTitle: "Parsing Directory",
                 totalFiles: this.fileList.length
             });
-            const batchDiv = document.getElementById(this.idMap.get("p1b2")+"_batchInput");
-            let batchNum = batchDiv.value === '' ? 20 :  parseInt(batchDiv.value);
+            let batchNum = this.#appState.getBatchSize();
             batchNum = Math.min(batchNum, this.fileList.length);
             await this.controller.cb_emitButtonEvent(this.idMap.get("p1b2"), "parseDirectory", batchNum);
+        });
+
+        this.getElementById("sb1").addEventListener("click", async () => {
+            this.settingsController.showSpinner();
         });
     }
 

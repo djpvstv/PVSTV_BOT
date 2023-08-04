@@ -106,10 +106,10 @@ ipcMain.on("clientEvent", async (event, args) => {
             case "findSlippiModal":
                 switch (extraData.flavor) {
                     case 0:
-                        model.browserForSlippiPath(event);
+                        model.browserForSlippiPath(event, extraData.source);
                         break;
                     case 1:
-                        model.browserForMeleeIsoPath(event);
+                        model.browserForMeleeIsoPath(event, extraData.source);
                         break;
                 }
                 break;
@@ -123,6 +123,12 @@ ipcMain.on("clientEvent", async (event, args) => {
                         break;
                 }
                 
+                break;
+            case "updatePathsFromClient":
+                model.updateBothSlippiPaths(event, extraData);
+                break;
+            case "updateNonPathsSettingsFromClient":
+                model.updateNonPathSettings(event, extraData);
                 break;
             default:
                 console.log(`Cannot match event ${args.eventName}`);
