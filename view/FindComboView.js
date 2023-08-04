@@ -62,17 +62,23 @@ class FindComboView extends ParseViewBase {
                                     </svg>
                                     <span>Play this combo</span>
                                 </li>
-                                <li class="context-item context-item-disabled">
+                                <li class="context-item" id="${this.idMap.get("c1l2")}">
                                     <svg class="icon">
                                         <image xlink:href="./Bootstrap/svg/pencil-square.svg" width="20" height="20" x="4" y="2"/>
                                     </svg>
                                     <option value="1">Open notes</option>
                                 </li>
-                                <li class="context-item context-item-disabled">
+                                <li class="context-item" id="${this.idMap.get("c1l3")}">
                                     <svg class="icon">
-                                        <image xlink:href="./Bootstrap/svg/x.svg" width="30" height="30" y="-2"/>
+                                        <image xlink:href="./Bootstrap/svg/x.svg" width="30" height="30" x="-2" y="-2"/>
                                     </svg>
                                     <option value="2">remove this combo</option>
+                                </li>
+                                <li class="context-item" id="${this.idMap.get("c1l4")}">
+                                    <svg class="icon">
+                                        <image xlink:href="./Bootstrap/svg/arrow-counterclockwise.svg" width="28" height="28" y="-2"/>
+                                    </svg>
+                                    <option value="2">restore all combos</option>
                                 </li>
                             </ul>
                         </div>
@@ -115,6 +121,7 @@ class FindComboView extends ParseViewBase {
         this.idMap.set("c1l1", "comboSlippi_context_play_combo");
         this.idMap.set("c1l2", "comboSlippi_context_edit_combo");
         this.idMap.set("c1l3", "comboSlippi_context_delete_combo");
+        this.idMap.set("c1l4", "comboSlippi_context_undelete_combos");
         this.idMap.set("sb1", "comboSlippi_settings_button");
 
         this.getController().setIDMap(this.idMap);
@@ -194,6 +201,18 @@ class FindComboView extends ParseViewBase {
 
         this.getElementById("c1l1").addEventListener("click", async() => {
             this.#controller.cb_playCombo();
+        });
+
+        this.getElementById("c1l2").addEventListener("click", async () => {
+            await this.#controller.cb_editCombo();
+        });
+
+        this.getElementById("c1l3").addEventListener("click", async () => {
+            await this.#controller.cb_removeCombo();
+        });
+
+        this.getElementById("c1l4").addEventListener("click", async () => {
+            await this.#controller.cb_restoreAllCombos();
         });
 
         this.getElementById("sb1").addEventListener("click", async () => {
@@ -343,6 +362,21 @@ class FindComboView extends ParseViewBase {
                 break;
         }
         return html;
+    }
+
+    updateTagSelectionAutofills () {
+        if ([1,4,5].includes(this.getFlavor())) {
+            let foundTagHTML = ``;
+            const foundTags = this.#appState.getFoundTags();
+            foundTags.forEach(tag => {
+                foundTagHTML = `
+                    ${foundTagHTML}
+                    <option value="${tag}">
+                `;
+            });
+
+            this.getElementById("i3d1").innerHTML = foundTagHTML;
+        }
     }
 
     getTargetType (flavor) {

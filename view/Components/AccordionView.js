@@ -261,7 +261,7 @@ class AccordionView {
         const pagDiv = document.getElementById(paginationID);
         let navDiv = '';
 
-        if (activePage > 0 && totalPages > 0) {
+        if (activePage > 0 && totalPages > 1) {
             let pageSkeletonInternal;
             if (totalPages === 2) {
                 pageSkeletonInternal = `
@@ -606,13 +606,14 @@ class AccordionView {
             this._createPaginationSection(activePage, totalPages, event.hitsThisPage, event.hitsTotal);
             this._attachPaginationCallbacks(activePage, totalPages);
         } else {
-            this._createPaginationSection(0, 0, 0, 0);
+            this._createPaginationSection(0, 0, numCombos, numCombos);
             this._attachPaginationCallbacks(0, 0);
         }
         
         accordDiv.innerHTML = skeletonInternal;
 
         this.createLimitedBootstrapObjects();
+        document.getElementById(this.#outerAccordionID).scrollTop = 0;
     }
 
     onlyUnique(value, index, array) {

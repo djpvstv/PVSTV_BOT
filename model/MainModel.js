@@ -474,7 +474,8 @@ class MainModel {
                     opponent_tag: parsedData[files[i]].opponent_tag,
                     opponent_char: parsedData[files[i]].opponent_char,
                     opponent_color: parsedData[files[i]].opponent_color,
-                    is_manually_hidden: false
+                    is_manually_hidden: false,
+                    notes: ''
                 }
                 this.#fileComboMap.set(files[i].substring(files[i].lastIndexOf("/") + 1).replace(/\.[^/.]+$/,"") + "_" + String(j), numCombos + j);
                 j++;
@@ -607,13 +608,15 @@ class MainModel {
                 parsedData = [...this.#comboInfo];
             }
 
+            parsedData = parsedData.filter(c => {return !c.is_manually_hidden});
+
             const numCombos = parsedData.length;
             const totalNumPages = Math.ceil(numCombos / this.#paginationLowerLimit); 
             const startIdx = this.#paginationLowerLimit * (targetPage-1);
 
             parsedData = parsedData.slice(startIdx, startIdx + this.#paginationLowerLimit);
             this.#win.webContents.send("findComboEvent", {
-                eventName: "updatePanelThreeAccordionJustAccordion",
+                eventName: "updatePanelTwoAccordionJustAccordion",
                 args: {
                     combos: parsedData,
                     needsPagination: true,
@@ -825,6 +828,54 @@ class MainModel {
                 lastChar: this.#lastCharacter
             }
         });
+    }
+
+    async retrieveComboNotes (event, comboNum) {
+        if (this.#comboInfo[comboNum]) return this.#comboInfo[comboNum].notes;
+        return '';
+    }
+
+    saveComboNotes (event, args) {
+        const comboNum = args.comboNum;
+        let notes = args.notes;
+
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;',
+            "/": '&#x2F;',
+            "`": '&#x96;'
+        };
+
+        notes = notes.replace(/[&<>"'/`]/ig, (n)=>(map[n]));
+
+        if (this.#comboInfo[comboNum]) this.#comboInfo[comboNum].notes = notes;
+    }
+
+    hideCombo (event, args) {
+        const game = args.game;
+        const comboNum = args.combo;
+        const comboIndex = this.#fileComboMap.get(game + "_" + comboNum);
+        if (this.#comboInfo[comboIndex]) {
+            const currPage = args.page;
+            this.#comboInfo[comboIndex].is_manually_hidden = true;
+            this.updateComboPagination(event, null, currPage);
+        }
+    }
+
+    restoreCombos (event, args) {
+        const currPage = args.page;
+        if (this.#comboInfo) {
+            let i = 0;
+            while (i < this.#comboInfo.length) {
+                this.#comboInfo[i].is_manually_hidden = false;
+                i++;
+            }
+            this.updateComboPagination(event, null, currPage);
+        }
+
     }
 
     async writeWorkerLog (commandHeader, command) {

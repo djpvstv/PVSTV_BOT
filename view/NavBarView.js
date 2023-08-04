@@ -23,6 +23,10 @@ class NavBarView {
         this.#parseViewPanel = new ParsePanelView(controller, spinnerController, settingsController, this.#navPanelIDs[0], appState);
         this.#comboViewPanel = new ComboPanelView(controller, spinnerController, settingsController, this.#navPanelIDs[1], appState);
 
+        document.getElementById('nav_Find_Combos').addEventListener("show.bs.tab", (evt) => {
+            this.#comboViewPanel.updateTagSelectionAutofills();
+        });
+
     }
 
     getParseViewPanel () {

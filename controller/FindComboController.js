@@ -5,12 +5,14 @@ const Utility = require("../Utility");
 class FindComboController extends EventEmitter {
     events = [
         "updatecombotarget",
-        "updatePanelThreeAccordion",
-        "hideSpinner"
+        "updatePanelTwoAccordion",
+        "hideSpinner",
+        "showNotesModal"
     ];
     #idMap = null;
     #contextShowing = null;
     #charUpperLimit = 26;
+    #currentPage = null;
     #contextSelect = {
         game: null,
         combo: null
@@ -26,11 +28,12 @@ class FindComboController extends EventEmitter {
         const that = this;
         ipcRenderer.on("findComboEvent", (evt, args) => {
             let response = args.args;
+            this.#currentPage = response.page;
             if (args.eventName === "findCombosComplete") {
-                this.emit("updatePanelThreeAccordion", response);
+                this.emit("updatePanelTwoAccordion", response);
                 this.emit("hideSpinner");
-            } else if (args.eventName === "updatePanelThreeAccordionJustAccordion") {
-                this.emit("updatePanelThreeAccordion", response);
+            } else if (args.eventName === "updatePanelTwoAccordionJustAccordion") {
+                this.emit("updatePanelTwoAccordion", response);
             }
         });
     }
@@ -117,6 +120,57 @@ class FindComboController extends EventEmitter {
             combo: this.#contextSelect.combo
         };
         this.cb_emitButtonEvent(this.idMap.get("c1l1"), "playCombo", sendData);
+    }
+
+    async cb_editCombo (){
+        this.cb_hideContextMenu(null, true);
+        const comboNotes = await this.cb_getNotesForCombo(this.#contextSelect.combo);
+        const sendData = {
+            args: {
+                notes: comboNotes,
+                comboNum: this.#contextSelect.combo
+            }
+        };
+        this.emit("showNotesModal", sendData);
+    }
+
+    async cb_getNotesForCombo (comboNum) {
+        let notes = '';
+        const eventName = "retrieveComboNotes";
+
+        const data = {
+            eventName: eventName,
+            val: comboNum
+        };
+        try {
+            notes = await ipcRenderer.invoke("clientEventInvoke", data);
+        } catch (error) {
+            console.log(error);
+        }
+
+        return notes;
+    }
+
+    cb_removeCombo () {
+        this.cb_hideContextMenu(null, true);
+
+        const sendData = {
+            page: this.#currentPage,
+            game: this.#contextSelect.game,
+            combo: this.#contextSelect.combo
+        };
+
+        this.cb_emitButtonEvent(this.idMap.get("c1l3"), "hideCombo", sendData);
+    }
+
+    cb_restoreAllCombos () {
+        this.cb_hideContextMenu(null, true);
+
+        const sendData = {
+            page: this.#currentPage
+        };
+
+        this.cb_emitButtonEvent(this.idMap.get("c1l4"), "restoreCombos", sendData);
     }
 
     // Validation Methods 

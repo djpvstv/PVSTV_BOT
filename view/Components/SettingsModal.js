@@ -1,5 +1,4 @@
 const bootstrap = require('../../Bootstrap/js/bootstrap.bundle.min');
-const AppState = require('../../appState');
 
 class SettingsModalView {
 

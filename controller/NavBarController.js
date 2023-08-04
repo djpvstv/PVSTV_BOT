@@ -16,8 +16,8 @@ class NavBarController extends EventEmitter {
         "updatePanelOneDirectoryInput",
         "updatePanelOneFilesTable",
         "updatePanelOneAccordionJustAccordion",
-        "updatePanelThreeDirectoryInput",
-        "updatePanelThreeComboButton",
+        "updatePanelTwoDirectoryInput",
+        "updatePanelTwoComboButton",
         "askForSlippiPath",
         "askForMeleeIsoPath"
     ]
@@ -121,8 +121,8 @@ class NavBarController extends EventEmitter {
                 successEventName = "updatePanelOneFilesTable";
                 break;
             case 2:
-                inputDirEventName = "updatePanelThreeDirectoryInput";
-                successEventName = "updatePanelThreeComboButton";
+                inputDirEventName = "updatePanelTwoDirectoryInput";
+                successEventName = "updatePanelTwoComboButton";
                 break;
         }
         this.emit(inputDirEventName, eventData);

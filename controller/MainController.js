@@ -3,6 +3,7 @@ const ProgressController = require('./Components/ProgressController');
 const SlippiPathController = require('./Components/SlippiPathController');
 const ComboFilterController = require("./Components/ComboFilterController");
 const SettingsController = require("./Components/SettingsController");
+const NotesController = require("./Components/NotesController");
 
 class MainController {
 
@@ -11,6 +12,7 @@ class MainController {
     #SlippiPathController = null;
     #ComboFilterController = null;
     #SettingsController = null;
+    #NotesController = null;
     #ControllerList = [];
 
     constructor () {
@@ -19,6 +21,7 @@ class MainController {
         this.#SlippiPathController = new SlippiPathController();
         this.#ComboFilterController = new ComboFilterController();
         this.#SettingsController = new SettingsController();
+        this.#NotesController = new NotesController();
 
         this.#ControllerList.push(this.#NavBarController);
         this.#ControllerList.push(this.#ProgressController);
@@ -26,6 +29,7 @@ class MainController {
         this.#ControllerList.push(this.#NavBarController.getFindComboController());
         this.#ControllerList.push(this.#ComboFilterController);
         this.#ControllerList.push(this.#SettingsController);
+        this.#ControllerList.push(this.#NotesController);
     }
 
     // Getters
@@ -51,6 +55,10 @@ class MainController {
 
     getSettingsController () {
         return this.#SettingsController;
+    }
+
+    getNotesController () {
+        return this.#NotesController;
     }
 
 }

@@ -4,6 +4,7 @@ const ProgressView = require("./Components/ProgressView");
 const {FindSlippiModal} = require("./Components/FindSlippiModal");
 const {ComboFilterModal} = require("./Components/ComboFilterModal");
 const SettingsModal = require("./Components/SettingsModal");
+const NotesModal = require("./Components/NotesModal");
 
 class MainView extends EventEmitter {
 
@@ -13,6 +14,7 @@ class MainView extends EventEmitter {
     #SlippiPathSpinner = null;
     #ComboFilterModal = null;
     #SettingsModal = null;
+    #NotesModal = null;
     #controllers = null;
 
     constructor( controllers, appState ) {
@@ -35,6 +37,7 @@ class MainView extends EventEmitter {
         this.#SlippiPathSpinner = new FindSlippiModal( controller.getSlippiPathController(), appState );
         this.#ComboFilterModal = new ComboFilterModal( controller.getComboFilterController(), appState );
         this.#SettingsModal = new SettingsModal (controller.getSettingsController(), appState );
+        this.#NotesModal = new NotesModal (controller.getNotesController(), appState );
     }
 
     createEventListeners() {
@@ -74,19 +77,19 @@ class MainView extends EventEmitter {
                             this.#NavBar.getParseViewPanel().updatePanelAccordion(event);
                         });
                         break;
-                    case "updatePanelThreeDirectoryInput":
+                    case "updatePanelTwoDirectoryInput":
                         controller.on(eventName, (event) => {
                             const comboPanel = this.#NavBar.getComboViewPanel()
                             comboPanel.updateValidationStateForInputOne(event.isValid, event.dir, false, event.errorMsg);
                             comboPanel.getController().validateAllWidgetsForBigButton(comboPanel.getFlavor());
                         })
                         break;
-                    case "updatePanelThreeComboButton":
+                    case "updatePanelTwoComboButton":
                         controller.on(eventName, (event) => {
                             this.#NavBar.getComboViewPanel().setFileNum(event.files.length);
                         });
                         break;
-                    case "updatePanelThreeAccordion":
+                    case "updatePanelTwoAccordion":
                         controller.on(eventName, (event) => {
                             this.#NavBar.getComboViewPanel().getPanelAccordion().render(event);
                         });
@@ -139,6 +142,16 @@ class MainView extends EventEmitter {
                     case "hideSettingsModal":
                         controller.on(eventName, (event) => {
                             this.#SettingsModal.show(event.args);
+                        });
+                        break;
+                    case "showNotesModal":
+                        controller.on(eventName, (event) => {
+                            this.#NotesModal.show(event.args);
+                        });
+                        break;
+                    case "hideNotesModal":
+                        controller.on(eventName, (event) => {
+                            this.#NotesModal.show(event.args);
                         });
                         break;
                     case "askForSlippiPath":

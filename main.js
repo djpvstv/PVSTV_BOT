@@ -60,6 +60,7 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
 
+// One Way Events
 ipcMain.on("clientEvent", async (event, args) => {
     try {
         let extraData = null;
@@ -130,10 +131,39 @@ ipcMain.on("clientEvent", async (event, args) => {
             case "updateNonPathsSettingsFromClient":
                 model.updateNonPathSettings(event, extraData);
                 break;
+            case "saveComboNotes":
+                model.saveComboNotes(event, extraData);
+                break;
+            case "hideCombo":
+                model.hideCombo(event, extraData);
+                break;
+            case "restoreCombos":
+                model.restoreCombos(event, extraData);
+                break;
             default:
                 console.log(`Cannot match event ${args.eventName}`);
         }
     } catch (error) {
         console.log(error);
+    }
+});
+
+// Two Way Events
+ipcMain.handle("clientEventInvoke", async (event, args) => {
+    try {
+        let result;
+        let extraData = null;
+        if (Object.hasOwnProperty.call(args, "val")) {
+            extraData = args.val;
+        }
+        switch (args.eventName) {
+            case "retrieveComboNotes":
+                result = await model.retrieveComboNotes(event, extraData);
+                break;
+        }
+        return result;
+    } catch (err) {
+        console.log("unable to handle invoke request");
+        console.log(err);
     }
 });
