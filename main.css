@@ -246,6 +246,11 @@
     border: var(--bs-border-width) solid var(--bs-border-color);
 }
 
+.replace-input-width .target-dropdown {
+    margin-top: 0px;
+    height: 42px;
+}
+
 .dropdown-item {
     height: 2.25rem;
 }
@@ -275,4 +280,116 @@
 
 .buffer-right-slightly {
     margin-right: 0.5rem;
+}
+
+.inner-addon {
+    background-color: var(--bs-form-control-disabled-bg);
+    position: relative;
+    margin: 0px;
+}
+
+.inner-addon .gliphicon {
+    margin: 5px;
+    pointer-events: none;
+    position: absolute;
+}
+
+.replace-input-width {
+    flex: 1 1 auto;
+}
+
+.gliphicon-box {
+    cursor: default;
+    background-color: -internal-light-dark(rgba(239, 239, 239, 0.3), rgba(59, 59, 59, 0.3));
+    color: -internal-light-dark(rgb(84, 84, 84), rgb(170, 170, 170));
+    border-color: rgba(118, 118, 118, 0.3);
+    width: 45px;
+}
+
+.inner-addon .x {
+    position: absolute;
+    margin-left: 24px;
+    margin-top: 5px;
+    width: 22px;
+    height: 22px;
+    opacity: 0.1;
+    transition: 0.3s;
+}
+
+.flex {
+    display: flex;
+}
+
+.char-box {
+    width: 45px;
+    position: relative;
+    display: inline-flex;
+    margin-right: 10px;
+    margin-bottom: 2px;
+}
+
+.id-box-container {
+    position: relative;
+    display: inline-flex;
+    margin-right: 10px;
+    border: 2px solid rgba(118, 118, 118, 0.3);
+    cursor: default;
+    padding-left: 3px;
+    background-color: -internal-light-dark(rgba(239, 239, 239, 0.3), rgba(59, 59, 59, 0.3));
+    color: -internal-light-dark(rgb(84, 84, 84), rgb(170, 170, 170));
+}
+
+.id-box-container .x {
+    position: relative;
+    margin-left: 2px;
+    margin-top: 3px;
+}
+
+.id-box-container:hover .x {
+    opacity: 1;
+}
+
+.char-box:hover .x {
+    opacity: 1;
+}
+
+.hide {
+    display: none;
+}
+
+#choose_stage_dropdown_dropdown,
+#choose_character_dropdown_dropdown {
+    height: 300px;
+    -webkit-column-count: 3;
+    column-count: 3;
+    -moz-column-count: 3;
+}
+
+.showing-x-of-y {
+    text-align: center;
+    margin-top: 8px;
+}
+
+#comboSlippi_settings_button,
+#parseSlippi_settings_button,
+img.gear-icon.settings-icon {
+    width: 1.75rem;
+    margin-left: 0.75rem;
+    transition: 0.3s;
+    opacity: 0.3;
+}
+
+#comboSlippi_settings_button:hover,
+#parseSlippi_settings_button:hover,
+img.gear-icon:hover {
+    opacity: 0.9;
+}
+
+.settingsInputWrapper {
+    text-align: center;
+}
+
+.settingsInput {
+    width: 100%;
+    margin-bottom: 5px;
 }

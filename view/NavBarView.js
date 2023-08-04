@@ -3,7 +3,7 @@ const ComboPanelView = require("./FindComboView");
 
 class NavBarView {
 
-    #navBarTitles = [`Parse Slippi`, `Count Moves`, `Find Combos`];
+    #navBarTitles = [`Parse Replays`, `Find Combos`, `Count Moves`];
     #navPanelIDs = [];
     #controller = null;
 
@@ -15,13 +15,17 @@ class NavBarView {
 
     #navBarListItemCount = 0;
 
-    constructor( controller, spinnerController, appState ) {
+    constructor( controller, spinnerController, settingsController, appState ) {
         this.#controller = controller;
 
         this.createPageSkeleton();
 
-        this.#parseViewPanel = new ParsePanelView(controller, spinnerController, this.#navPanelIDs[0], appState);
-        this.#comboViewPanel = new ComboPanelView(controller, spinnerController, this.#navPanelIDs[2], appState);
+        this.#parseViewPanel = new ParsePanelView(controller, spinnerController, settingsController, this.#navPanelIDs[0], appState);
+        this.#comboViewPanel = new ComboPanelView(controller, spinnerController, settingsController, this.#navPanelIDs[1], appState);
+
+        document.getElementById('nav_Find_Combos').addEventListener("show.bs.tab", (evt) => {
+            this.#comboViewPanel.updateTagSelectionAutofills();
+        });
 
     }
 
@@ -72,7 +76,7 @@ class NavBarView {
             `;
             } else {
             buttonHTML = `${buttonHTML}
-                <button class="nav-link" id="nav_${titleID}" data-bs-toggle="tab" data-bs-target="#panel_${titleID}" type="button" role="tab" aria-controls="panel_${titleID}" aria-selected="false">${title}</button>
+                <button ${titleID === "Count_Moves" ? 'disabled ' : ''}class="nav-link" id="nav_${titleID}" data-bs-toggle="tab" data-bs-target="#panel_${titleID}" type="button" role="tab" aria-controls="panel_${titleID}" aria-selected="false">${title}</button>
             `;
             }
             isFirst = false;

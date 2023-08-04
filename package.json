@@ -1,16 +1,17 @@
 {
   "name": "pvstvbot.exe",
-  "version": "1.0.2",
+  "version": "0.3",
   "description": "The front end for clippi replacement",
   "main": "main.js",
   "type": "commonjs",
   "target": "es6",
   "scripts": {
     "test": "test",
-    "start": "set NODE_ENV=development&& webpack && electron .",
+    "start": "set NODE_ENV=development&& webpack && electron . --inspect-brk=9229",
     "startProd": "set NODE_ENV=production&& webpack && electron .",
+    "pack": "webpack",
     "buildcpp": "node-gyp rebuild --target=24.0.0 --dist-url=https://electronjs.org/headers",
-    "package": "set NODE_ENV=production&& webpack && electron-packager . --platform=win32 --arch=x64 PVSTVBOT --icon=img/noodles.ico"
+    "package": "set NODE_ENV=production&& webpack && electron-packager . --platform=win32 --arch=x64 PVSTVBOT --icon=img/noodles.ico --ignore webpack.config.js --ignore .gitignore --ignore view --ignore controller --ignore jQuery --ignore MDB --ignore .vscode --ignore binding.gyp --ignore test.js --ignore src --ignore Utility.js --overwrite"
   },
   "author": "",
   "license": "ISC",

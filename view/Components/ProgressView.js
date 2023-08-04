@@ -105,4 +105,4 @@ class ProgressView {
 
 }
 
-module.exports = {ProgressView};
+module.exports = ProgressView;

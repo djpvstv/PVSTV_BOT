@@ -1,35 +1,43 @@
 const NavBarView = require("./NavBarView");
 const {EventEmitter} = require("events");
-const {ProgressView} = require("./Components/ProgressView");
+const ProgressView = require("./Components/ProgressView");
 const {FindSlippiModal} = require("./Components/FindSlippiModal");
 const {ComboFilterModal} = require("./Components/ComboFilterModal");
+const SettingsModal = require("./Components/SettingsModal");
+const NotesModal = require("./Components/NotesModal");
 
 class MainView extends EventEmitter {
 
+    #appState = null;
     #NavBar = null;
     #Spinner = null;
     #SlippiPathSpinner = null;
     #ComboFilterModal = null;
+    #SettingsModal = null;
+    #NotesModal = null;
     #controllers = null;
 
     constructor( controllers, appState ) {
         super();
+        this.#appState = appState;
         this.#controllers = controllers;
-        this.createNavBar( controllers.getNavBarController(), controllers.getProgressController(), appState);
+        this.createNavBar( controllers.getNavBarController(), controllers.getProgressController(), controllers.getSettingsController(), appState);
         this.createSpinners( controllers, appState );
         this.createEventListeners();
 
         controllers.getNavBarController().emitStartupEvent();
     }
 
-    createNavBar (controller, progressController, appState ) {
-        this.#NavBar = new NavBarView( controller, progressController, appState );
+    createNavBar (controller, progressController, settingsController, appState ) {
+        this.#NavBar = new NavBarView( controller, progressController, settingsController, appState );
     }
 
     createSpinners( controller, appState ) {
         this.#Spinner = new ProgressView( controller.getProgressController(), appState );
         this.#SlippiPathSpinner = new FindSlippiModal( controller.getSlippiPathController(), appState );
         this.#ComboFilterModal = new ComboFilterModal( controller.getComboFilterController(), appState );
+        this.#SettingsModal = new SettingsModal (controller.getSettingsController(), appState );
+        this.#NotesModal = new NotesModal (controller.getNotesController(), appState );
     }
 
     createEventListeners() {
@@ -39,6 +47,15 @@ class MainView extends EventEmitter {
             const events = controller.getEvents();
             events.forEach(eventName => {
                 switch (eventName) {
+                    case "updateAppData":
+                        controller.on(eventName, (event) => {
+                            this.#appState.setIsoPath(event.args.meleePath);
+                            this.#appState.setSlippiPath(event.args.slippiPath);
+                            this.#appState.setHitsPerPage(event.args.paginationLowerLimit);
+                            this.#appState.setFrameLeniency(event.args.frameLeniency);
+                            this.#appState.setBatchSize(event.args.batchSize);
+                        });
+                        break;
                     case "updatePanelOneDirectoryInput":
                         controller.on(eventName, (event) => {
                             this.#NavBar.getParseViewPanel().updateValidationStateForInputOne(event.isValid, event.dir, true, event.errorMsg);
@@ -60,19 +77,19 @@ class MainView extends EventEmitter {
                             this.#NavBar.getParseViewPanel().updatePanelAccordion(event);
                         });
                         break;
-                    case "updatePanelThreeDirectoryInput":
+                    case "updatePanelTwoDirectoryInput":
                         controller.on(eventName, (event) => {
                             const comboPanel = this.#NavBar.getComboViewPanel()
                             comboPanel.updateValidationStateForInputOne(event.isValid, event.dir, false, event.errorMsg);
                             comboPanel.getController().validateAllWidgetsForBigButton(comboPanel.getFlavor());
                         })
                         break;
-                    case "updatePanelThreeComboButton":
+                    case "updatePanelTwoComboButton":
                         controller.on(eventName, (event) => {
                             this.#NavBar.getComboViewPanel().setFileNum(event.files.length);
                         });
                         break;
-                    case "updatePanelThreeAccordion":
+                    case "updatePanelTwoAccordion":
                         controller.on(eventName, (event) => {
                             this.#NavBar.getComboViewPanel().getPanelAccordion().render(event);
                         });
@@ -117,6 +134,26 @@ class MainView extends EventEmitter {
                             this.#ComboFilterModal.applyValidationOnModalInput(event);
                         });
                         break;
+                    case "showSettingsModal":
+                        controller.on(eventName, (event) => {
+                            this.#SettingsModal.show(event.args);
+                        });
+                        break;
+                    case "hideSettingsModal":
+                        controller.on(eventName, (event) => {
+                            this.#SettingsModal.show(event.args);
+                        });
+                        break;
+                    case "showNotesModal":
+                        controller.on(eventName, (event) => {
+                            this.#NotesModal.show(event.args);
+                        });
+                        break;
+                    case "hideNotesModal":
+                        controller.on(eventName, (event) => {
+                            this.#NotesModal.show(event.args);
+                        });
+                        break;
                     case "askForSlippiPath":
                         controller.on(eventName, (event) => {
                             this.#SlippiPathSpinner.show(event);
@@ -124,17 +161,16 @@ class MainView extends EventEmitter {
                         break;
                     case "newSlippiPath":
                         controller.on(eventName, (event) => {
-                            this.#SlippiPathSpinner.newPath(event);
+                            if (event.src === "settingsModal") {
+                                this.#SettingsModal.newPath(event);
+                            } else {
+                                this.#SlippiPathSpinner.newPath(event);
+                            }
                         });
                         break;
                     case "askForMeleeIsoPath":
                         controller.on(eventName, (event) => {
                             this.#SlippiPathSpinner.show(event);
-                        });
-                        break;
-                    case "newMeleeIsoPath":
-                        controller.on(eventName, (event) => {
-
                         });
                         break;
                 }
