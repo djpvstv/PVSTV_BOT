@@ -526,63 +526,68 @@ class MainModel {
     getFileredCombosFromAll () {
         const allCombos = [...this.#comboInfo];
         const rules = this.#comboFilterParams;
-        const tempCombos = allCombos.filter((combo) => {
-            let isValid = true;
-            if (rules.minNumMoves > combo.combo.moves.length) isValid = false;
-            
-            if (rules.maxNumMoves < combo.combo.moves.length) isValid = false;
+        let tempCombos;
+        if (!Object.prototype.hasOwnProperty.call(rules, "ruleList") && rules.length === 0) {
+            tempCombos = allCombos;
+        } else {
+            tempCombos = allCombos.filter((combo) => {
+                let isValid = true;
+                if (rules.minNumMoves > combo.combo.moves.length) isValid = false;
+                
+                if (rules.maxNumMoves < combo.combo.moves.length) isValid = false;
 
-            if (rules.doesKill && (combo.combo.didKill === 'false')) isValid = false;
+                if (rules.doesKill && (combo.combo.didKill === "false")) isValid = false;
 
-            if (combo.is_manually_hidden) isValid = false;
+                if (combo.is_manually_hidden) isValid = false;
 
-            const comboDamage = parseFloat(combo.combo.endPercent) - parseFloat(combo.combo.startPercent);
+                const comboDamage = parseFloat(combo.combo.endPercent) - parseFloat(combo.combo.startPercent);
 
-            if (isValid) {
-                let i = 0;
-                while (i < rules.ruleList.length) {
-                    const option = rules.ruleList[i].option;
-                    let id, comboActionIDs;
-                    if (!Array.isArray(option)) {
-                        id = option.replace(/(^\d+)(.+$)/i,'$1');
+                if (isValid) {
+                    let i = 0;
+                    while (i < rules.ruleList.length) {
+                        const option = rules.ruleList[i].option;
+                        let id, comboActionIDs;
+                        if (!Array.isArray(option)) {
+                            id = option.replace(/(^\d+)(.+$)/i,'$1');
+                        }
+
+                        switch (parseInt(rules.ruleList[i].flavorType)) {
+                            case 0:
+                                if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
+                                break;
+                            case 1:
+                                if (combo.combo.moves.filter(m => m.actionID === id).length === 0) isValid = false;
+                                break;
+                            case 2:
+                                // Total Damage > X
+                                if (comboDamage <= parseFloat(option)) isValid = false;
+                                break;
+                            case 3:
+                                // Total Damage < X
+                                if (comboDamage >= parseFloat(option)) isValid = false;
+                                break;
+                            case 4:
+                                if (!option.includes(parseInt(combo.opponent_char))) isValid = false;
+                                break;
+                            case 5:
+                                if (!(option.includes(parseInt(combo.stage)))) isValid = false;
+                                break;
+                            case 6:
+                                comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
+                                if (!(this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
+                                break;
+                            case 7:
+                                comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
+                                if ((this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
+                                break;
+                        }
+                        i++;
                     }
-
-                    switch (parseInt(rules.ruleList[i].flavorType)) {
-                        case 0:
-                            if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
-                            break;
-                        case 1:
-                            if (combo.combo.moves.filter(m => m.actionID === id).length === 0) isValid = false;
-                            break;
-                        case 2:
-                            // Total Damage > X
-                            if (comboDamage <= parseFloat(option)) isValid = false;
-                            break;
-                        case 3:
-                            // Total Damage < X
-                            if (comboDamage >= parseFloat(option)) isValid = false;
-                            break;
-                        case 4:
-                            if (!option.includes(parseInt(combo.opponent_char))) isValid = false;
-                            break;
-                        case 5:
-                            if (!(option.includes(parseInt(combo.stage)))) isValid = false;
-                            break;
-                        case 6:
-                            comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
-                            if (!(this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
-                            break;
-                        case 7:
-                            comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
-                            if ((this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
-                            break;
-                    }
-                    i++;
                 }
-            }
 
-            return isValid;
-        });
+                return isValid;
+            });
+        }
 
         return tempCombos;
     }
@@ -825,11 +830,12 @@ class MainModel {
     async playAllCombos (event, sourceID) {
         const combos = [];
         let i = 0;
-        while (i < this.#comboInfo.length) {
+        const tempCombos = this.getFileredCombosFromAll();
+        while (i < tempCombos.length) {
             combos.push({
-                startFrame: parseInt(this.#comboInfo[i].combo.startFrame) - 120,
-                endFrame: parseInt(this.#comboInfo[i].combo.endFrame),
-                filePath: this.#comboInfo[i].file
+                startFrame: parseInt(tempCombos[i].combo.startFrame) - 120,
+                endFrame: parseInt(tempCombos[i].combo.endFrame),
+                filePath: tempCombos[i].file
             });
             i++;
         }
