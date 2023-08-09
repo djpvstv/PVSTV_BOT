@@ -98,7 +98,7 @@ class FindComboController extends EventEmitter {
         if (this.#contextShowing) {
             // don't close if clicking on context menu
             if (!forceClose) {
-                if (event.srcElement.closest(".wrapper")) return;
+                if (event.srcElement.closest(".context-wrapper")) return;
             }
                 
             const contextDiv = document.getElementById(this.idMap.get("c1"));

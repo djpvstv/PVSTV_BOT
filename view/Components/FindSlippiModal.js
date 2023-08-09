@@ -26,6 +26,7 @@ class FindSlippiModal {
         topDiv.setAttribute("aria-labelledby","staticBackdropLabel");
         topDiv.setAttribute("aria-modal", "true");
         topDiv.setAttribute("role","dialog");
+        topDiv.setAttribute("data-bs-theme", "dark");
         topDiv.style.display = "none";
 
         this.#modalDiv = topDiv;
@@ -55,7 +56,7 @@ class FindSlippiModal {
                 <div class="modal-body">
                     <label for="findSlippiModalButton" class="dropped-label">${buttonLabel}</label>
                     <div class="input-group mb-3">
-                        <button class="btn btn-light rm-1" id="findSlippiModalButton">Choose...</button>
+                        <button class="btn btn-dark btn-left rm-1" id="findSlippiModalButton">Choose...</button>
                         <input type="text" class="form-control" id="${this.#inputID}">
                         <div class="invalid-feedback">
                             Please enter a valid Slippi Dolphin application.

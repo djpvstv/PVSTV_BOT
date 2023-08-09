@@ -38,8 +38,13 @@ class NavBarView {
     }
 
     createPageSkeleton () {
-        document.body.classList.add("container-fluid","h-100");
-        document.body.innerHTML = `
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.classList.add("wrapper");
+        document.body.appendChild(wrapperDiv);
+        const containerDiv = document.createElement('div');
+        containerDiv.classList.add("container-fluid","h-100","top-gun");
+        containerDiv.setAttribute("data-bs-theme", "dark");
+        containerDiv.innerHTML = `
         <div class="h-100 d-flex flex-column">
             <div class="row">
                 <div class="col-12">
@@ -63,6 +68,12 @@ class NavBarView {
             </div>
         </div>
         `;
+        wrapperDiv.appendChild(containerDiv);
+        const gridBackground = document.createElement('div');
+        gridBackground.classList.add("top-lad");
+        wrapperDiv.appendChild(gridBackground);
+
+        this.createGridding(gridBackground);
     }
 
     createNavBarButtons () {
@@ -72,7 +83,7 @@ class NavBarView {
             const titleID = title.replaceAll(' ', '_');
             if (isFirst) {
             buttonHTML = `${buttonHTML}
-                <button class="nav-link active id="nav_${titleID}" data-bs-toggle="tab" data-bs-target="#panel_${titleID}" type="button" role="tab" aria-controls="panel_${titleID}" aria-selected="true">${title}</button>
+                <button class="nav-link active" id="nav_${titleID}" data-bs-toggle="tab" data-bs-target="#panel_${titleID}" type="button" role="tab" aria-controls="panel_${titleID}" aria-selected="true">${title}</button>
             `;
             } else {
             buttonHTML = `${buttonHTML}
@@ -108,6 +119,33 @@ class NavBarView {
         });
 
         return panelHTML;
+    }
+
+    createGridding (wrapper) {
+        const createTile = index => {
+            const tile = document.createElement("div");
+            tile.classList.add("tile");
+            return tile;
+        }
+
+        const createTiles = quantity => {
+            Array.from(Array(quantity)).map((tile, index) => {
+                wrapper.appendChild(createTile(index));
+            })
+        }
+
+        const createGrid = () => {
+            wrapper.innerHTML = "";
+            const columns = Math.floor(document.body.clientWidth / 50);
+            const rows = Math.floor(document.body.clientHeight / 50);
+            wrapper.style.setProperty("--columns", columns);
+            wrapper.style.setProperty("--rows", rows);
+            createTiles(columns * rows);
+        }
+        createGrid();
+        window.addEventListener("resize", () => {
+            createGrid();
+        });
     }
 
 }

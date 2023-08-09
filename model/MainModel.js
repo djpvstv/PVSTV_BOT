@@ -422,7 +422,7 @@ class MainModel {
             needsPagination: bNeedsPagination,
             page: page,
             totalPage: totalNumPages,
-            hitsThisPage: parsedData.length,
+            hitsThisPage: parsedData.players.length,
             hitsTotal: numPlayers
         });
     }
@@ -441,7 +441,7 @@ class MainModel {
                     needsPagination: true,
                     page: targetPage,
                     totalPage: totalNumPages,
-                    hitsThisPage: parsedData.length,
+                    hitsThisPage: parsedData.players.length,
                     hitsTotal: numPlayers
                 });
             }

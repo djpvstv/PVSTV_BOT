@@ -267,29 +267,17 @@ class AccordionView {
                 pageSkeletonInternal = `
                 <nav>
                     <ul class="pagination justify-content-center">
-                        <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
-                            <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
-                        </li>
                         <li id="${this.#paginationID + "_left"}" class="page-item${activePage === 1 ? ' disabled' : ''}"><a class="page-link" href="#">1</a></li>
                         <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' disabled' : ''}"><a class="page-link" href="#">2</a></li>
-                        <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === 2 ? ' disabled' : ''}">
-                            <a class="page-link" href="#"${activePage === 3 ? ' aria-disabled="true"' : ''}>Next</a>
-                        </li>
                     </ul>
                 </nav>`;
             } else if (totalPages === 3) {
                 pageSkeletonInternal = `
                 <nav>
                     <ul class="pagination justify-content-center">
-                        <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
-                            <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
-                        </li>
                         <li id="${this.#paginationID + "_left"}" class="page-item${activePage === 1 ? ' disabled' : ''}"><a class="page-link" href="#">1</a></li>
                         <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' disabled' : ''}"><a class="page-link" href="#">2</a></li>
                         <li id="${this.#paginationID + "_right"}" class="page-item${activePage === 3 ? ' disabled' : ''}"><a class="page-link" href="#">3</a></li>
-                        <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === 3 ? ' disabled' : ''}">
-                            <a class="page-link" href="#"${activePage === 3 ? ' aria-disabled="true"' : ''}>Next</a>
-                        </li>
                     </ul>
                 </nav>`;
             } else {
@@ -299,9 +287,6 @@ class AccordionView {
                 pageSkeletonInternal = `
                 <nav>
                     <ul class="pagination justify-content-center">
-                        <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
-                            <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
-                        </li>
                         ${leftDistance <= 1 ? `
                             <li id="${this.#paginationID + "_left"}"  class="page-item${activePage === 1 ? ' active' : ''}"><a class="page-link" href="#">1</a></li>
                             <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' active' : ''}"><a class="page-link" href="#">2</a></li>
@@ -323,9 +308,6 @@ class AccordionView {
                             <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
                             <li id="${this.#paginationID + "_end"}"class="page-item"><a class="page-link" href="#">${String(totalPages)}</a></li>
                         `}
-                        <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === totalPages ? ' disabled' : ''}">
-                            <a class="page-link" href="#"${activePage === totalPages ? ' aria-disabled="true"' : ''}>Next</a>
-                        </li>
                     </ul>
                 </nav>`;
 
@@ -336,7 +318,7 @@ class AccordionView {
         if (this.#type === AccordionTypes.FINDCOMBOS) {
             buttonDiv = `
                 <div class="d-gap justify-content-md-end">
-                    <button id="${this.#filterID}" type="button" class="btn btn-filter">Filter</button>
+                    <button id="${this.#filterID}" type="button" class="btn btn-dark btn-filter">Filter</button>
                     <button id="${this.#playAllID}" type="button" class="btn btn-primary">Play All</button>
                 </div>
             `;
@@ -344,13 +326,13 @@ class AccordionView {
 
         pagDiv.innerHTML = `
             <div class="row">
-                <div class="showing-x-of-y col-md-3">
+                <div class="showing-x-of-y col-lg-3">
                     Showing ${hitsThisPage} of (${hitsTotal})
                 </div>
-                <div class="col-md-6">
+                <div class="col-lg-6">
                     ${navDiv}
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-3">
                     ${buttonDiv}
                 </div>
             </div>
@@ -359,18 +341,6 @@ class AccordionView {
 
     _attachPaginationCallbacks(activePage, totalPages) {
         if (activePage > 0 && totalPages > 0) {
-            document.getElementById(this.#paginationID + "_backwards").addEventListener("click", async (evt) => {
-                if (!evt.srcElement.classList.contains('disabled')) {
-                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_backwards", this.getUpdatePaginationEventName(), activePage - 1);
-                }
-            });
-
-            document.getElementById(this.#paginationID + "_forwards").addEventListener("click", async (evt) => {
-                if (!evt.srcElement.classList.contains('disabled')) {
-                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), activePage + 1);
-                }
-            });
-
             document.getElementById(this.#paginationID + "_left").addEventListener("click", async (evt) => {
                 if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
                     const labelVal = parseInt(evt.srcElement.innerHTML);

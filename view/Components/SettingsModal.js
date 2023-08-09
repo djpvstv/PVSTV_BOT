@@ -27,6 +27,7 @@ class SettingsModalView {
         topDiv.setAttribute("aria-labelledby","staticBackdropLabel");
         topDiv.setAttribute("aria-modal", "true");
         topDiv.setAttribute("role","dialog");
+        topDiv.setAttribute("data-bs-theme", "dark");
         topDiv.style.display = "none";
 
         this.#modalDiv = topDiv;
@@ -71,7 +72,7 @@ class SettingsModalView {
                         <div class="row">
                             <label for="findSlippiModalButton" class="dropped-label">Slippi Dolphin Location</label>
                             <div class="input-group mb-3">
-                                <button class="btn btn-light rm-1" id="${this.#idMap.get("b1")}">Choose...</button>
+                                <button class="btn btn-dark btn-left rm-1" id="${this.#idMap.get("b1")}">Choose...</button>
                                 <input disabled type="text" class="form-control" id="${this.#idMap.get("b1i")}">
                                 <div class="invalid-feedback">
                                     Please enter a valid Slippi Dolphin application.
@@ -84,7 +85,7 @@ class SettingsModalView {
                         <div class="row">
                             <label for="findSlippiModalButton" class="label">Melee ISO Location</label>
                             <div class="input-group mb-3">
-                                <button class="btn btn-light rm-1" id="${this.#idMap.get("b2")}">Choose...</button>
+                                <button class="btn btn-dark btn-left rm-1" id="${this.#idMap.get("b2")}">Choose...</button>
                                 <input disabled type="text" class="form-control" id="${this.#idMap.get("b2i")}">
                                 <div class="invalid-feedback">
                                     Please enter a valid Melee ISO.
