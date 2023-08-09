@@ -618,7 +618,8 @@ li.context-item > span {
     border: 2px solid rgba(118, 118, 118, 0.3);
     cursor: default;
     padding-left: 3px;
-    background-color: -internal-light-dark(rgba(239, 239, 239, 0.3), rgba(59, 59, 59, 0.3));
+    background-color: var(--darkness);
+    border-radius: var(--bs-border-radius);
     color: -internal-light-dark(rgb(84, 84, 84), rgb(170, 170, 170));
 }
 
@@ -656,6 +657,14 @@ li.context-item > span {
     text-align: center;
     margin-top: 8px;
     color: var(--non-highlighted-text-color);
+}
+
+.filter-play-buttons {
+    margin-bottom: 20px;
+}
+
+.filter-play-buttons > .d-gap {
+    margin-left: calc(50% - 72px);
 }
 
 #comboSlippi_settings_button,

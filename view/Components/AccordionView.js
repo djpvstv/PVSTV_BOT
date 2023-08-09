@@ -317,7 +317,7 @@ class AccordionView {
         let buttonDiv = '';
         if (this.#type === AccordionTypes.FINDCOMBOS) {
             buttonDiv = `
-                <div class="d-gap justify-content-md-end">
+                <div class="d-gap justify-content-center">
                     <button id="${this.#filterID}" type="button" class="btn btn-dark btn-filter">Filter</button>
                     <button id="${this.#playAllID}" type="button" class="btn btn-primary">Play All</button>
                 </div>
@@ -326,13 +326,13 @@ class AccordionView {
 
         pagDiv.innerHTML = `
             <div class="row">
-                <div class="showing-x-of-y col-lg-3">
+                <div class="showing-x-of-y col-md-3">
                     Showing ${hitsThisPage} of (${hitsTotal})
                 </div>
-                <div class="col-lg-6">
+                <div class="col-md-6">
                     ${navDiv}
                 </div>
-                <div class="col-lg-3">
+                <div class="col-md-3 filter-play-buttons">
                     ${buttonDiv}
                 </div>
             </div>

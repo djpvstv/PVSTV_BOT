@@ -589,6 +589,7 @@ class MainModel {
 
     _hasConsecutiveSubset (mainArray, targetArray) {
         let mainIdx = 0;
+        let bReturn = false;
         const filteredArray = mainArray.filter(e => {
             if (e === targetArray[mainIdx]) {
                 mainIdx++;
@@ -596,7 +597,23 @@ class MainModel {
             }
             return false;
         });
-        return filteredArray.length === targetArray.length;
+
+        // Check for sequentially incrementing indices
+        if (filteredArray.length === targetArray.length) {
+            const filteredArrayIdx = [];
+            let i = 0;
+            while (i < filteredArray.length) {
+                filteredArrayIdx.push(mainArray.indexOf(filteredArray[i]));
+                if (filteredArrayIdx.length > 1 && filteredArrayIdx.at(-1) === 1 + filteredArrayIdx.at(-2)) {
+                    bReturn = true;
+                }
+                i++;
+            }
+            if (filteredArrayIdx.length === 1) {
+                bReturn = true;
+            }
+        }
+        return bReturn;
     }
 
     async updateComboPagination ( event, buttonID, targetPage ) {
