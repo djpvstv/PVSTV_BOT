@@ -67,6 +67,19 @@ class FindComboController extends EventEmitter {
         }
     }
 
+    cb_setSelectedComboFromClick(event) {
+        const closestParent = event.srcElement.closest(".outer-accordion-item");
+        if (!(closestParent)) return;
+
+        const gameAndCombo = closestParent.querySelector(".outer-accordion-header").id.replace("combo_","").replace("_heading","");
+        const parts = gameAndCombo.split("").reverse().join("").split("_");
+        const comboNum = parseInt(parts.shift().split("").reverse().join(""));
+        const game = parts.join("_").split("").reverse().join("");
+
+        this.#contextSelect.combo = comboNum;
+        this.#contextSelect.game = game;
+    }
+
     cb_handleRightClick (event) {
         this.#contextShowing = true;
         const closestParent = event.srcElement.closest(".outer-accordion-item");

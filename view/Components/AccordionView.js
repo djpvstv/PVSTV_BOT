@@ -1,4 +1,5 @@
 const bootstrap = require('../../Bootstrap/js/bootstrap.bundle.min');
+const bootstrapBundleMin = require('../../Bootstrap/js/bootstrap.bundle.min');
 const utility = require('../../Utility');
 
 const AccordionTypes = Object.freeze({
@@ -21,6 +22,7 @@ class AccordionView {
     #collapseList = null;
     #playAllID = "";
     #filterID = '';
+    #tooltipList = null;
 
     // I need a finite number of things that can be open in an accordion
     // This is a performance limitation
@@ -39,6 +41,7 @@ class AccordionView {
                 this.#filterID = "comboSlippi_filter_combos";
                 break;
         }
+        this.#tooltipList = [];
         this.#appState = appState;
         this.#controller = controller;
         this.#type = type;
@@ -79,6 +82,14 @@ class AccordionView {
         }
     }
 
+    destroyPreviousTooltips () {
+        let i = 0;
+        while (i < this.#tooltipList.length) {
+            this.#tooltipList[i].dispose();
+        }
+        this.#tooltipList = [];
+    }
+
     createLimitedBootstrapObjects () {
         this.#idList.forEach((ID) => {
             document.getElementById(ID).addEventListener("click", async (evt) => {
@@ -89,6 +100,13 @@ class AccordionView {
                 }
                 const collapsedIDStruct = this.#collapseIDMap.get(ID);
                 const collapseID = collapsedIDStruct.collapseID;
+                const isPlayButtonEvt = evt.srcElement.closest(".play-button-div");
+                if (isPlayButtonEvt) {
+                    evt.stopPropagation();
+                    this.#controller.cb_setSelectedComboFromClick(evt);
+                    this.#controller.cb_playCombo();
+                    return;
+                }
 
                 const isMeatballsEvt = evt.srcElement.closest(".meatballs-div");
                 if (isMeatballsEvt) {
@@ -122,6 +140,14 @@ class AccordionView {
                 }
             });
         }, this);
+    }
+
+    createLimitedTooltipObjects () {
+        // For all tooltips that exist, initialize
+        const tooltipTargets = document.querySelectorAll('[data-toggle="tooltip"]');
+        if (tooltipTargets.length > 0) {
+            this.#tooltipList = [...tooltipTargets].map(tooltipTriggerEl => new bootstrapBundleMin.Tooltip(tooltipTriggerEl));
+        }
     }
 
     async render (event) {
@@ -397,6 +423,7 @@ class AccordionView {
     }
 
     async renderCombos (event) {
+        this.destroyPreviousTooltips();
         this.destroyPreviousBootstrapCollapseObjects();
         const bUsePagination = event.needsPagination;
         const numCombos = event.combos.length;
@@ -534,6 +561,7 @@ class AccordionView {
             const moveHeaderButtonID = moveHeaderID + "_button";
             const moveCollapseID = "combo_" + comboID + "_collapse";
             const moveMeatballsButtonID = "combo_" + comboID + "_meatballs";
+            const movePlayButtonID = "combo_" + comboID + "_play_button";
             this.#idList.push(moveHeaderID);
             this.#collapseIDMap.set(moveHeaderID, {
                 collapseID: moveCollapseID,
@@ -552,7 +580,10 @@ class AccordionView {
                                 <p class="p-move">${playerTag} combos</p>
                                 <img src="./img/si_${opponentColorString}.png" width="20" height="20">
                                 <p class="p-move">${opponentTag} on ${utility.getStageNameFromID(stageID)} (${combo.combo.moves.length} moves)</p>
-                                <div id="${moveMeatballsButtonID}" class="meatballs-div">
+                                <div id="${movePlayButtonID}" class="play-button-div" data-toggle="tooltip" data-placement="top" title="Play this combo">
+                                    <img src="./Bootstrap/svg/play-fill.svg" class="play-button-icon">
+                                </div>
+                                <div id="${moveMeatballsButtonID}" class="meatballs-div" data-toggle="tooltip" data-placement="top" title="Combo options">
                                     <img src="./Bootstrap/svg/three-dots.svg" class="meatballs-icon">
                                 </div>
                             </button>
@@ -583,6 +614,7 @@ class AccordionView {
         accordDiv.innerHTML = skeletonInternal;
 
         this.createLimitedBootstrapObjects();
+        this.createLimitedTooltipObjects();
         document.getElementById(this.#outerAccordionID).scrollTop = 0;
     }
 

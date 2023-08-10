@@ -551,11 +551,17 @@ li.context-item > span {
     margin: 0.25rem 1rem 0.25rem 1rem;
 }
 
+.play-button-div,
 .meatballs-div {
     position: absolute;
     right: 2rem;
 }
 
+.play-button-div {
+    right: 4.5rem;
+}
+
+.play-button-icon,
 .meatballs-icon {
     height: 2rem;
     width: 2rem;
