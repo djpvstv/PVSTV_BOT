@@ -2,6 +2,8 @@ const path = require('path');
 const { join } = require('path');
 const mainModulePath = path.join(__dirname, "..", "model", "MainModel");
 const MainModel = require(mainModulePath);
+const fs = require('fs/promises');
+const comboTestDataJSONPath = path.join(__dirname, "testFiles", "comboTestData.json");
 
 const model = new MainModel({});
 
@@ -18,4 +20,81 @@ test("Validate Consecutive Subset Method", () => {
 
     // Call, validate
     expect(model._hasConsecutiveSubset(mainArray, targetArray)).toBe(false);
+});
+
+test("Check Minimum Moves Filter", async () => {
+    // Setup
+    const comboData = await fs.readFile(comboTestDataJSONPath);
+    model.setComboInfo(JSON.parse(comboData.toString()));
+
+    const minNumMoves = 3;
+
+    // Add minimum moves filter
+    model.setComboFilterParams({
+        minNumMoves: minNumMoves,
+        maxNumMoves: 99,
+        doesKill: false,
+        is_manually_hidden: false,
+        ruleList: []
+    });
+
+    // Call
+    const filteredData = model.getFileredCombosFromAll();
+
+    // Verify We Filtered Correctly
+    expect(filteredData.length).toBe(1);
+    expect(filteredData[0].combo.moves.length).toBeGreaterThanOrEqual(minNumMoves);
+
+});
+
+test("Check Maximum Moves Filter", async () => {
+    // Setup
+    const comboData = await fs.readFile(comboTestDataJSONPath);
+    model.setComboInfo(JSON.parse(comboData.toString()));
+
+    const maxNumMoves = 3;
+
+    // Add maximum moves filter
+    model.setComboFilterParams({
+        minNumMoves: 0,
+        maxNumMoves: maxNumMoves,
+        doesKill: false,
+        is_manually_hidden: false,
+        ruleList: []
+    });
+
+    // Call
+    const filteredData = model.getFileredCombosFromAll();
+
+    // Verify We Filtered Correctly
+    expect(filteredData.length).toBe(8);
+    expect(filteredData[0].combo.moves.length).toBeLessThanOrEqual(maxNumMoves);
+
+});
+
+test("Check Character Filter", async () => {
+    // Setup
+    const comboData = await fs.readFile(comboTestDataJSONPath);
+    model.setComboInfo(JSON.parse(comboData.toString()));
+
+    const hasCharacter = "1";
+
+    // Add character filter
+    model.setComboFilterParams({
+        minNumMoves: 0,
+        maxNumMoves: 99,
+        doesKill: false,
+        is_manually_hidden: false,
+        ruleList: [{
+            flavorType: 4,
+            option: hasCharacter
+        }]
+    });
+
+    // Call
+    const filteredData = model.getFileredCombosFromAll();
+
+    // Verify We Filtered Correctly
+    expect(filteredData.length).toBe(1);
+    expect(filteredData[0].opponent_char).toBe(hasCharacter);
 });

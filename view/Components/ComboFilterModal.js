@@ -369,7 +369,7 @@ class ComboFilterModal {
         }
 
         // For all tooltips that exist, initialize
-        const tooltipTargets = document.querySelectorAll('[data-toggle="tooltip"]');
+        const tooltipTargets = document.querySelectorAll('[data-toggle="tooltip_filterModal"]');
         if (tooltipTargets.length > 0) {
             // Also need to kill previous list
             this.#tooltipList = [...tooltipTargets].map(tooltipTriggerEl => new bootstrapBundleMin.Tooltip(tooltipTriggerEl));

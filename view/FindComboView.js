@@ -94,6 +94,8 @@ class FindComboView extends ParseViewBase {
         const buttonRow = document.createElement("div");
         buttonRow.classList.add("row");
         panelDiv.appendChild(buttonRow);
+        this.#foundCombosAccordion.attachBottomButtons({bShowAll: false});
+        this.#foundCombosAccordion.attachBottomButtonCallbacks();
 
         this.attachCallbacks();
     }

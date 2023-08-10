@@ -45,6 +45,14 @@ class MainModel {
         this.createWorker();
     }
 
+    setComboInfo (comboInfo) {
+        this.#comboInfo = [...comboInfo];
+    }
+
+    setComboFilterParams(filterParams) {
+        this.#comboFilterParams = filterParams;
+    }
+
     async checkPaths () {
         // Set Up AppData
         let actualAppDataPath, found;
@@ -183,6 +191,7 @@ class MainModel {
     async browserForSlippiPath (event, source) {
         const appDataPath = app.getPath("appData");
         const filename = await dialog.showOpenDialog({
+            title: "Select Slippi executable",
             defaultPath: appDataPath,
             properties: [
                 "openFile"
@@ -213,6 +222,7 @@ class MainModel {
         const appDataPath = app.getPath("appData");
         const documentsPath = app.getPath("documents");
         const filename = await dialog.showOpenDialog({
+            title: "Select valid Melee ISO",
             defaultPath: documentsPath,
             properties: [
                 "openFile"
@@ -332,6 +342,7 @@ class MainModel {
     async processDirectoryForSlippiFilesWithUI ( event, buttonID ) {
 
         const file = await dialog.showOpenDialog({
+            title: "Choose a directory for Slippi replays",
             properties: [
                 "openDirectory"
             ]
@@ -449,7 +460,7 @@ class MainModel {
     }
 
     handleProcessedComboParse (data) {
-        this.#comboFilterParams = [];
+        this.setComboFilterParams([]);
         this.#isFilterOn = false;
         this.#fileComboMap.clear();
         const parsedData = JSON.parse(data.args.replaceAll('\\', '/').replaceAll('/"','\\\"'));
@@ -489,7 +500,7 @@ class MainModel {
 
     async updateComboFilterRules ( event, buttonID, rules ) {
         this.#isFilterOn = true;
-        this.#comboFilterParams = rules;
+        this.setComboFilterParams(rules);
 
         const tempCombos = this.getFileredCombosFromAll();
         const numCombos = tempCombos.length;
@@ -503,7 +514,7 @@ class MainModel {
         const page = 1;
 
         this.#usePagination[2] = bNeedsPagination;
-        if (updateComboInfo) this.#comboInfo = [...comboData];
+        if (updateComboInfo) this.setComboInfo(comboData);
         if (bNeedsPagination) {
             const startIdx = this.#paginationLowerLimit * (page-1);
             comboData = comboData.slice(startIdx, startIdx + this.#paginationLowerLimit);
@@ -530,7 +541,7 @@ class MainModel {
         if (!Object.prototype.hasOwnProperty.call(rules, "ruleList") && rules.length === 0) {
             tempCombos = allCombos;
         } else {
-            tempCombos = allCombos.filter((combo) => {
+            const filteredCombos = allCombos.filter((combo) => {
                 let isValid = true;
                 if (rules.minNumMoves > combo.combo.moves.length) isValid = false;
                 
@@ -553,9 +564,11 @@ class MainModel {
 
                         switch (parseInt(rules.ruleList[i].flavorType)) {
                             case 0:
+                                // Minimum Moves
                                 if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
                                 break;
                             case 1:
+                                // Maximum Moves
                                 if (combo.combo.moves.filter(m => m.actionID === id).length === 0) isValid = false;
                                 break;
                             case 2:
@@ -567,16 +580,20 @@ class MainModel {
                                 if (comboDamage >= parseFloat(option)) isValid = false;
                                 break;
                             case 4:
+                                // Has Opponent Character
                                 if (!option.includes(parseInt(combo.opponent_char))) isValid = false;
                                 break;
                             case 5:
+                                // Has Stage
                                 if (!(option.includes(parseInt(combo.stage)))) isValid = false;
                                 break;
                             case 6:
+                                // Includes Combo String
                                 comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
                                 if (!(this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
                                 break;
                             case 7:
+                                // Exclude Combo String
                                 comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
                                 if ((this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
                                 break;
@@ -587,6 +604,8 @@ class MainModel {
 
                 return isValid;
             });
+
+            tempCombos = filteredCombos;
         }
 
         return tempCombos;
@@ -635,13 +654,15 @@ class MainModel {
             const numCombos = parsedData.length;
             const totalNumPages = Math.ceil(numCombos / this.#paginationLowerLimit); 
             const startIdx = this.#paginationLowerLimit * (targetPage-1);
+            let bNeedsPagination = true;
+            if (totalNumPages === 1) bNeedsPagination = false;
 
             parsedData = parsedData.slice(startIdx, startIdx + this.#paginationLowerLimit);
             this.#win.webContents.send("findComboEvent", {
                 eventName: "updatePanelTwoAccordionJustAccordion",
                 args: {
                     combos: parsedData,
-                    needsPagination: true,
+                    needsPagination: bNeedsPagination,
                     page: targetPage,
                     totalPage: totalNumPages,
                     hitsThisPage: parsedData.length,
@@ -940,7 +961,118 @@ class MainModel {
                     break;
             }
         });
-      }
+    }
+
+    async showExport (event) {
+        const tempCombos = this.getFileredCombosFromAll();
+
+        try {
+            const results = await dialog.showSaveDialog(this.#win, {
+                "title": "Save combos as...",
+                "buttonLabel": "Save Combos",
+                "filters": [
+                    {name: "JSON files", "extensions": ["json"]}
+                ]
+            });
+
+            if (!results.canceled) {
+                const filePath = results.filePath;
+
+                this.writeWorkerLog("Export combos", JSON.stringify({
+                    filePath: filePath
+                }));
+
+                await fs.writeFile(filePath, JSON.stringify(tempCombos, null, 2));
+
+            }
+        } catch (err) {
+            console.log("could not export combos, here's why:");
+            console.log(err);
+        }
+    }
+
+    async showImport (event) {
+        try {
+            // Get file for import
+            const filename = await dialog.showOpenDialog({
+                title: "Import combos from JSON file",
+                properties: [
+                    
+                    "openFile"
+                ],
+                filters: [
+                    {name: 'JSON Files', extensions: ['json']}
+                ]
+            });
+
+            if (!filename.canceled) {
+                const importPath = filename.filePaths[0];
+                try {
+                    const importData = await fs.readFile(importPath);
+                    const validCombos = this.validateInputCombos(JSON.parse(importData.toString()));
+
+                    this.setComboInfo(validCombos);
+                    this.updateComboPagination(null,null,1);
+
+                } catch (err) {
+                    await dialog.showMessageBox(this.#win, {
+                        "title": "Cannot read import JSON file",
+                        "message": `Could not read the selected JSON file.\nError: ${err}`,
+                        "type": "error"
+                    });
+                }
+            }
+
+        } catch (err) {
+            console.log("could not import combos, here's why:");
+            console.log(err);
+        }
+    }
+
+    validateInputCombos (combos) {
+        let i = 0;
+        const filteredCombos = combos.filter((combo) => {
+            let isValid = true;
+            // Top level combo properties
+            if (!Object.prototype.hasOwnProperty.call(combo, 'combo')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'comboNum')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'file')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'is_manually_hidden')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'notes')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'opponent_char')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'opponent_color')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'opponent_tag')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'stage')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'target_char')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'target_color')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'target_tag')) isValid = false;
+
+            // combo properties
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'didKill')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'endFrame')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'endPercent')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'moves')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'startFrame')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'startPercent')) isValid = false;
+
+            // Move properties
+            let j = 0;
+            while (j < combo.combo.moves.length) {
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'actionID')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'damage')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'frame')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'hitCount')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'moveID')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'xPos')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'yPos')) isValid = false;
+                j++;
+            }
+
+            return isValid;
+        });
+
+        return filteredCombos;
+    }
 
 }
 

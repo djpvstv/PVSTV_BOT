@@ -30,7 +30,7 @@
 	"target_char": "23",
 	"target_color": "0",
 	"opponent_tag": "PVSTV＃1",
-	"opponent_char": "23",
+	"opponent_char": "1",
 	"opponent_color": "4",
 	"is_manually_hidden": false,
 	"notes": ""
@@ -338,4 +338,4 @@
 	"opponent_color": "4",
 	"is_manually_hidden": false,
 	"notes": ""
-}
+}]

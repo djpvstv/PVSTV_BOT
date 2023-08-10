@@ -33,8 +33,9 @@
 }
 
 :root {
-    --g1: rgb(98,0,234);
+    --g1: rgb(98, 0, 234);
     --g2: rgb(11, 8, 175);
+    --g1-brighter: rgb(146, 69, 255);
     --g2-fade: rgba(11, 8, 175, 0.3);
     --g2-less-fade: rgba(11, 8, 175, 0.6);
     --highlighted-text-color: rgb(0,0,0);
@@ -544,7 +545,8 @@ li.context-item > span {
 }
 
 .btn-dark.btn-filter:hover {
-    background-color: var(--darkness-bg);
+    background-color: var(--g2-fade);
+    border-color: var(--g1-brighter);
 }
 
 .p-move {
@@ -559,6 +561,26 @@ li.context-item > span {
 
 .play-button-div {
     right: 4.5rem;
+}
+
+.btn-export,
+.btn-import {
+    border: solid 2px var(--bs-border-color);
+    height: 38px;
+}
+
+.btn-export:hover,
+.btn-import:hover {
+    border-color: var(--bs-regular-text);
+}
+
+.import-button {
+    margin-top: 5px;
+}
+
+.import-export-button {
+    height: 1rem;
+    width: 1rem;
 }
 
 .play-button-icon,
@@ -670,7 +692,7 @@ li.context-item > span {
 }
 
 .filter-play-buttons > .d-gap {
-    margin-left: calc(50% - 72px);
+    margin-left: calc(50% - 125px);
 }
 
 #comboSlippi_settings_button,

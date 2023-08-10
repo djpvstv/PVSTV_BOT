@@ -90,7 +90,7 @@ class HasStageRule extends RuleBase {
         let j = 0;
         this.option.forEach(f => {
             imageDiv = `${imageDiv}
-            <div class="char-box" value="${f}" data-toggle="tooltip" data-placement="top" title="${Utility.getStageNameFromID(f)}">
+            <div class="char-box" value="${f}" data-toggle="tooltip_filterModal" data-placement="top" title="${Utility.getStageNameFromID(f)}">
                 <img class="gliphicon" src="./img/st_${f}.png" width="20" height="20">
                 <svg class="x">
                     <image href="./Bootstrap/svg/x.svg" heigth="20" width="20">

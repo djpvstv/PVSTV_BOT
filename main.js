@@ -140,6 +140,12 @@ ipcMain.on("clientEvent", async (event, args) => {
             case "restoreCombos":
                 model.restoreCombos(event, extraData);
                 break;
+            case "showExport":
+                model.showExport(event, args.sourceID);
+                break;
+            case "showImport":
+                model.showImport(event, args.sourceID);
+                break;
             default:
                 console.log(`Cannot match event ${args.eventName}`);
         }

@@ -51,8 +51,6 @@ class ParseViewBase {
             }
             
             inputDiv.classList.add("is-invalid");
-            console.log("Error from Server: " + errorMsg);
-
             
             // Early return - Invalid directory
             return;
