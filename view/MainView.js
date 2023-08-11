@@ -54,6 +54,8 @@ class MainView extends EventEmitter {
                             this.#appState.setHitsPerPage(event.args.paginationLowerLimit);
                             this.#appState.setFrameLeniency(event.args.frameLeniency);
                             this.#appState.setBatchSize(event.args.batchSize);
+                            this.#appState.setPreReplayFrames(event.args.preReplayFrames);
+                            this.#appState.setPostReplayFrames(event.args.postReplayFrames);
                         });
                         break;
                     case "updatePanelOneDirectoryInput":

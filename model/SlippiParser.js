@@ -53,7 +53,7 @@ function processDirectoryForParse (files, dir, chunkSize) {
 }
 
 // Recursively call this to allow a stop in-between loops
-function processComboByTagChunk (i, chunkSize, argFiles, tag) {
+function processComboByTagChunk (i, chunkSize, argFiles, tag, frameLeniency) {
     if (shouldWorkerStop()) {
         parentPort.postMessage({
             eventName: 'halted'
@@ -61,14 +61,14 @@ function processComboByTagChunk (i, chunkSize, argFiles, tag) {
     } else {
         const chunk = argFiles.slice(i, i + chunkSize);
         // Find Combos by Tag
-        eng.comboParseByTag(chunk, tag);
+        eng.comboParseByTag(chunk, tag, frameLeniency);
         const numCompleted = i + chunk.length;
         const data = {};
         data.eventName = "findCombosUpdateCount";
         data.count = numCompleted;
         parentPort.postMessage(data);
         if (i + chunkSize < argFiles.length) {
-            setImmediate(processComboByTagChunk, i+chunkSize, chunkSize, argFiles, tag);
+            setImmediate(processComboByTagChunk, i+chunkSize, chunkSize, argFiles, tag, frameLeniency);
         } else {
             // Finish loop
             const retData = eng.comboPrint();
@@ -81,7 +81,7 @@ function processComboByTagChunk (i, chunkSize, argFiles, tag) {
     }
 }
 
-function processDirectoryForCombosByTag (files, dir, chunkSize, tag) {
+function processDirectoryForCombosByTag (files, dir, chunkSize, tag, frameLeniency) {
     if (files.length > 0) {
         eng.resetCombo();
 
@@ -90,12 +90,12 @@ function processDirectoryForCombosByTag (files, dir, chunkSize, tag) {
             argFiles.push(dir + '\\\\' + file);
         });
 
-        processComboByTagChunk(0, chunkSize, argFiles, tag);
+        processComboByTagChunk(0, chunkSize, argFiles, tag, frameLeniency);
     }
 }
 
 // Recursively call this to allow a stop in-between loops
-function processComboByCharChunk (i, chunkSize, argFiles, char) {
+function processComboByCharChunk (i, chunkSize, argFiles, char, frameLeniency) {
     if (shouldWorkerStop()) {
         parentPort.postMessage({
             eventName: 'halted'
@@ -103,14 +103,14 @@ function processComboByCharChunk (i, chunkSize, argFiles, char) {
     } else {
         const chunk = argFiles.slice(i, i + chunkSize);
         // Find Combos by Tag
-        eng.comboParseByChar(chunk, char);
+        eng.comboParseByChar(chunk, char, frameLeniency);
         const numCompleted = i + chunk.length;
         const data = {};
         data.eventName = "findCombosUpdateCount";
         data.count = numCompleted;
         parentPort.postMessage(data);
         if (i + chunkSize < argFiles.length) {
-            setImmediate(processComboByCharChunk, i+chunkSize, chunkSize, argFiles, char);
+            setImmediate(processComboByCharChunk, i+chunkSize, chunkSize, argFiles, char, frameLeniency);
         } else {
             // Finish loop
             const retData = eng.comboPrint();
@@ -123,7 +123,7 @@ function processComboByCharChunk (i, chunkSize, argFiles, char) {
     }
 }
 
-function processDirectoryForCombosByChar (files, dir, chunkSize, char) {
+function processDirectoryForCombosByChar (files, dir, chunkSize, char, frameLeniency) {
     if (files.length > 0) {
         eng.resetCombo();
 
@@ -132,12 +132,12 @@ function processDirectoryForCombosByChar (files, dir, chunkSize, char) {
             argFiles.push(dir + '\\\\' + file);
         });
 
-        processComboByCharChunk(0, chunkSize, argFiles, char);
+        processComboByCharChunk(0, chunkSize, argFiles, char, frameLeniency);
     }
 }
 
 // Recursively call this to allow a stop in-between loops
-function processComboByCharColorChunk (i, chunkSize, argFiles, char, color) {
+function processComboByCharColorChunk (i, chunkSize, argFiles, char, color, frameLeniency) {
     if (shouldWorkerStop()) {
         parentPort.postMessage({
             eventName: 'halted'
@@ -145,14 +145,14 @@ function processComboByCharColorChunk (i, chunkSize, argFiles, char, color) {
     } else {
         const chunk = argFiles.slice(i, i + chunkSize);
         // Find Combos by Tag
-        eng.comboParseByCharColor(chunk, char, color);
+        eng.comboParseByCharColor(chunk, char, color, frameLeniency);
         const numCompleted = i + chunk.length;
         const data = {};
         data.eventName = "findCombosUpdateCount";
         data.count = numCompleted;
         parentPort.postMessage(data);
         if (i + chunkSize < argFiles.length) {
-            setImmediate(processComboByCharColorChunk, i+chunkSize, chunkSize, argFiles, char, color);
+            setImmediate(processComboByCharColorChunk, i+chunkSize, chunkSize, argFiles, char, color, frameLeniency);
         } else {
             // Finish loop
             const retData = eng.comboPrint();
@@ -165,7 +165,7 @@ function processComboByCharColorChunk (i, chunkSize, argFiles, char, color) {
     }
 }
 
-function processDirectoryForCombosByCharColor (files, dir, chunkSize, char, color) {
+function processDirectoryForCombosByCharColor (files, dir, chunkSize, char, color, frameLeniency) {
     if (files.length > 0) {
         eng.resetCombo();
 
@@ -174,12 +174,12 @@ function processDirectoryForCombosByCharColor (files, dir, chunkSize, char, colo
             argFiles.push(dir + '\\\\' + file);
         });
 
-        processComboByCharColorChunk(0, chunkSize, argFiles, char, color);
+        processComboByCharColorChunk(0, chunkSize, argFiles, char, color, frameLeniency);
     }
 }
 
 // Recursively call this to allow a stop in-between loops
-function processComboByCharTagChunk (i, chunkSize, argFiles, char, tag) {
+function processComboByCharTagChunk (i, chunkSize, argFiles, char, tag, frameLeniency) {
     if (shouldWorkerStop()) {
         parentPort.postMessage({
             eventName: 'halted'
@@ -187,14 +187,14 @@ function processComboByCharTagChunk (i, chunkSize, argFiles, char, tag) {
     } else {
         const chunk = argFiles.slice(i, i + chunkSize);
         // Find Combos by Tag
-        eng.comboParseByCharTag(chunk, char, tag);
+        eng.comboParseByCharTag(chunk, char, tag, frameLeniency);
         const numCompleted = i + chunk.length;
         const data = {};
         data.eventName = "findCombosUpdateCount";
         data.count = numCompleted;
         parentPort.postMessage(data);
         if (i + chunkSize < argFiles.length) {
-            setImmediate(processComboByCharTagChunk, i+chunkSize, chunkSize, argFiles, char, tag);
+            setImmediate(processComboByCharTagChunk, i+chunkSize, chunkSize, argFiles, char, tag, frameLeniency);
         } else {
             // Finish loop
             const retData = eng.comboPrint();
@@ -207,7 +207,7 @@ function processComboByCharTagChunk (i, chunkSize, argFiles, char, tag) {
     }
 }
 
-function processDirectoryForCombosByCharTag (files, dir, chunkSize, char, tag) {
+function processDirectoryForCombosByCharTag (files, dir, chunkSize, char, tag, frameLeniency) {
     if (files.length > 0) {
         eng.resetCombo();
 
@@ -216,12 +216,12 @@ function processDirectoryForCombosByCharTag (files, dir, chunkSize, char, tag) {
             argFiles.push(dir + '\\\\' + file);
         });
 
-        processComboByCharTagChunk(0, chunkSize, argFiles, char, tag);
+        processComboByCharTagChunk(0, chunkSize, argFiles, char, tag, frameLeniency);
     }
 }
 
 // Recursively call this to allow a stop in-between loops
-function processComboByCharTagColorChunk (i, chunkSize, argFiles, char, tag, color) {
+function processComboByCharTagColorChunk (i, chunkSize, argFiles, char, tag, color, frameLeniency) {
     if (shouldWorkerStop()) {
         parentPort.postMessage({
             eventName: 'halted'
@@ -229,14 +229,14 @@ function processComboByCharTagColorChunk (i, chunkSize, argFiles, char, tag, col
     } else {
         const chunk = argFiles.slice(i, i + chunkSize);
         // Find Combos by Tag
-        eng.comboParseByCharTagColor(chunk, char, tag, color);
+        eng.comboParseByCharTagColor(chunk, char, tag, color, frameLeniency);
         const numCompleted = i + chunk.length;
         const data = {};
         data.eventName = "findCombosUpdateCount";
         data.count = numCompleted;
         parentPort.postMessage(data);
         if (i + chunkSize < argFiles.length) {
-            setImmediate(processComboByCharTagColorChunk, i+chunkSize, chunkSize, argFiles, char, tag, color);
+            setImmediate(processComboByCharTagColorChunk, i+chunkSize, chunkSize, argFiles, char, tag, color, frameLeniency);
         } else {
             // Finish loop
             const retData = eng.comboPrint();
@@ -249,7 +249,7 @@ function processComboByCharTagColorChunk (i, chunkSize, argFiles, char, tag, col
     }
 }
 
-function processDirectoryForCombosByCharTagColor (files, dir, chunkSize, char, tag, color) {
+function processDirectoryForCombosByCharTagColor (files, dir, chunkSize, char, tag, color, frameLeniency) {
     if (files.length > 0) {
         eng.resetCombo();
 
@@ -258,7 +258,7 @@ function processDirectoryForCombosByCharTagColor (files, dir, chunkSize, char, t
             argFiles.push(dir + '\\\\' + file);
         });
 
-        processComboByCharTagColorChunk(0, chunkSize, argFiles, char, tag, color);
+        processComboByCharTagColorChunk(0, chunkSize, argFiles, char, tag, color, frameLeniency);
     }
 }
 
@@ -268,19 +268,19 @@ parentPort.on('message', (message) => {
             processDirectoryForParse(message.files, message.dir, message.chunk);
             break;
         case 'processForComboTag':
-            processDirectoryForCombosByTag(message.files, message.dir, message.chunk, message.tag);
+            processDirectoryForCombosByTag(message.files, message.dir, message.chunk, message.tag, message.frameLeniency);
             break;
         case 'processForComboChar':
-            processDirectoryForCombosByChar(message.files, message.dir, message.chunk, message.char);
+            processDirectoryForCombosByChar(message.files, message.dir, message.chunk, message.char, message.frameLeniency);
             break;
         case 'processForComboCharColor':
-            processDirectoryForCombosByCharColor(message.files, message.dir, message.chunk, message.char, message.color);
+            processDirectoryForCombosByCharColor(message.files, message.dir, message.chunk, message.char, message.color, message.frameLeniency);
             break;
         case 'processForComboCharTag':
-            processDirectoryForCombosByCharTag(message.files, message.dir, message.chunk, message.char, message.tag);
+            processDirectoryForCombosByCharTag(message.files, message.dir, message.chunk, message.char, message.tag, message.frameLeniency);
             break;
         case 'processForComboCharTagColor':
-            processDirectoryForCombosByCharTagColor(message.files, message.dir, message.chunk, message.char, message.tag, message.color);
+            processDirectoryForCombosByCharTagColor(message.files, message.dir, message.chunk, message.char, message.tag, message.color, message.frameLeniency);
             break;
         case 'isCancelled':
             parentPort.postMessage({

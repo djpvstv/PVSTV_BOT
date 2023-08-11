@@ -1,4 +1,5 @@
 const bootstrap = require('../../Bootstrap/js/bootstrap.bundle.min');
+const bootstrapBundleMin = require('../../Bootstrap/js/bootstrap.bundle.min');
 const utility = require('../../Utility');
 
 const AccordionTypes = Object.freeze({
@@ -20,7 +21,10 @@ class AccordionView {
     #collapseMap = null;
     #collapseList = null;
     #playAllID = "";
-    #filterID = '';
+    #filterID = "";
+    #importID = "";
+    #exportID = "";
+    #tooltipList = null;
 
     // I need a finite number of things that can be open in an accordion
     // This is a performance limitation
@@ -37,8 +41,11 @@ class AccordionView {
                 this.#paginationID = "comboSlippi_pagination_div";
                 this.#playAllID = "comboSlippi_play_all_combos";
                 this.#filterID = "comboSlippi_filter_combos";
+                this.#importID = "comboSlippi_import_combos";
+                this.#exportID = "comboSlippi_export_combos";
                 break;
         }
+        this.#tooltipList = [];
         this.#appState = appState;
         this.#controller = controller;
         this.#type = type;
@@ -79,6 +86,15 @@ class AccordionView {
         }
     }
 
+    destroyPreviousTooltips () {
+        let i = 0;
+        while (i < this.#tooltipList.length) {
+            if (this.#tooltipList[i]._isEnabled) this.#tooltipList[i].dispose();
+            i++;
+        }
+        this.#tooltipList = [];
+    }
+
     createLimitedBootstrapObjects () {
         this.#idList.forEach((ID) => {
             document.getElementById(ID).addEventListener("click", async (evt) => {
@@ -89,6 +105,13 @@ class AccordionView {
                 }
                 const collapsedIDStruct = this.#collapseIDMap.get(ID);
                 const collapseID = collapsedIDStruct.collapseID;
+                const isPlayButtonEvt = evt.srcElement.closest(".play-button-div");
+                if (isPlayButtonEvt) {
+                    evt.stopPropagation();
+                    this.#controller.cb_setSelectedComboFromClick(evt);
+                    this.#controller.cb_playCombo();
+                    return;
+                }
 
                 const isMeatballsEvt = evt.srcElement.closest(".meatballs-div");
                 if (isMeatballsEvt) {
@@ -122,6 +145,14 @@ class AccordionView {
                 }
             });
         }, this);
+    }
+
+    createLimitedTooltipObjects () {
+        // For all tooltips that exist, initialize
+        const tooltipTargets = document.querySelectorAll('[data-toggle="tooltip_accordion"]');
+        if (tooltipTargets.length > 0) {
+            this.#tooltipList = [...tooltipTargets].map(tooltipTriggerEl => new bootstrapBundleMin.Tooltip(tooltipTriggerEl));
+        }
     }
 
     async render (event) {
@@ -267,29 +298,17 @@ class AccordionView {
                 pageSkeletonInternal = `
                 <nav>
                     <ul class="pagination justify-content-center">
-                        <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
-                            <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
-                        </li>
                         <li id="${this.#paginationID + "_left"}" class="page-item${activePage === 1 ? ' disabled' : ''}"><a class="page-link" href="#">1</a></li>
                         <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' disabled' : ''}"><a class="page-link" href="#">2</a></li>
-                        <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === 2 ? ' disabled' : ''}">
-                            <a class="page-link" href="#"${activePage === 3 ? ' aria-disabled="true"' : ''}>Next</a>
-                        </li>
                     </ul>
                 </nav>`;
             } else if (totalPages === 3) {
                 pageSkeletonInternal = `
                 <nav>
                     <ul class="pagination justify-content-center">
-                        <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
-                            <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
-                        </li>
                         <li id="${this.#paginationID + "_left"}" class="page-item${activePage === 1 ? ' disabled' : ''}"><a class="page-link" href="#">1</a></li>
                         <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' disabled' : ''}"><a class="page-link" href="#">2</a></li>
                         <li id="${this.#paginationID + "_right"}" class="page-item${activePage === 3 ? ' disabled' : ''}"><a class="page-link" href="#">3</a></li>
-                        <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === 3 ? ' disabled' : ''}">
-                            <a class="page-link" href="#"${activePage === 3 ? ' aria-disabled="true"' : ''}>Next</a>
-                        </li>
                     </ul>
                 </nav>`;
             } else {
@@ -299,9 +318,6 @@ class AccordionView {
                 pageSkeletonInternal = `
                 <nav>
                     <ul class="pagination justify-content-center">
-                        <li id="${this.#paginationID + "_backwards"}" class="page-item${activePage === 1 ? ' disabled' : ''}">
-                            <a class="page-link" href="#" tabindex="-1"${activePage === 1 ? ' aria-disabled="true"' : ''}>Previous</a>
-                        </li>
                         ${leftDistance <= 1 ? `
                             <li id="${this.#paginationID + "_left"}"  class="page-item${activePage === 1 ? ' active' : ''}"><a class="page-link" href="#">1</a></li>
                             <li id="${this.#paginationID + "_center"}" class="page-item${activePage === 2 ? ' active' : ''}"><a class="page-link" href="#">2</a></li>
@@ -323,54 +339,108 @@ class AccordionView {
                             <li class="page-item disabled page-item-elipsis"><a class="page-link" href="#" aria-disaled="true">...</a></li>
                             <li id="${this.#paginationID + "_end"}"class="page-item"><a class="page-link" href="#">${String(totalPages)}</a></li>
                         `}
-                        <li id="${this.#paginationID + "_forwards"}" class="page-item${activePage === totalPages ? ' disabled' : ''}">
-                            <a class="page-link" href="#"${activePage === totalPages ? ' aria-disabled="true"' : ''}>Next</a>
-                        </li>
                     </ul>
                 </nav>`;
 
             }
             navDiv = pageSkeletonInternal;
         }
+        
+        this.attachBottomButtons({
+            bShowAll: true,
+            navDiv: navDiv,
+            hitsThisPage: hitsThisPage,
+            hitsTotal: hitsTotal
+        });
+    }
+
+    attachBottomButtons (args) {
+        const paginationID = this.#paginationID;
+        const pagDiv = document.getElementById(paginationID);
+
         let buttonDiv = '';
         if (this.#type === AccordionTypes.FINDCOMBOS) {
-            buttonDiv = `
-                <div class="d-gap justify-content-md-end">
-                    <button id="${this.#filterID}" type="button" class="btn btn-filter">Filter</button>
-                    <button id="${this.#playAllID}" type="button" class="btn btn-primary">Play All</button>
+            if (args.bShowAll) {
+                buttonDiv = `
+                    <div class="d-gap justify-content-center">
+                        <div id="${this.#importID}" class="btn btn-import" data-toggle="tooltip_accordion" data-placement="top" title="Import">
+                            <img src="./Bootstrap/svg/box-arrow-down.svg" class="import-export-button import-button">
+                        </div>
+                        <div id="${this.#exportID}" class="btn btn-export" data-toggle="tooltip_accordion" data-placement="top" title="Export">
+                            <img src="./Bootstrap/svg/box-arrow-up.svg" class="import-export-button">
+                        </div>
+                        <button id="${this.#filterID}" type="button" class="btn btn-dark btn-filter">Filter</button>
+                        <button id="${this.#playAllID}" type="button" class="btn btn-primary">Play All</button>
+                    </div>
+                `;
+            } else {
+                buttonDiv = `
+                    <div class="d-gap justify-content-center">
+                        <div id="${this.#importID}" class="btn btn-import" data-toggle="tooltip_accordion" data-placement="top" title="Import">
+                            <img src="./Bootstrap/svg/box-arrow-down.svg" class="import-export-button import-button">
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        if (args.bShowAll) {
+            pagDiv.innerHTML = `
+                <div class="row">
+                    <div class="showing-x-of-y col-md-3">
+                        Showing ${args.hitsThisPage} of (${args.hitsTotal})
+                    </div>
+                    <div class="col-md-6">
+                        ${args.navDiv}
+                    </div>
+                    <div class="col-md-3 filter-play-buttons">
+                        ${buttonDiv}
+                    </div>
+                </div>
+            `;
+        } else {
+            pagDiv.innerHTML = `
+                <div class="row">
+                    <div class="showing-x-of-y col-md-3">
+                    </div>
+                    <div class="col-md-6">
+                    </div>
+                    <div class="col-md-3 filter-play-buttons">
+                        ${buttonDiv}
+                    </div>
                 </div>
             `;
         }
+    }
 
-        pagDiv.innerHTML = `
-            <div class="row">
-                <div class="showing-x-of-y col-md-3">
-                    Showing ${hitsThisPage} of (${hitsTotal})
-                </div>
-                <div class="col-md-6">
-                    ${navDiv}
-                </div>
-                <div class="col-md-3">
-                    ${buttonDiv}
-                </div>
-            </div>
-        `;
+    attachBottomButtonCallbacks () {
+        if (document.getElementById(this.#playAllID)) {
+            document.getElementById(this.#playAllID).addEventListener("click", async (evt) => {
+                await this.#controller.cb_emitButtonEvent(this.#playAllID, "playAllCombos");
+            });
+        }
+
+        if (document.getElementById(this.#filterID)) {
+            document.getElementById(this.#filterID).addEventListener("click", async () => {
+                await this.#controller.cb_emitButtonEvent(this.#filterID, "getFilterParams");
+            });
+        }
+
+        if (document.getElementById(this.#exportID)) {
+            document.getElementById(this.#exportID).addEventListener("click", async() => {
+                await this.#controller.cb_emitButtonEvent(this.#exportID, "showExport");
+            });
+        }
+
+        if (document.getElementById(this.#importID)) {
+            document.getElementById(this.#importID).addEventListener("click", async() => {
+                await this.#controller.cb_emitButtonEvent(this.#importID, "showImport");
+            });
+        }
     }
 
     _attachPaginationCallbacks(activePage, totalPages) {
         if (activePage > 0 && totalPages > 0) {
-            document.getElementById(this.#paginationID + "_backwards").addEventListener("click", async (evt) => {
-                if (!evt.srcElement.classList.contains('disabled')) {
-                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_backwards", this.getUpdatePaginationEventName(), activePage - 1);
-                }
-            });
-
-            document.getElementById(this.#paginationID + "_forwards").addEventListener("click", async (evt) => {
-                if (!evt.srcElement.classList.contains('disabled')) {
-                    await this.#controller.cb_emitButtonEvent(this.#paginationID + "_forwards", this.getUpdatePaginationEventName(), activePage + 1);
-                }
-            });
-
             document.getElementById(this.#paginationID + "_left").addEventListener("click", async (evt) => {
                 if (!(evt.srcElement.classList.contains('disabled') || evt.srcElement.classList.contains("active"))) {
                     const labelVal = parseInt(evt.srcElement.innerHTML);
@@ -413,20 +483,11 @@ class AccordionView {
             }
         }
 
-        if (document.getElementById(this.#playAllID)) {
-            document.getElementById(this.#playAllID).addEventListener("click", async (evt) => {
-                await this.#controller.cb_emitButtonEvent(this.#playAllID, "playAllCombos");
-            });
-        }
-
-        if (document.getElementById(this.#filterID)) {
-            document.getElementById(this.#filterID).addEventListener("click", async () => {
-                await this.#controller.cb_emitButtonEvent(this.#filterID, "getFilterParams");
-            });
-        }
+        this.attachBottomButtonCallbacks();
     }
 
     async renderCombos (event) {
+        this.destroyPreviousTooltips();
         this.destroyPreviousBootstrapCollapseObjects();
         const bUsePagination = event.needsPagination;
         const numCombos = event.combos.length;
@@ -449,35 +510,50 @@ class AccordionView {
             const playerColor = combo.target_color;
             const opponentColor = combo.opponent_color;
 
+            const yesPng = `<img src="./img/si_26.png" width="20" height="20">`;
+            const noPng = `<img src="./img/no.png" width="20" height="20">`;
+
             // Loop over moves
             let moveHTML = `
             <div class="accordion-combo-data">
                 <div class="row">
-                    <div class="col col-md-3">
-                        <b>Did Kill?</b>
+                    <div class="col col-md-2" data-toggle="tooltip_accordion" data-placement="top" title="Does this combo kill? Was player ever in disadvantage state?">
+                        <b>Kills? Clean?</b>
                     </div>
-                    <div class="col col-md-3">
-                        <b>Start</b>:
+                    <div class="col col-md-2">
+                        <b>Start Frame</b>:
                     </div>
-                    <div class="col col-md-3">
-                        <b>End</b>:
+                    <div class="col col-md-2">
+                        <b>End Frame</b>:
                     </div>
-                    <div class="col col-md-3">
-                        <b>Damage</b>:
+                    <div class="col col-md-2">
+                        <b>Damage Dealt</b>:
+                    </div>
+                    <div class="col col-md-2">
+                        <b>Starting %</b>
+                    </div>
+                    <div class="col col-md-2">
+                        <b>Damage Taken</b>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col col-md-3">
-                        ${combo.combo.didKill}
+                    <div class="col col-md-2">
+                        ${combo.combo.didKill === 'true' ? yesPng : noPng} / ${combo.combo.wasInDisadvantage === 'false' ? yesPng : noPng}
                     </div>
-                    <div class="col col-md-3">
+                    <div class="col col-md-2">
                         ${combo.combo.startFrame}
                     </div>
-                    <div class="col col-md-3">
+                    <div class="col col-md-2">
                         ${combo.combo.endFrame}
                     </div>
-                    <div class="col col-md-3">
-                        ${(combo.combo.endPercent - combo.combo.startPercent).toFixed(2)}
+                    <div class="col col-md-2">
+                        ${(combo.combo.opponentEndPercent - combo.combo.opponentStartPercent).toFixed(2)}
+                    </div>
+                    <div class="col col-md-2">
+                        ${parseFloat(combo.combo.playerStartPercent).toFixed(2)}
+                    </div>
+                    <div class="col col-md-2">
+                        ${(combo.combo.playerEndPercent - combo.combo.playerStartPercent).toFixed(2)}
                     </div>
                 </div>
                 <div class="row accordion-combo-data-extra-space">
@@ -564,6 +640,7 @@ class AccordionView {
             const moveHeaderButtonID = moveHeaderID + "_button";
             const moveCollapseID = "combo_" + comboID + "_collapse";
             const moveMeatballsButtonID = "combo_" + comboID + "_meatballs";
+            const movePlayButtonID = "combo_" + comboID + "_play_button";
             this.#idList.push(moveHeaderID);
             this.#collapseIDMap.set(moveHeaderID, {
                 collapseID: moveCollapseID,
@@ -582,7 +659,10 @@ class AccordionView {
                                 <p class="p-move">${playerTag} combos</p>
                                 <img src="./img/si_${opponentColorString}.png" width="20" height="20">
                                 <p class="p-move">${opponentTag} on ${utility.getStageNameFromID(stageID)} (${combo.combo.moves.length} moves)</p>
-                                <div id="${moveMeatballsButtonID}" class="meatballs-div">
+                                <div id="${movePlayButtonID}" class="play-button-div" data-toggle="tooltip_accordion" data-placement="top" title="Play this combo">
+                                    <img src="./Bootstrap/svg/play-fill.svg" class="play-button-icon">
+                                </div>
+                                <div id="${moveMeatballsButtonID}" class="meatballs-div" data-toggle="tooltip_accordion" data-placement="top" title="Combo options">
                                     <img src="./Bootstrap/svg/three-dots.svg" class="meatballs-icon">
                                 </div>
                             </button>
@@ -613,6 +693,7 @@ class AccordionView {
         accordDiv.innerHTML = skeletonInternal;
 
         this.createLimitedBootstrapObjects();
+        this.createLimitedTooltipObjects();
         document.getElementById(this.#outerAccordionID).scrollTop = 0;
     }
 

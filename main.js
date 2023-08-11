@@ -1,6 +1,7 @@
 require('v8-compile-cache');
 const { env } = require('node:process');
 const { app, BrowserWindow, ipcMain } = require('electron');
+if (require('electron-squirrel-startup')) app.quit();
 const path = require('path');
 const { join } = require('path');
 const mainModulePath = path.join(__dirname, 'model', 'MainModel');
@@ -139,6 +140,12 @@ ipcMain.on("clientEvent", async (event, args) => {
                 break;
             case "restoreCombos":
                 model.restoreCombos(event, extraData);
+                break;
+            case "showExport":
+                model.showExport(event, args.sourceID);
+                break;
+            case "showImport":
+                model.showImport(event, args.sourceID);
                 break;
             default:
                 console.log(`Cannot match event ${args.eventName}`);

@@ -74,7 +74,7 @@ class ParsePanelView extends ParseViewBase {
         <div class="row h-100">
             <div class="col-6">
                 <div class="d-flex flex-column h-100">
-                    <div class="row flex-grow-1 position-relative">
+                    <div class="row flex-grow-1 position-relative fifty-fifty-column-split">
                         <div class="menu accordion-overflow accordion" id="${this.idMap.get("p1a1")}">
                         </div>
                     </div>
@@ -84,12 +84,12 @@ class ParsePanelView extends ParseViewBase {
             </div>
             <div class="col-6">
                 <div class="d-flex flex-column h-100">
-                    <div class="row flex-grow-1 position-relative">
+                    <div class="row flex-grow-1 position-relative fifty-fifty-column-split">
                         <div id="${this.idMap.get("p1t1")}" class="table-overflow">
                             <time-table-view></time-table-view>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row fifty-fifty-column-split">
                         <div id="${this.idMap.get("p1t2")}">
                         </div>
                     </div>

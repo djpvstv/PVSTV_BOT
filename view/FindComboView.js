@@ -50,10 +50,10 @@ class FindComboView extends ParseViewBase {
             <div class="col-12">
                 <div class="d-flex flex-column h-100">
                     <div class="row flex-grow-1 position-relative">
-                        <div class="menu accordion-overflow accordion" id="${this.idMap.get("a1")}">
+                        <div class="menu accordion-overflow accordion fifty-fifty-column-split" id="${this.idMap.get("a1")}">
                         </div>
                     </div>
-                    <div class="wrapper hidden-context" id="${this.idMap.get("c1")}">
+                    <div class="context-wrapper hidden-context" id="${this.idMap.get("c1")}">
                         <div class="content">
                             <ul class="context-menu">
                                 <li class="context-item" id="${this.idMap.get("c1l1")}">
@@ -94,6 +94,8 @@ class FindComboView extends ParseViewBase {
         const buttonRow = document.createElement("div");
         buttonRow.classList.add("row");
         panelDiv.appendChild(buttonRow);
+        this.#foundCombosAccordion.attachBottomButtons({bShowAll: false});
+        this.#foundCombosAccordion.attachBottomButtonCallbacks();
 
         this.attachCallbacks();
     }

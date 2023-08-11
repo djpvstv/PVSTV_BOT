@@ -13,9 +13,9 @@ class ParseViewBase {
         const article = `
         <label for="${openFolderButtonID}" class="dropped-label">Import from Directory</label>
         <div class="input-group mb-3">
-            <button class="btn btn-light rm-1" id="${openFolderButtonID}">Choose...</button>
+            <button class="btn btn-dark btn-left rm-1" id="${openFolderButtonID}">Choose...</button>
             <input type="text" class="form-control" id="${inputID}">
-            <button type="submit" class="btn btn-primary rm-1" id="${parseButtonID}" disabled>${parseButtonLabel}</button>
+            <button type="submit" class="btn btn-primary btn-right rm-1" id="${parseButtonID}" disabled>${parseButtonLabel}</button>
             <div class="invalid-feedback">
                 Please enter a directory with Slippi (.slp) replays.
             </div>
@@ -51,8 +51,6 @@ class ParseViewBase {
             }
             
             inputDiv.classList.add("is-invalid");
-            console.log("Error from Server: " + errorMsg);
-
             
             // Early return - Invalid directory
             return;

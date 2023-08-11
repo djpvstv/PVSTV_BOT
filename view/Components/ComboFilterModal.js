@@ -16,6 +16,9 @@ class ComboFilterModal {
     #applyButtonID = null;
     #isShowing = false;
     #handleForHandleInputForMainInput = null;
+    #handlePopupShow = null;
+    #handlePopupHide = null;
+
     #tooltipList = null;
     #currentCharTarget = null;
     #flavorMap = null;
@@ -25,6 +28,7 @@ class ComboFilterModal {
         minNumMoves: 0,
         maxNumMoves: 99,
         doesKill: false,
+        mustBeClean: false,
         ruleList: []
     };
     
@@ -33,6 +37,8 @@ class ComboFilterModal {
         this.#currentCharTarget = 23;
 
         this.#handleForHandleInputForMainInput = this.handleInputForMainInput.bind(this);
+        this.#handlePopupShow = this.beforePopupShows.bind(this);
+        this.#handlePopupHide = this.afterPopupHides.bind(this);
         this.createFlavorMap();
 
         this.#modalID = "filterComboModal";
@@ -47,6 +53,7 @@ class ComboFilterModal {
         topDiv.setAttribute("aria-labelledby","staticBackdropLabel");
         topDiv.setAttribute("aria-modal", "true");
         topDiv.setAttribute("role","dialog");
+        topDiv.setAttribute("data-bs-theme", "dark");
         topDiv.style.display = "none";
 
         this.#modalDiv = topDiv;
@@ -76,7 +83,7 @@ class ComboFilterModal {
     createFlavorMap () {
         this.#flavorMap = this.#controller.getFlavorMap();
 
-        this.#flavorOrder = [0, 1, 4, 5, 6, 7, 2, 3];
+        this.#flavorOrder = [0, 1, 4, 5, 6, 7, 2, 3, 8, 9];
     }
 
     getFlavorOrder () {
@@ -122,10 +129,16 @@ class ComboFilterModal {
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 dropped-label">
+                            <div class="col-md-3 dropped-label">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="doesKill">
-                                    <label class="form-check-label" for="doesKill">Combos must Kill</label>
+                                    <label class="form-check-label" for="doesKill">Must Kill</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 dropped-label">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="mustBeClean">
+                                    <label class="form-check-label" for="mustBeClean">Must be clean</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -250,16 +263,24 @@ class ComboFilterModal {
     }
 
     _applyCallbacks () {
+        // Main Apply Button
         document.getElementById(this.#applyButtonID).addEventListener("click", async () => {
             await this.#controller.cb_emitAcceptButtonEvent(true, this.#currentRules);
         });
 
+        // Does kill toggle
         document.getElementById('doesKill').checked = this.#currentRules.doesKill;
-
         document.getElementById('doesKill').addEventListener("click", (evt) => {
             this.#currentRules.doesKill = evt.target.checked;
         });
 
+        // is clean toggle
+        document.getElementById('mustBeClean').checked = this.#currentRules.mustBeClean;
+        document.getElementById('mustBeClean').addEventListener("click", (evt) => {
+            this.#currentRules.mustBeClean = evt.target.checked;
+        });
+
+        // Minimum Number of Moves input
         document.getElementById('minNumMoves').addEventListener("change", (evt) => {
             const newVal = parseInt(evt.target.value);
             if (newVal >= this.#currentRules.maxNumMoves) {
@@ -269,6 +290,7 @@ class ComboFilterModal {
             }
         });
 
+        // Maximum Number of Moves input
         document.getElementById('maxNumMoves').addEventListener("change", (evt) => {
             const newVal = parseInt(evt.target.value);
             if (newVal <= this.#currentRules.minNumMoves) {
@@ -278,6 +300,7 @@ class ComboFilterModal {
             }
         });
 
+        // Target Character that chooses Action ID dropdown autofills
         document.getElementById("filterComboSlippiModali_input_targetCharacter").addEventListener("click", evt => {
             const selectedItem = evt.srcElement.closest(".dropdown-item");
             const newChar = parseInt(selectedItem.value);
@@ -297,14 +320,17 @@ class ComboFilterModal {
     }
 
     _applyRuleCallbacks () {
+        // Filters dropdown selection for adding a rule
         document.getElementById("rule0").addEventListener("change", (evt) => {
             this.#controller.cb_handleRuleFlavorSelection(evt.target.value, this.#currentCharTarget);
         });
 
+        // Input widget for adding a rule row
         document.getElementById("form-0-input").addEventListener("change", (evt) => {
             this.#controller.cb_handleInputValidation(evt.target, document.getElementById("form-0-datalist"), this.#inputFlavor);
         });
 
+        // + Button on the right of the input row
         document.getElementById("rule0_add").addEventListener("click", (evt) => {
             if (evt.target.closest("div").classList.contains("enabled-icon")) {
                 this.handleRuleAddition();
@@ -356,7 +382,7 @@ class ComboFilterModal {
         }
 
         // For all tooltips that exist, initialize
-        const tooltipTargets = document.querySelectorAll('[data-toggle="tooltip"]');
+        const tooltipTargets = document.querySelectorAll('[data-toggle="tooltip_filterModal"]');
         if (tooltipTargets.length > 0) {
             // Also need to kill previous list
             this.#tooltipList = [...tooltipTargets].map(tooltipTriggerEl => new bootstrapBundleMin.Tooltip(tooltipTriggerEl));
@@ -377,6 +403,9 @@ class ComboFilterModal {
             }
             if (Object.hasOwnProperty.call(args.params, 'doesKill')) {
                 this.#currentRules.doesKill = args.params.doesKill;
+            }
+            if (Object.hasOwnProperty.call(args.params, 'mustBeClean')) {
+                this.#currentRules.mustBeClean = args.params.mustBeClean;
             }
             if (Object.hasOwnProperty.call(args.params, 'ruleList')) {
                 this.#currentRules.ruleList = [];
@@ -429,8 +458,12 @@ class ComboFilterModal {
         }
 
         if (ruleObj.doesDropdownRequireEventListener) {
-            dataListDiv.removeEventListener('hide.bs.dropdown', this.#handleForHandleInputForMainInput, false);
-            dataListDiv.addEventListener('hide.bs.dropdown', this.#handleForHandleInputForMainInput, false);
+            dataListDiv.removeEventListener("hide.bs.dropdown", this.#handleForHandleInputForMainInput, false);
+            dataListDiv.addEventListener("hide.bs.dropdown", this.#handleForHandleInputForMainInput, false);
+            dataListDiv.removeEventListener("hide.bs.dropdown", this.#handlePopupHide, false);
+            dataListDiv.addEventListener("hide.bs.dropdown", this.#handlePopupHide, false);
+            dataListDiv.removeEventListener("show.bs.dropdown", this.#handlePopupShow, false);
+            dataListDiv.addEventListener("show.bs.dropdown", this.#handlePopupShow, false);
             // Add callback for selections of each individual checkbox
             dataListDiv.querySelectorAll('li').forEach(d => {
                 d.addEventListener('click', (evt) => {
@@ -457,6 +490,7 @@ class ComboFilterModal {
         inputDiv.select();
     }
 
+    // This gets called for shortcutting adding a new rule without the + button.
     handleInputForMainInput (evt) {
         const ruleObj = this.getFromFlavorMap(this.getFlavor());
         const bIsValid = ruleObj.isCorrectEventForMainInput(evt);
@@ -471,11 +505,20 @@ class ComboFilterModal {
         }
     }
 
+    // Must enable and disable the apply button, or else you can select the apply button first
+    beforePopupShows () {
+        document.getElementById(this.#applyButtonID).setAttribute("disabled","");
+    }
+
+    afterPopupHides () {
+        document.getElementById(this.#applyButtonID).removeAttribute("disabled");
+    }
+
     applyValidationOnModalInput (args) {
         const inputDiv = document.getElementById("form-0-input");
         const buttonDiv = document.getElementById("rule0_add");
         // Depending on flavor, validation is done elsewhere
-        const bNeedsValidation = [0, 1, 2, 3].includes(this.#inputFlavor);
+        const bNeedsValidation = [0, 1, 2, 3, 8, 9].includes(this.#inputFlavor);
 
         if (bNeedsValidation) {
             if (args) {

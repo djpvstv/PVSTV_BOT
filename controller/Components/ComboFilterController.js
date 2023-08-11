@@ -10,6 +10,8 @@ const HasMinDamageRule = require("../../view/Components/FilterRules/HasMinDamage
 const HasMaxDamageRule = require("../../view/Components/FilterRules/HasMaxDamageRule");
 const HasActionIDStringRule = require("../../view/Components/FilterRules/HasActionIDStringRule");
 const ExcludeActionIDStringRule = require("../../view/Components/FilterRules/ExcludeActionIDStringRule");
+const HasMaxDamageTakenRule = require("../../view/Components/FilterRules/HasMaxDamageTakenRule");
+const HasMaxPercentStartRule = require("../../view/Components/FilterRules/HasMaxPercentStartRule");
 
 class ComboFilterController extends EventEmitter {
 
@@ -36,7 +38,8 @@ class ComboFilterController extends EventEmitter {
         this.#flavorMap = new Map();
 
         let i = 0;
-        const rules = [HasMoveRule, HasActionIDRule, HasOpponentRule, HasStageRule, HasMinDamageRule, HasMaxDamageRule, HasActionIDStringRule, ExcludeActionIDStringRule];
+        const rules = [HasMoveRule, HasActionIDRule, HasOpponentRule, HasStageRule, HasMinDamageRule, HasMaxDamageRule, HasActionIDStringRule,
+            ExcludeActionIDStringRule, HasMaxDamageTakenRule, HasMaxPercentStartRule];
         while (i < rules.length) {
             this.#flavorMap.set(rules[i].getFlavor(), {
                 name: rules[i].getRuleName(),
@@ -125,6 +128,8 @@ class ComboFilterController extends EventEmitter {
             // Damage
             case 2:
             case 3:
+            case 8:
+            case 9:
                 this.emit("changeModalInput", {
                     flavor: flavor
                 });

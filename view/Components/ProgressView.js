@@ -23,6 +23,7 @@ class ProgressView {
         topDiv.setAttribute("aria-labelledby","staticBackdropLabel");
         topDiv.setAttribute("aria-modal", "true");
         topDiv.setAttribute("role","dialog");
+        topDiv.setAttribute("data-bs-theme", "dark");
         topDiv.style.display = "none";
 
         this.#progressDiv = topDiv;

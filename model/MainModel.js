@@ -5,6 +5,7 @@ const SlippiPlayer = require('./SlippiPlayer');
 
 const fs = require('fs/promises');
 const { join } = require('path');
+const { isIP } = require('node:net');
 
 class MainModel {
 
@@ -28,6 +29,8 @@ class MainModel {
     #paginationLowerLimit = 100;
     #frameLeniency = 45;
     #batchSize = 20;
+    #preReplayFrames = 120;
+    #postReplayFrames = 0;
 
     #appDataPath = "";
     #meleeIsoPath = "";
@@ -43,6 +46,26 @@ class MainModel {
         this.#win = mainWindow;
         this.#usePagination = [false, false, false];
         this.createWorker();
+    }
+
+    getFrameLeniency () {
+        return this.#frameLeniency;
+    }
+
+    setComboInfo (comboInfo) {
+        this.#comboInfo = [...comboInfo];
+    }
+
+    setComboFilterParams(filterParams) {
+        this.#comboFilterParams = filterParams;
+    }
+
+    setDirectory (directory) {
+        this.#directory = directory;
+    }
+
+    setCurrentFiles (files) {
+        this.#currentFiles = files;
     }
 
     async checkPaths () {
@@ -159,6 +182,12 @@ class MainModel {
             if (Object.hasOwnProperty.call(appData, 'batchSize')) {
                 this.#batchSize = appData.batchSize;
             }
+            if (Object.hasOwnProperty.call(appData, 'preReplayFrames')) {
+                this.#preReplayFrames = appData.preReplayFrames;
+            }
+            if (Object.hasOwnProperty.call(appData, 'postReplayFrames')) {
+                this.#postReplayFrames = appData.postReplayFrames;
+            }
 
         } catch (err) {
             console.log("could not write to appData: " + err);
@@ -175,7 +204,9 @@ class MainModel {
                 meleePath: this.#meleeIsoPath,
                 batchSize: this.#batchSize,
                 frameLeniency: this.#frameLeniency,
-                paginationLowerLimit: this.#paginationLowerLimit
+                paginationLowerLimit: this.#paginationLowerLimit,
+                preReplayFrames: this.#preReplayFrames,
+                postReplayFrames: this.#postReplayFrames
             }
         });
     }
@@ -183,6 +214,7 @@ class MainModel {
     async browserForSlippiPath (event, source) {
         const appDataPath = app.getPath("appData");
         const filename = await dialog.showOpenDialog({
+            title: "Select Slippi executable",
             defaultPath: appDataPath,
             properties: [
                 "openFile"
@@ -213,6 +245,7 @@ class MainModel {
         const appDataPath = app.getPath("appData");
         const documentsPath = app.getPath("documents");
         const filename = await dialog.showOpenDialog({
+            title: "Select valid Melee ISO",
             defaultPath: documentsPath,
             properties: [
                 "openFile"
@@ -316,6 +349,8 @@ class MainModel {
             appData.batchSize = args.batchSize;
             appData.frameLeniency = args.frameLeniency;
             appData.paginationSize = args.paginationSize;
+            appData.preReplayFrames = args.preReplayFrames;
+            appData.postReplayFrames = args.postReplayFrames;
 
             await this.updateAppData(appData);
 
@@ -332,6 +367,7 @@ class MainModel {
     async processDirectoryForSlippiFilesWithUI ( event, buttonID ) {
 
         const file = await dialog.showOpenDialog({
+            title: "Choose a directory for Slippi replays",
             properties: [
                 "openDirectory"
             ]
@@ -380,8 +416,8 @@ class MainModel {
         }
 
         if (bIsValid) {
-            this.#currentFiles = files;
-            this.#directory = directoryToCheck.replaceAll('\\','\\\\');
+            this.setCurrentFiles(files);
+            this.setDirectory(directoryToCheck.replaceAll('\\','\\\\'));
             returnData.files = files;
             returnData.srcID = buttonID;
         }
@@ -422,7 +458,7 @@ class MainModel {
             needsPagination: bNeedsPagination,
             page: page,
             totalPage: totalNumPages,
-            hitsThisPage: parsedData.length,
+            hitsThisPage: parsedData.players.length,
             hitsTotal: numPlayers
         });
     }
@@ -441,7 +477,7 @@ class MainModel {
                     needsPagination: true,
                     page: targetPage,
                     totalPage: totalNumPages,
-                    hitsThisPage: parsedData.length,
+                    hitsThisPage: parsedData.players.length,
                     hitsTotal: numPlayers
                 });
             }
@@ -449,7 +485,7 @@ class MainModel {
     }
 
     handleProcessedComboParse (data) {
-        this.#comboFilterParams = [];
+        this.setComboFilterParams([]);
         this.#isFilterOn = false;
         this.#fileComboMap.clear();
         const parsedData = JSON.parse(data.args.replaceAll('\\', '/').replaceAll('/"','\\\"'));
@@ -489,7 +525,7 @@ class MainModel {
 
     async updateComboFilterRules ( event, buttonID, rules ) {
         this.#isFilterOn = true;
-        this.#comboFilterParams = rules;
+        this.setComboFilterParams(rules);
 
         const tempCombos = this.getFileredCombosFromAll();
         const numCombos = tempCombos.length;
@@ -503,7 +539,7 @@ class MainModel {
         const page = 1;
 
         this.#usePagination[2] = bNeedsPagination;
-        if (updateComboInfo) this.#comboInfo = [...comboData];
+        if (updateComboInfo) this.setComboInfo(comboData);
         if (bNeedsPagination) {
             const startIdx = this.#paginationLowerLimit * (page-1);
             comboData = comboData.slice(startIdx, startIdx + this.#paginationLowerLimit);
@@ -526,69 +562,94 @@ class MainModel {
     getFileredCombosFromAll () {
         const allCombos = [...this.#comboInfo];
         const rules = this.#comboFilterParams;
-        const tempCombos = allCombos.filter((combo) => {
-            let isValid = true;
-            if (rules.minNumMoves > combo.combo.moves.length) isValid = false;
-            
-            if (rules.maxNumMoves < combo.combo.moves.length) isValid = false;
+        let tempCombos;
+        if (!Object.prototype.hasOwnProperty.call(rules, "ruleList") && rules.length === 0) {
+            tempCombos = allCombos;
+        } else {
+            const filteredCombos = allCombos.filter((combo) => {
+                let isValid = true;
+                if (rules.minNumMoves > combo.combo.moves.length) isValid = false;
+                
+                if (rules.maxNumMoves < combo.combo.moves.length) isValid = false;
 
-            if (rules.doesKill && (combo.combo.didKill === 'false')) isValid = false;
+                if (rules.doesKill && (combo.combo.didKill === "false")) isValid = false;
 
-            if (combo.is_manually_hidden) isValid = false;
+                if (rules.mustBeClean && (combo.combo.wasInDisadvantage === "true")) isValid = false;
 
-            const comboDamage = parseFloat(combo.combo.endPercent) - parseFloat(combo.combo.startPercent);
+                if (combo.is_manually_hidden) isValid = false;
 
-            if (isValid) {
-                let i = 0;
-                while (i < rules.ruleList.length) {
-                    const option = rules.ruleList[i].option;
-                    let id, comboActionIDs;
-                    if (!Array.isArray(option)) {
-                        id = option.replace(/(^\d+)(.+$)/i,'$1');
+                const comboDamage = parseFloat(combo.combo.opponentEndPercent) - parseFloat(combo.combo.opponentStartPercent);
+                const damageTaken = parseFloat(combo.combo.playerEndPercent) - parseFloat(combo.combo.playerStartPercent);
+
+                if (isValid) {
+                    let i = 0;
+                    while (i < rules.ruleList.length) {
+                        const option = rules.ruleList[i].option;
+                        let id, comboActionIDs;
+                        if (!Array.isArray(option)) {
+                            id = option.replace(/(^\d+)(.+$)/i,'$1');
+                        }
+
+                        switch (parseInt(rules.ruleList[i].flavorType)) {
+                            case 0:
+                                // Minimum Moves
+                                if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
+                                break;
+                            case 1:
+                                // Maximum Moves
+                                if (combo.combo.moves.filter(m => m.actionID === id).length === 0) isValid = false;
+                                break;
+                            case 2:
+                                // Total Damage > X
+                                if (comboDamage <= parseFloat(option)) isValid = false;
+                                break;
+                            case 3:
+                                // Total Damage < X
+                                if (comboDamage >= parseFloat(option)) isValid = false;
+                                break;
+                            case 4:
+                                // Has Opponent Character
+                                if (!option.includes(parseInt(combo.opponent_char))) isValid = false;
+                                break;
+                            case 5:
+                                // Has Stage
+                                if (!(option.includes(parseInt(combo.stage)))) isValid = false;
+                                break;
+                            case 6:
+                                // Includes Combo String
+                                comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
+                                if (!(this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
+                                break;
+                            case 7:
+                                // Exclude Combo String
+                                comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
+                                if ((this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
+                                break;
+                                // Maximum damage taken
+                            case 8:
+                                if (damageTaken >= parseFloat(option)) isValid = false;
+                                break;
+                                // Combo starts before percentage
+                            case 9:
+                                if (parseFloat(combo.combo.opponentStartPercent) >= parseFloat(option)) isValid = false;
+                                break;
+                        }
+                        i++;
                     }
-
-                    switch (parseInt(rules.ruleList[i].flavorType)) {
-                        case 0:
-                            if (combo.combo.moves.filter(m => m.moveID === id).length === 0) isValid = false;
-                            break;
-                        case 1:
-                            if (combo.combo.moves.filter(m => m.actionID === id).length === 0) isValid = false;
-                            break;
-                        case 2:
-                            // Total Damage > X
-                            if (comboDamage <= parseFloat(option)) isValid = false;
-                            break;
-                        case 3:
-                            // Total Damage < X
-                            if (comboDamage >= parseFloat(option)) isValid = false;
-                            break;
-                        case 4:
-                            if (!option.includes(parseInt(combo.opponent_char))) isValid = false;
-                            break;
-                        case 5:
-                            if (!(option.includes(parseInt(combo.stage)))) isValid = false;
-                            break;
-                        case 6:
-                            comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
-                            if (!(this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
-                            break;
-                        case 7:
-                            comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
-                            if ((this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
-                            break;
-                    }
-                    i++;
                 }
-            }
 
-            return isValid;
-        });
+                return isValid;
+            });
+
+            tempCombos = filteredCombos;
+        }
 
         return tempCombos;
     }
 
     _hasConsecutiveSubset (mainArray, targetArray) {
         let mainIdx = 0;
+        let bReturn = false;
         const filteredArray = mainArray.filter(e => {
             if (e === targetArray[mainIdx]) {
                 mainIdx++;
@@ -596,7 +657,23 @@ class MainModel {
             }
             return false;
         });
-        return filteredArray.length === targetArray.length;
+
+        // Check for sequentially incrementing indices
+        if (filteredArray.length === targetArray.length) {
+            const filteredArrayIdx = [];
+            let i = 0;
+            while (i < filteredArray.length) {
+                filteredArrayIdx.push(mainArray.indexOf(filteredArray[i]));
+                if (filteredArrayIdx.length > 1 && filteredArrayIdx.at(-1) === 1 + filteredArrayIdx.at(-2)) {
+                    bReturn = true;
+                }
+                i++;
+            }
+            if (filteredArrayIdx.length === 1) {
+                bReturn = true;
+            }
+        }
+        return bReturn;
     }
 
     async updateComboPagination ( event, buttonID, targetPage ) {
@@ -613,13 +690,15 @@ class MainModel {
             const numCombos = parsedData.length;
             const totalNumPages = Math.ceil(numCombos / this.#paginationLowerLimit); 
             const startIdx = this.#paginationLowerLimit * (targetPage-1);
+            let bNeedsPagination = true;
+            if (totalNumPages === 1) bNeedsPagination = false;
 
             parsedData = parsedData.slice(startIdx, startIdx + this.#paginationLowerLimit);
             this.#win.webContents.send("findComboEvent", {
                 eventName: "updatePanelTwoAccordionJustAccordion",
                 args: {
                     combos: parsedData,
-                    needsPagination: true,
+                    needsPagination: bNeedsPagination,
                     page: targetPage,
                     totalPage: totalNumPages,
                     hitsThisPage: parsedData.length,
@@ -669,7 +748,7 @@ class MainModel {
                 this.findCombosFromCharColor(event, buttonID, params.targetChar, params.targetColor, params.batchNum);
                 break;
             case 4:
-                this.findCombosFromCharTag(event, buttonID, params.targetChar, params.targetTag, params.batchNum);
+                this.findCombosFromCharTag(event, buttonID, params.targetChar, params.targetTag, params.batchNum, true);
                 break;
             case 5:
                 this.findCombosFromCharTagColor(event, buttonID, params.targetChar, params.targetTag, params.targetColor, params.batchNum);
@@ -685,7 +764,8 @@ class MainModel {
 
         this.writeWorkerLog("Process for Combos, Tag", JSON.stringify({
             tag: tag,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         }));
 
         this.#worker.postMessage({
@@ -693,7 +773,8 @@ class MainModel {
             dir: this.#directory,
             files: this.#currentFiles,
             tag: tag,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         });
     }
     
@@ -705,7 +786,8 @@ class MainModel {
 
         this.writeWorkerLog("Process for Combos, Char", JSON.stringify({
             char: char,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         }));
 
         this.#worker.postMessage({
@@ -713,7 +795,8 @@ class MainModel {
             dir: this.#directory,
             files: this.#currentFiles,
             char: char,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         });
         this.#lastCharacter = char;
     }
@@ -727,7 +810,8 @@ class MainModel {
         this.writeWorkerLog("Process for Combos, Char, Color", JSON.stringify({
             char: char,
             color: color,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         }));
 
         this.#worker.postMessage({
@@ -736,22 +820,26 @@ class MainModel {
             files: this.#currentFiles,
             char: char,
             color: color,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         });
         this.#lastCharacter = char;
     }
 
-    async findCombosFromCharTag(event, buttonID, char, tag, chunk) {
+    async findCombosFromCharTag(event, buttonID, char, tag, chunk, bLog) {
         this.#worker.postMessage({
             evt: 'stop',
             value: false
         });
 
-        this.writeWorkerLog("Process for Combos, Char, Tag", JSON.stringify({
-            char: char,
-            tag: tag,
-            chunk: chunk
-        }));
+        if (bLog) {
+            this.writeWorkerLog("Process for Combos, Char, Tag", JSON.stringify({
+                char: char,
+                tag: tag,
+                chunk: chunk,
+                frameLeniency: this.getFrameLeniency()
+            }));
+        }
 
         this.#worker.postMessage({
             evt: 'processForComboCharTag',
@@ -759,7 +847,8 @@ class MainModel {
             files: this.#currentFiles,
             char: char,
             tag: tag,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         });
         this.#lastCharacter = char;
     }
@@ -774,7 +863,8 @@ class MainModel {
             char: char,
             tag: tag,
             color: color,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         }));
 
         this.#worker.postMessage({
@@ -784,7 +874,8 @@ class MainModel {
             char: char,
             tag: tag,
             color: color,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         });
         this.#lastCharacter = char;
     }
@@ -794,10 +885,10 @@ class MainModel {
         const comboNum = gameAndCombo.combo;
         const comboIndex = this.#fileComboMap.get(game + "_" + comboNum);
         const bDidKill = this.#comboInfo[comboIndex].combo.didKill === 'true';
-        const endFrame = parseInt(this.#comboInfo[comboIndex].combo.endFrame);
+        const endFrame = parseInt(this.#comboInfo[comboIndex].combo.endFrame) + this.#postReplayFrames;
 
         const combos = [{
-            startFrame: parseInt(this.#comboInfo[comboIndex].combo.startFrame) - 120, // buffering for more time
+            startFrame: parseInt(this.#comboInfo[comboIndex].combo.startFrame) - this.#preReplayFrames, // buffering for more time
             endFrame: bDidKill ? endFrame + 240 : endFrame,
             filePath: this.#comboInfo[comboIndex].file
         }];
@@ -808,11 +899,12 @@ class MainModel {
     async playAllCombos (event, sourceID) {
         const combos = [];
         let i = 0;
-        while (i < this.#comboInfo.length) {
+        const tempCombos = this.getFileredCombosFromAll();
+        while (i < tempCombos.length) {
             combos.push({
-                startFrame: parseInt(this.#comboInfo[i].combo.startFrame) - 120,
-                endFrame: parseInt(this.#comboInfo[i].combo.endFrame),
-                filePath: this.#comboInfo[i].file
+                startFrame: parseInt(tempCombos[i].combo.startFrame) - 120,
+                endFrame: parseInt(tempCombos[i].combo.endFrame),
+                filePath: tempCombos[i].file
             });
             i++;
         }
@@ -888,6 +980,16 @@ class MainModel {
         }
     }
 
+    createWorkerForTest () {
+        this.#worker = new Worker(__dirname + '\\SlippiParser.js',
+        {
+            workerData: {
+                isCancelled: false
+            }
+        });
+        return this.#worker;
+    }
+
     createWorker () {
         this.#worker = new Worker(__dirname + '\\SlippiParser.js',
         {
@@ -917,7 +1019,129 @@ class MainModel {
                     break;
             }
         });
-      }
+    }
+
+    async showExport (event) {
+        const tempCombos = this.getFileredCombosFromAll();
+
+        try {
+            const results = await dialog.showSaveDialog(this.#win, {
+                "title": "Save combos as...",
+                "buttonLabel": "Save Combos",
+                "filters": [
+                    {name: "JSON files", "extensions": ["json"]}
+                ]
+            });
+
+            if (!results.canceled) {
+                const filePath = results.filePath;
+
+                this.writeWorkerLog("Export combos", JSON.stringify({
+                    filePath: filePath
+                }));
+
+                await fs.writeFile(filePath, JSON.stringify(tempCombos, null, 2));
+
+            }
+        } catch (err) {
+            console.log("could not export combos, here's why:");
+            console.log(err);
+        }
+    }
+
+    async showImport (event) {
+        try {
+            // Get file for import
+            const filename = await dialog.showOpenDialog({
+                title: "Import combos from JSON file",
+                properties: [
+                    
+                    "openFile"
+                ],
+                filters: [
+                    {name: 'JSON Files', extensions: ['json']}
+                ]
+            });
+
+            if (!filename.canceled) {
+                const importPath = filename.filePaths[0];
+                try {
+                    const importData = await fs.readFile(importPath);
+                    const validCombos = this.validateInputCombos(JSON.parse(importData.toString()));
+
+                    this.setComboInfo(validCombos);
+                    this.updateComboPagination(null,null,1);
+
+                } catch (err) {
+                    await dialog.showMessageBox(this.#win, {
+                        "title": "Cannot read import JSON file",
+                        "message": `Could not read the selected JSON file.\nError: ${err}`,
+                        "type": "error"
+                    });
+                }
+            }
+
+        } catch (err) {
+            console.log("could not import combos, here's why:");
+            console.log(err);
+        }
+    }
+
+    validateInputCombos (combos) {
+        let i = 0;
+        const filteredCombos = combos.filter((combo) => {
+            let isValid = true;
+            // Top level combo properties
+            if (!Object.prototype.hasOwnProperty.call(combo, 'combo')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'comboNum')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'file')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'is_manually_hidden')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'notes')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'opponent_char')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'opponent_color')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'opponent_tag')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'stage')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'target_char')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'target_color')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo, 'target_tag')) isValid = false;
+
+            // combo properties
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'didKill')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'wasInDisadvantage')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'endFrame')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'startFrame')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'moves')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'playerStartPercent')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'playerStartPercent')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'opponentStartPercent')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'opponentStartPercent')) isValid = false;
+
+            // Move properties
+            let j = 0;
+            while (j < combo.combo.moves.length) {
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'actionID')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'damage')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'frame')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'hitCount')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'moveID')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'xPos')) isValid = false;
+                if (!Object.prototype.hasOwnProperty.call(combo.combo.moves[j], 'yPos')) isValid = false;
+                j++;
+            }
+
+            return isValid;
+        });
+
+        i = 0;
+        // update the import map
+        while (i < combos.length) {
+            const fileName = combos[i].file;
+            this.#fileComboMap.set(fileName.substring(fileName.lastIndexOf("/") + 1).replace(/\.[^/.]+$/,"") + "_" + String(combos[i].comboNum), i);
+            i++;
+        }
+
+        return filteredCombos;
+    }
 
 }
 

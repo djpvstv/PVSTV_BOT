@@ -180,8 +180,8 @@ napi_value PrintSimpleParse(napi_env env, napi_callback_info info) {
 
 napi_value ComboParseByTag(napi_env env, napi_callback_info info) {
     // Process Input
-    size_t argc = 2;
-    napi_value argv[2];
+    size_t argc = 3;
+    napi_value argv[3];
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     // Check if the first argument is an array
@@ -210,6 +210,14 @@ napi_value ComboParseByTag(napi_env env, napi_callback_info info) {
     std::string tag_str(str_length, '\0');
     napi_get_value_string_utf8(env, argv[1], &tag_str[0], str_length + 1, nullptr);
 
+    // Ensure the Third argument is an integer
+    int32_t frameLimitInt;
+    napi_status status = napi_get_value_int32(env, argv[2], &frameLimitInt);
+    if (status != napi_ok) {
+      napi_throw_type_error(env, nullptr, "Third argument must be an integer");
+      return NULL;
+    }
+
     slip::TargetParams tp;
     tp.targetType = slip::TargetType::TAG;
     tp.analysisType.combos = true;
@@ -217,6 +225,7 @@ napi_value ComboParseByTag(napi_env env, napi_callback_info info) {
     tp.analysisType.countMoves = false;
 
     tp.targetTag = tag_str;
+    tp.comboFrameLimit = frameLimitInt;
 
     try {
       parser.parseSlippiFromPaths(cppVec, tp);
@@ -246,8 +255,8 @@ napi_value ComboParseByTag(napi_env env, napi_callback_info info) {
 
 napi_value ComboParseByChar(napi_env env, napi_callback_info info) {
   // Process Input
-    size_t argc = 2;
-    napi_value argv[2];
+    size_t argc = 3;
+    napi_value argv[3];
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     // Check if the first argument is an array
@@ -267,6 +276,14 @@ napi_value ComboParseByChar(napi_env env, napi_callback_info info) {
       napi_throw_type_error(env, nullptr, "Second argument must be an integer");
       return NULL;
     }
+
+    // Ensure the third argument is an integer
+    int32_t frameLimitInt;
+    status = napi_get_value_int32(env, argv[2], &frameLimitInt);
+    if (status != napi_ok) {
+      napi_throw_type_error(env, nullptr, "Third argument must be an integer");
+      return NULL;
+    }
     
     slip::TargetParams tp;
     tp.targetType = slip::TargetType::CHAR;
@@ -275,6 +292,7 @@ napi_value ComboParseByChar(napi_env env, napi_callback_info info) {
     tp.analysisType.countMoves = false;
 
     tp.char_id = intValue;
+    tp.comboFrameLimit = frameLimitInt;
 
     try {
       parser.parseSlippiFromPaths(cppVec, tp);
@@ -304,8 +322,8 @@ napi_value ComboParseByChar(napi_env env, napi_callback_info info) {
 
 napi_value ComboParseByCharColor(napi_env env, napi_callback_info info) {
   // Process Input
-    size_t argc = 3;
-    napi_value argv[3];
+    size_t argc = 4;
+    napi_value argv[4];
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     // Check if the first argument is an array
@@ -334,6 +352,14 @@ napi_value ComboParseByCharColor(napi_env env, napi_callback_info info) {
       return NULL;
     }
 
+    // Ensure the fourth argument is an integer
+    int32_t frameLimitInt;
+    status = napi_get_value_int32(env, argv[3], &frameLimitInt);
+    if (status != napi_ok) {
+      napi_throw_type_error(env, nullptr, "Fourth argument must be an integer");
+      return NULL;
+    }
+
     slip::TargetParams tp;
     tp.targetType = slip::TargetType::CHAR_COLOR;
     tp.analysisType.combos = true;
@@ -342,6 +368,7 @@ napi_value ComboParseByCharColor(napi_env env, napi_callback_info info) {
 
     tp.char_id = charInt;
     tp.targetColor = colorInt;
+    tp.comboFrameLimit = frameLimitInt;
 
     try {
       parser.parseSlippiFromPaths(cppVec, tp);
@@ -371,8 +398,8 @@ napi_value ComboParseByCharColor(napi_env env, napi_callback_info info) {
 
 napi_value ComboParseByCharTag(napi_env env, napi_callback_info info) {
   // Process Input
-    size_t argc = 3;
-    napi_value argv[3];
+    size_t argc = 4;
+    napi_value argv[4];
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     // Check if the first argument is an array
@@ -410,6 +437,14 @@ napi_value ComboParseByCharTag(napi_env env, napi_callback_info info) {
     std::string tag_str(str_length, '\0');
     napi_get_value_string_utf8(env, argv[2], &tag_str[0], str_length + 1, nullptr);
 
+    // Ensure the fourth argument is an integer
+    int32_t frameLimitInt;
+    status = napi_get_value_int32(env, argv[3], &frameLimitInt);
+    if (status != napi_ok) {
+      napi_throw_type_error(env, nullptr, "Fourth argument must be an integer");
+      return NULL;
+    }
+
     slip::TargetParams tp;
     tp.targetType = slip::TargetType::CHAR_TAG;
     tp.analysisType.combos = true;
@@ -418,6 +453,7 @@ napi_value ComboParseByCharTag(napi_env env, napi_callback_info info) {
 
     tp.targetTag = tag_str;
     tp.char_id = charInt;
+    tp.comboFrameLimit = frameLimitInt;
 
     try {
       parser.parseSlippiFromPaths(cppVec, tp);
@@ -447,8 +483,8 @@ napi_value ComboParseByCharTag(napi_env env, napi_callback_info info) {
 
 napi_value ComboParseByCharTagColor(napi_env env, napi_callback_info info) {
   // Process Input
-    size_t argc = 4;
-    napi_value argv[4];
+    size_t argc = 5;
+    napi_value argv[5];
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     // Check if the first argument is an array
@@ -494,6 +530,14 @@ napi_value ComboParseByCharTagColor(napi_env env, napi_callback_info info) {
       return NULL;
     }
 
+    // Ensure the fifth argument is an integer
+    int32_t frameLimitInt;
+    status = napi_get_value_int32(env, argv[4], &frameLimitInt);
+    if (status != napi_ok) {
+      napi_throw_type_error(env, nullptr, "Fifth argument must be an integer");
+      return NULL;
+    }
+
     slip::TargetParams tp;
     tp.targetType = slip::TargetType::CHAR_TAG_COLOR;
     tp.analysisType.combos = true;
@@ -503,6 +547,7 @@ napi_value ComboParseByCharTagColor(napi_env env, napi_callback_info info) {
     tp.targetTag = tag_str;
     tp.char_id = charInt;
     tp.targetColor = colorInt;
+    tp.comboFrameLimit = frameLimitInt;
 
     try {
       parser.parseSlippiFromPaths(cppVec, tp);

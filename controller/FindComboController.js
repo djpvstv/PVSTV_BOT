@@ -67,6 +67,19 @@ class FindComboController extends EventEmitter {
         }
     }
 
+    cb_setSelectedComboFromClick(event) {
+        const closestParent = event.srcElement.closest(".outer-accordion-item");
+        if (!(closestParent)) return;
+
+        const gameAndCombo = closestParent.querySelector(".outer-accordion-header").id.replace("combo_","").replace("_heading","");
+        const parts = gameAndCombo.split("").reverse().join("").split("_");
+        const comboNum = parseInt(parts.shift().split("").reverse().join(""));
+        const game = parts.join("_").split("").reverse().join("");
+
+        this.#contextSelect.combo = comboNum;
+        this.#contextSelect.game = game;
+    }
+
     cb_handleRightClick (event) {
         this.#contextShowing = true;
         const closestParent = event.srcElement.closest(".outer-accordion-item");
@@ -98,7 +111,7 @@ class FindComboController extends EventEmitter {
         if (this.#contextShowing) {
             // don't close if clicking on context menu
             if (!forceClose) {
-                if (event.srcElement.closest(".wrapper")) return;
+                if (event.srcElement.closest(".context-wrapper")) return;
             }
                 
             const contextDiv = document.getElementById(this.idMap.get("c1"));
@@ -207,7 +220,7 @@ class FindComboController extends EventEmitter {
         const isTagValid = this.getElementById("i3") ? /^[A-Z]{1,10}#\d{1,3}$/.test(this.getElementById("i3").value) : false;
         const isDirInputValid = this.getElementById("i1").classList.contains("is-valid");
         const charValue = this.getElementById("i4b1") ? parseInt(this.getElementById("i4b1").value) : null;
-        const isCharValid = this.getElementById("i4b1") ? charValue > 0 && charValue < this.#charUpperLimit : false;
+        const isCharValid = this.getElementById("i4b1") ? charValue >= 0 && charValue < this.#charUpperLimit : false;
         const isColorValid = this.getElementById("i5b1") ? parseInt(this.getElementById("i5b1").value) <= Utility.getMaxCostumesByCharacter(charValue) : false;
 
         switch (flavor) {

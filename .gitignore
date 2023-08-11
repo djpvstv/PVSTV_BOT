@@ -1,5 +1,4 @@
 .cache/
-.vscode/
 build/
 Bootstrap/
 dist/obj/
@@ -12,3 +11,7 @@ build/Release/v8engine.node
 build/binding.sln
 build/config.gypi
 temp.json
+release/bundle.js
+release/bundle.js.LICENSE.txt
+test/testFiles/giantComboTestData.json
+out/
