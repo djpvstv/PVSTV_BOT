@@ -5,6 +5,7 @@ const SlippiPlayer = require('./SlippiPlayer');
 
 const fs = require('fs/promises');
 const { join } = require('path');
+const { isIP } = require('node:net');
 
 class MainModel {
 
@@ -28,6 +29,8 @@ class MainModel {
     #paginationLowerLimit = 100;
     #frameLeniency = 45;
     #batchSize = 20;
+    #preReplayFrames = 120;
+    #postReplayFrames = 0;
 
     #appDataPath = "";
     #meleeIsoPath = "";
@@ -45,12 +48,24 @@ class MainModel {
         this.createWorker();
     }
 
+    getFrameLeniency () {
+        return this.#frameLeniency;
+    }
+
     setComboInfo (comboInfo) {
         this.#comboInfo = [...comboInfo];
     }
 
     setComboFilterParams(filterParams) {
         this.#comboFilterParams = filterParams;
+    }
+
+    setDirectory (directory) {
+        this.#directory = directory;
+    }
+
+    setCurrentFiles (files) {
+        this.#currentFiles = files;
     }
 
     async checkPaths () {
@@ -167,6 +182,12 @@ class MainModel {
             if (Object.hasOwnProperty.call(appData, 'batchSize')) {
                 this.#batchSize = appData.batchSize;
             }
+            if (Object.hasOwnProperty.call(appData, 'preReplayFrames')) {
+                this.#preReplayFrames = appData.preReplayFrames;
+            }
+            if (Object.hasOwnProperty.call(appData, 'postReplayFrames')) {
+                this.#postReplayFrames = appData.postReplayFrames;
+            }
 
         } catch (err) {
             console.log("could not write to appData: " + err);
@@ -183,7 +204,9 @@ class MainModel {
                 meleePath: this.#meleeIsoPath,
                 batchSize: this.#batchSize,
                 frameLeniency: this.#frameLeniency,
-                paginationLowerLimit: this.#paginationLowerLimit
+                paginationLowerLimit: this.#paginationLowerLimit,
+                preReplayFrames: this.#preReplayFrames,
+                postReplayFrames: this.#postReplayFrames
             }
         });
     }
@@ -326,6 +349,8 @@ class MainModel {
             appData.batchSize = args.batchSize;
             appData.frameLeniency = args.frameLeniency;
             appData.paginationSize = args.paginationSize;
+            appData.preReplayFrames = args.preReplayFrames;
+            appData.postReplayFrames = args.postReplayFrames;
 
             await this.updateAppData(appData);
 
@@ -391,8 +416,8 @@ class MainModel {
         }
 
         if (bIsValid) {
-            this.#currentFiles = files;
-            this.#directory = directoryToCheck.replaceAll('\\','\\\\');
+            this.setCurrentFiles(files);
+            this.setDirectory(directoryToCheck.replaceAll('\\','\\\\'));
             returnData.files = files;
             returnData.srcID = buttonID;
         }
@@ -549,9 +574,12 @@ class MainModel {
 
                 if (rules.doesKill && (combo.combo.didKill === "false")) isValid = false;
 
+                if (rules.mustBeClean && (combo.combo.wasInDisadvantage === "true")) isValid = false;
+
                 if (combo.is_manually_hidden) isValid = false;
 
-                const comboDamage = parseFloat(combo.combo.endPercent) - parseFloat(combo.combo.startPercent);
+                const comboDamage = parseFloat(combo.combo.opponentEndPercent) - parseFloat(combo.combo.opponentStartPercent);
+                const damageTaken = parseFloat(combo.combo.playerEndPercent) - parseFloat(combo.combo.playerStartPercent);
 
                 if (isValid) {
                     let i = 0;
@@ -596,6 +624,14 @@ class MainModel {
                                 // Exclude Combo String
                                 comboActionIDs = combo.combo.moves.map(a => parseInt(a.actionID));
                                 if ((this._hasConsecutiveSubset(comboActionIDs, option))) isValid = false;
+                                break;
+                                // Maximum damage taken
+                            case 8:
+                                if (damageTaken >= parseFloat(option)) isValid = false;
+                                break;
+                                // Combo starts before percentage
+                            case 9:
+                                if (parseFloat(combo.combo.opponentStartPercent) >= parseFloat(option)) isValid = false;
                                 break;
                         }
                         i++;
@@ -712,7 +748,7 @@ class MainModel {
                 this.findCombosFromCharColor(event, buttonID, params.targetChar, params.targetColor, params.batchNum);
                 break;
             case 4:
-                this.findCombosFromCharTag(event, buttonID, params.targetChar, params.targetTag, params.batchNum);
+                this.findCombosFromCharTag(event, buttonID, params.targetChar, params.targetTag, params.batchNum, true);
                 break;
             case 5:
                 this.findCombosFromCharTagColor(event, buttonID, params.targetChar, params.targetTag, params.targetColor, params.batchNum);
@@ -728,7 +764,8 @@ class MainModel {
 
         this.writeWorkerLog("Process for Combos, Tag", JSON.stringify({
             tag: tag,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         }));
 
         this.#worker.postMessage({
@@ -736,7 +773,8 @@ class MainModel {
             dir: this.#directory,
             files: this.#currentFiles,
             tag: tag,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         });
     }
     
@@ -748,7 +786,8 @@ class MainModel {
 
         this.writeWorkerLog("Process for Combos, Char", JSON.stringify({
             char: char,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         }));
 
         this.#worker.postMessage({
@@ -756,7 +795,8 @@ class MainModel {
             dir: this.#directory,
             files: this.#currentFiles,
             char: char,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         });
         this.#lastCharacter = char;
     }
@@ -770,7 +810,8 @@ class MainModel {
         this.writeWorkerLog("Process for Combos, Char, Color", JSON.stringify({
             char: char,
             color: color,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         }));
 
         this.#worker.postMessage({
@@ -779,22 +820,26 @@ class MainModel {
             files: this.#currentFiles,
             char: char,
             color: color,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         });
         this.#lastCharacter = char;
     }
 
-    async findCombosFromCharTag(event, buttonID, char, tag, chunk) {
+    async findCombosFromCharTag(event, buttonID, char, tag, chunk, bLog) {
         this.#worker.postMessage({
             evt: 'stop',
             value: false
         });
 
-        this.writeWorkerLog("Process for Combos, Char, Tag", JSON.stringify({
-            char: char,
-            tag: tag,
-            chunk: chunk
-        }));
+        if (bLog) {
+            this.writeWorkerLog("Process for Combos, Char, Tag", JSON.stringify({
+                char: char,
+                tag: tag,
+                chunk: chunk,
+                frameLeniency: this.getFrameLeniency()
+            }));
+        }
 
         this.#worker.postMessage({
             evt: 'processForComboCharTag',
@@ -802,7 +847,8 @@ class MainModel {
             files: this.#currentFiles,
             char: char,
             tag: tag,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         });
         this.#lastCharacter = char;
     }
@@ -817,7 +863,8 @@ class MainModel {
             char: char,
             tag: tag,
             color: color,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         }));
 
         this.#worker.postMessage({
@@ -827,7 +874,8 @@ class MainModel {
             char: char,
             tag: tag,
             color: color,
-            chunk: chunk
+            chunk: chunk,
+            frameLeniency: this.getFrameLeniency()
         });
         this.#lastCharacter = char;
     }
@@ -837,10 +885,10 @@ class MainModel {
         const comboNum = gameAndCombo.combo;
         const comboIndex = this.#fileComboMap.get(game + "_" + comboNum);
         const bDidKill = this.#comboInfo[comboIndex].combo.didKill === 'true';
-        const endFrame = parseInt(this.#comboInfo[comboIndex].combo.endFrame);
+        const endFrame = parseInt(this.#comboInfo[comboIndex].combo.endFrame) + this.#postReplayFrames;
 
         const combos = [{
-            startFrame: parseInt(this.#comboInfo[comboIndex].combo.startFrame) - 120, // buffering for more time
+            startFrame: parseInt(this.#comboInfo[comboIndex].combo.startFrame) - this.#preReplayFrames, // buffering for more time
             endFrame: bDidKill ? endFrame + 240 : endFrame,
             filePath: this.#comboInfo[comboIndex].file
         }];
@@ -930,6 +978,16 @@ class MainModel {
         } catch (err) {
             console.log("could not write to logger: " + err);
         }
+    }
+
+    createWorkerForTest () {
+        this.#worker = new Worker(__dirname + '\\SlippiParser.js',
+        {
+            workerData: {
+                isCancelled: false
+            }
+        });
+        return this.#worker;
     }
 
     createWorker () {
@@ -1049,11 +1107,14 @@ class MainModel {
 
             // combo properties
             if (!Object.prototype.hasOwnProperty.call(combo.combo, 'didKill')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'wasInDisadvantage')) isValid = false;
             if (!Object.prototype.hasOwnProperty.call(combo.combo, 'endFrame')) isValid = false;
-            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'endPercent')) isValid = false;
-            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'moves')) isValid = false;
             if (!Object.prototype.hasOwnProperty.call(combo.combo, 'startFrame')) isValid = false;
-            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'startPercent')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'moves')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'playerStartPercent')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'playerStartPercent')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'opponentStartPercent')) isValid = false;
+            if (!Object.prototype.hasOwnProperty.call(combo.combo, 'opponentStartPercent')) isValid = false;
 
             // Move properties
             let j = 0;
@@ -1070,6 +1131,14 @@ class MainModel {
 
             return isValid;
         });
+
+        i = 0;
+        // update the import map
+        while (i < combos.length) {
+            const fileName = combos[i].file;
+            this.#fileComboMap.set(fileName.substring(fileName.lastIndexOf("/") + 1).replace(/\.[^/.]+$/,"") + "_" + String(combos[i].comboNum), i);
+            i++;
+        }
 
         return filteredCombos;
     }

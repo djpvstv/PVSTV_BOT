@@ -28,6 +28,7 @@ class ComboFilterModal {
         minNumMoves: 0,
         maxNumMoves: 99,
         doesKill: false,
+        mustBeClean: false,
         ruleList: []
     };
     
@@ -82,7 +83,7 @@ class ComboFilterModal {
     createFlavorMap () {
         this.#flavorMap = this.#controller.getFlavorMap();
 
-        this.#flavorOrder = [0, 1, 4, 5, 6, 7, 2, 3];
+        this.#flavorOrder = [0, 1, 4, 5, 6, 7, 2, 3, 8, 9];
     }
 
     getFlavorOrder () {
@@ -128,10 +129,16 @@ class ComboFilterModal {
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 dropped-label">
+                            <div class="col-md-3 dropped-label">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="doesKill">
-                                    <label class="form-check-label" for="doesKill">Combos must Kill</label>
+                                    <label class="form-check-label" for="doesKill">Must Kill</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 dropped-label">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="mustBeClean">
+                                    <label class="form-check-label" for="mustBeClean">Must be clean</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -267,6 +274,12 @@ class ComboFilterModal {
             this.#currentRules.doesKill = evt.target.checked;
         });
 
+        // is clean toggle
+        document.getElementById('mustBeClean').checked = this.#currentRules.mustBeClean;
+        document.getElementById('mustBeClean').addEventListener("click", (evt) => {
+            this.#currentRules.mustBeClean = evt.target.checked;
+        });
+
         // Minimum Number of Moves input
         document.getElementById('minNumMoves').addEventListener("change", (evt) => {
             const newVal = parseInt(evt.target.value);
@@ -391,6 +404,9 @@ class ComboFilterModal {
             if (Object.hasOwnProperty.call(args.params, 'doesKill')) {
                 this.#currentRules.doesKill = args.params.doesKill;
             }
+            if (Object.hasOwnProperty.call(args.params, 'mustBeClean')) {
+                this.#currentRules.mustBeClean = args.params.mustBeClean;
+            }
             if (Object.hasOwnProperty.call(args.params, 'ruleList')) {
                 this.#currentRules.ruleList = [];
                 args.params.ruleList.forEach(r => {
@@ -502,7 +518,7 @@ class ComboFilterModal {
         const inputDiv = document.getElementById("form-0-input");
         const buttonDiv = document.getElementById("rule0_add");
         // Depending on flavor, validation is done elsewhere
-        const bNeedsValidation = [0, 1, 2, 3].includes(this.#inputFlavor);
+        const bNeedsValidation = [0, 1, 2, 3, 8, 9].includes(this.#inputFlavor);
 
         if (bNeedsValidation) {
             if (args) {

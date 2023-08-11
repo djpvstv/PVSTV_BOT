@@ -11,7 +11,8 @@ class SettingsModalView {
     #idMap = null;
     #modalTitle = "Settings";
 
-    #MAX_FRAME_LENIENCY = 1200;
+    #MAX_FRAME_LENIENCY = 120;
+    #MAX_FRAME_PRE_POST_COMBO = 300;
 
     constructor ( controller, appState ) {
         this.#controller = controller;
@@ -52,6 +53,8 @@ class SettingsModalView {
         this.#idMap.set("i1", "settingsModal_batch_size_input");
         this.#idMap.set("i2", "settingsModal_frame_leniency_input");
         this.#idMap.set("i3", "settingsModal_pagination_button");
+        this.#idMap.set("i4", "settingsModal_preReplay_frames_input");
+        this.#idMap.set("i5", "settingsModal_postReplay_frame_input");
         this.#idMap.set("i3d", "settingsModal_pagination_dropdown");
         this.#idMap.set("c1", "settingsModal_confirm_button");
         this.#idMap.set("c2", "settingsModal_cancel_button");
@@ -99,13 +102,13 @@ class SettingsModalView {
                             <div class="col-md-4">
                                 <div class="settingsInputWrapper">
                                     <label for="${this.#idMap.get("i1")}">Batch Size</label>
-                                    <input type="number" class="form-control settingsInput" id="${this.#idMap.get("i1")}" placeholder="${this.#appState.getBatchSize()}">
+                                    <input type="number" class="form-control settingsInput" id="${this.#idMap.get("i1")}" value="${this.#appState.getBatchSize()}">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="settingsInputWrapper">
                                     <label for="${this.#idMap.get("i2")}">Frame Leniency</label>
-                                    <input type="number" class="form-control settingsInput" id="${this.#idMap.get("i2")}" placeholder="${this.#appState.getFrameLeniency()}">
+                                    <input type="number" class="form-control settingsInput" id="${this.#idMap.get("i2")}" value="${this.#appState.getFrameLeniency()}" min="0" max="${this.#MAX_FRAME_LENIENCY}">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -122,6 +125,22 @@ class SettingsModalView {
                                     </ul>
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-4">
+                                <div class="settingsInputWrapper">
+                                    <label for="${this.#idMap.get("i4")}">Pre-Replay Frames</label>
+                                    <input type="number" class="form-control settingsInput" id="${this.#idMap.get("i4")}" value="${this.#appState.getPreReplayFrames()}" min="0" max="${this.#MAX_FRAME_PRE_POST_COMBO}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="settingsInputWrapper">
+                                    <label for="${this.#idMap.get("i5")}">Post-Replay Frames</label>
+                                    <input type="number" class="form-control settingsInput" id="${this.#idMap.get("i5")}" value="${this.#appState.getPostReplayFrames()}" min="0" max="${this.#MAX_FRAME_PRE_POST_COMBO}">
+                                </div>
+                            </div>
+                            <div class="col-md-2"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -160,15 +179,21 @@ class SettingsModalView {
             const batchSize = parseInt(this.getElementById("i1").value);
             const frameLeniency = parseInt(this.getElementById("i2").value);
             const paginationSize = parseInt(this.getElementById("i3").value);
+            const preFrames = parseInt(this.getElementById("i4").value);
+            const postFrames = parseInt(this.getElementById("i5").value);
 
             if (batchSize > 0) this.#appState.setBatchSize(batchSize);
-            if (frameLeniency > 0 && frameLeniency < this.#MAX_FRAME_LENIENCY) this.#appState.setFrameLeniency(frameLeniency);
-            if (paginationSize > 9 && paginationSize < 201) this.#appState.setHitsPerPage(paginationSize);
+            if (frameLeniency >= 0 && frameLeniency <= this.#MAX_FRAME_LENIENCY) this.#appState.setFrameLeniency(frameLeniency);
+            if (paginationSize > 9 && paginationSize <= 200) this.#appState.setHitsPerPage(paginationSize);
+            if (preFrames >= 0 && preFrames <= this.#MAX_FRAME_PRE_POST_COMBO) this.#appState.setPreReplayFrames(preFrames);
+            if (postFrames >= 0 && postFrames <= this.#MAX_FRAME_PRE_POST_COMBO) this.#appState.setPostReplayFrames(postFrames);
 
             this.#controller.cb_updateNonPathSettings({
-                batchSize: batchSize ? batchSize : 20,
-                frameLeniency: frameLeniency ? frameLeniency : 45,
-                paginationSize: paginationSize ? paginationSize : 100
+                batchSize: this.#appState.getBatchSize(),
+                frameLeniency: this.#appState.getFrameLeniency(),
+                paginationSize: this.#appState.getHitsPerPage(),
+                preReplayFrames: this.#appState.getPreReplayFrames(),
+                postReplayFrames: this.#appState.getPostReplayFrames()
             });
         });
 

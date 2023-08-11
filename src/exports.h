@@ -63,10 +63,13 @@ namespace slip {
 		int                    endFrame = -1;
 		float                  startPercent = -1;
 		float                  endPercent = -1;
+		float				   startPercentPlayer = -1;
+		float                  endPercentPlayer = -1;
 		float                  currentPercent = -1;
 		std::vector<ComboMove> moves;
 		bool                   didKill = false;
 		int                    lastHitBy = -1;
+		bool				   wasPlayerInDisadvantage = false;
 	};
 
 	struct Conversion {

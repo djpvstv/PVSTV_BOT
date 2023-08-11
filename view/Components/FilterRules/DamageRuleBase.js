@@ -18,7 +18,7 @@ class DamageRuleBase extends RuleBase {
     }
 
     static validateInputForMainInput (newVal, listDiv) {
-        return Number.isInteger(newVal) && newVal > -1;
+        return Number.isInteger(parseFloat(newVal)) && newVal > -1;
     }
 
     static alterInputElementForFlavor (inputDiv, dataListDiv, dataListHTML) {

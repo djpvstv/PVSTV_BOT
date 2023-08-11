@@ -98,3 +98,27 @@ test("Check Character Filter", async () => {
     expect(filteredData.length).toBe(1);
     expect(filteredData[0].opponent_char).toBe(hasCharacter);
 });
+
+
+// This test is useless in that it can't await the results
+// But it will plot an actual output, so run it anyway
+test("Tag and Character Search on Replay", async () => {
+    // Setup
+    const comboPath = path.join(__dirname, "testFiles");
+
+    const targetChar = 23; // Roy
+    const targetTag = "PVSTV#1"; // Roy's tag
+
+    // Set up test worker
+    let data;
+    const worker = model.createWorkerForTest();
+    const e = worker.once("message", async (workerData) => {
+        console.log(workerData);
+        data = workerData;
+    });
+
+    // Call
+    model.setDirectory(comboPath);
+    model.setCurrentFiles(["Game_1.slp"]);
+    model.findCombosFromCharTag(null, null, targetChar, targetTag, 1, false);
+});

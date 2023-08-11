@@ -5,6 +5,8 @@ class AppState {
     #hitsPerPage = 100;
     #isoPath = '';
     #slippiPath = '';
+    #postReplayFrames = 0;
+    #preReplayFrames = 120;
 
     getFoundTags () {
         return this.#foundTags;
@@ -52,6 +54,22 @@ class AppState {
 
     setHitsPerPage (val) {
         this.#hitsPerPage = val;
+    }
+
+    getPreReplayFrames () {
+        return this.#preReplayFrames;
+    }
+
+    setPreReplayFrames (val) {
+        this.#preReplayFrames = val;
+    }
+
+    getPostReplayFrames () {
+        return this.#postReplayFrames;
+    }
+    
+    setPostReplayFrames (val) {
+        this.#postReplayFrames = val;
     }
 }
 

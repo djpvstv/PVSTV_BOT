@@ -510,35 +510,50 @@ class AccordionView {
             const playerColor = combo.target_color;
             const opponentColor = combo.opponent_color;
 
+            const yesPng = `<img src="./img/si_26.png" width="20" height="20">`;
+            const noPng = `<img src="./img/no.png" width="20" height="20">`;
+
             // Loop over moves
             let moveHTML = `
             <div class="accordion-combo-data">
                 <div class="row">
-                    <div class="col col-md-3">
-                        <b>Did Kill?</b>
+                    <div class="col col-md-2" data-toggle="tooltip_accordion" data-placement="top" title="Does this combo kill? Was player ever in disadvantage state?">
+                        <b>Kills? Clean?</b>
                     </div>
-                    <div class="col col-md-3">
-                        <b>Start</b>:
+                    <div class="col col-md-2">
+                        <b>Start Frame</b>:
                     </div>
-                    <div class="col col-md-3">
-                        <b>End</b>:
+                    <div class="col col-md-2">
+                        <b>End Frame</b>:
                     </div>
-                    <div class="col col-md-3">
-                        <b>Damage</b>:
+                    <div class="col col-md-2">
+                        <b>Damage Dealt</b>:
+                    </div>
+                    <div class="col col-md-2">
+                        <b>Starting %</b>
+                    </div>
+                    <div class="col col-md-2">
+                        <b>Damage Taken</b>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col col-md-3">
-                        ${combo.combo.didKill}
+                    <div class="col col-md-2">
+                        ${combo.combo.didKill === 'true' ? yesPng : noPng} / ${combo.combo.wasInDisadvantage === 'false' ? yesPng : noPng}
                     </div>
-                    <div class="col col-md-3">
+                    <div class="col col-md-2">
                         ${combo.combo.startFrame}
                     </div>
-                    <div class="col col-md-3">
+                    <div class="col col-md-2">
                         ${combo.combo.endFrame}
                     </div>
-                    <div class="col col-md-3">
-                        ${(combo.combo.endPercent - combo.combo.startPercent).toFixed(2)}
+                    <div class="col col-md-2">
+                        ${(combo.combo.opponentEndPercent - combo.combo.opponentStartPercent).toFixed(2)}
+                    </div>
+                    <div class="col col-md-2">
+                        ${parseFloat(combo.combo.playerStartPercent).toFixed(2)}
+                    </div>
+                    <div class="col col-md-2">
+                        ${(combo.combo.playerEndPercent - combo.combo.playerStartPercent).toFixed(2)}
                     </div>
                 </div>
                 <div class="row accordion-combo-data-extra-space">
