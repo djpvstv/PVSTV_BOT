@@ -14,3 +14,4 @@ temp.json
 release/bundle.js
 release/bundle.js.LICENSE.txt
 test/testFiles/giantComboTestData.json
+out/
