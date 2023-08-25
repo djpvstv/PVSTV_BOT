@@ -554,7 +554,8 @@ class MainModel {
                 needsPagination: bNeedsPagination,
                 totalPage: totalNumPages,
                 hitsThisPage: comboData.length,
-                hitsTotal: numCombos
+                hitsTotal: numCombos,
+                updateScrollbar: true
             }
         });
     }
@@ -676,7 +677,10 @@ class MainModel {
         return bReturn;
     }
 
-    async updateComboPagination ( event, buttonID, targetPage ) {
+    async updateComboPagination ( event, buttonID, targetPage , bUpdateScrollbar) {
+        if (bUpdateScrollbar !== false) {
+            bUpdateScrollbar = true;
+        }
         if (this.#comboInfo && this.#comboInfo.length > 0) {
             let parsedData;
             if (this.#isFilterOn) {
@@ -702,7 +706,8 @@ class MainModel {
                     page: targetPage,
                     totalPage: totalNumPages,
                     hitsThisPage: parsedData.length,
-                    hitsTotal: numCombos
+                    hitsTotal: numCombos,
+                    updateScrollbar: bUpdateScrollbar
                 }
             });
         }
@@ -954,13 +959,15 @@ class MainModel {
     }
 
     hideCombo (event, args) {
+        // Need to send a flag to not change the position of the scroll bar here
         const game = args.game;
         const comboNum = args.combo;
         const comboIndex = this.#fileComboMap.get(game + "_" + comboNum);
         if (this.#comboInfo[comboIndex]) {
             const currPage = args.page;
+            const bUpdateScrollbar = false;
             this.#comboInfo[comboIndex].is_manually_hidden = true;
-            this.updateComboPagination(event, null, currPage);
+            this.updateComboPagination(event, null, currPage, bUpdateScrollbar);
         }
     }
 

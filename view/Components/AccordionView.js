@@ -495,6 +495,7 @@ class AccordionView {
         const accordDiv = document.getElementById(parentAccordionID);
         let skeletonInternal = ``;
         let i = 0;
+        const bUpdateScrollbar = event.updateScrollbar;
         
         while (i < numCombos) {
             const combo = event.combos[i];
@@ -694,7 +695,9 @@ class AccordionView {
 
         this.createLimitedBootstrapObjects();
         this.createLimitedTooltipObjects();
-        document.getElementById(this.#outerAccordionID).scrollTop = 0;
+        if (bUpdateScrollbar) {
+            document.getElementById(this.#outerAccordionID).scrollTop = 0;
+        }
     }
 
     onlyUnique(value, index, array) {

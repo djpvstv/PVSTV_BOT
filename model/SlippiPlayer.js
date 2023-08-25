@@ -71,9 +71,7 @@ class SlippiPlayer {
                 params.push(join(this.#appDataPath, "queue.json"));
                 params.push("-e");
                 params.push(this.#isoPath);
-                params.push("--cout");
                 params.push("--batch");
-                // params.push("--hide-seekbar");
 
                 this.#isBusy = true;
                 try {
