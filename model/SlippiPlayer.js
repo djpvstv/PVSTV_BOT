@@ -73,7 +73,7 @@ class SlippiPlayer {
                 params.push(this.#isoPath);
                 params.push("--cout");
                 params.push("--batch");
-                params.push("--hide-seekbar");
+                // params.push("--hide-seekbar");
 
                 this.#isBusy = true;
                 try {
@@ -110,9 +110,7 @@ class SlippiPlayer {
 
         const outerJSON = {
             mode: "queue",
-            replay: "",
-            isRealTimeMode: false,
-            outputOverlayFiles: true,
+            commandId: Math.random().toString(36).slice(2),
             queue: queue
         };
 

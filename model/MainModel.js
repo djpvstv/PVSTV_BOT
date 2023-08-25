@@ -765,7 +765,8 @@ class MainModel {
         this.writeWorkerLog("Process for Combos, Tag", JSON.stringify({
             tag: tag,
             chunk: chunk,
-            frameLeniency: this.getFrameLeniency()
+            frameLeniency: this.getFrameLeniency(),
+            files: this.#currentFiles
         }));
 
         this.#worker.postMessage({
@@ -787,7 +788,8 @@ class MainModel {
         this.writeWorkerLog("Process for Combos, Char", JSON.stringify({
             char: char,
             chunk: chunk,
-            frameLeniency: this.getFrameLeniency()
+            frameLeniency: this.getFrameLeniency(),
+            files: this.#currentFiles
         }));
 
         this.#worker.postMessage({
@@ -811,7 +813,8 @@ class MainModel {
             char: char,
             color: color,
             chunk: chunk,
-            frameLeniency: this.getFrameLeniency()
+            frameLeniency: this.getFrameLeniency(),
+            files: this.#currentFiles
         }));
 
         this.#worker.postMessage({
@@ -837,7 +840,8 @@ class MainModel {
                 char: char,
                 tag: tag,
                 chunk: chunk,
-                frameLeniency: this.getFrameLeniency()
+                frameLeniency: this.getFrameLeniency(),
+                files: this.#currentFiles
             }));
         }
 
@@ -864,7 +868,8 @@ class MainModel {
             tag: tag,
             color: color,
             chunk: chunk,
-            frameLeniency: this.getFrameLeniency()
+            frameLeniency: this.getFrameLeniency(),
+            files: this.#currentFiles
         }));
 
         this.#worker.postMessage({
@@ -901,9 +906,11 @@ class MainModel {
         let i = 0;
         const tempCombos = this.getFileredCombosFromAll();
         while (i < tempCombos.length) {
+            const bDidKill = tempCombos[i].combo.didKill === 'true';
+            const endFrame = parseInt(tempCombos[i].combo.endFrame) + this.#postReplayFrames;
             combos.push({
-                startFrame: parseInt(tempCombos[i].combo.startFrame) - 120,
-                endFrame: parseInt(tempCombos[i].combo.endFrame),
+                startFrame: parseInt(tempCombos[i].combo.startFrame) - this.#preReplayFrames,
+                endFrame: bDidKill ? endFrame + 240: endFrame,
                 filePath: tempCombos[i].file
             });
             i++;

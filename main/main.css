@@ -1,16 +1,16 @@
 @font-face {
     font-family: "arimo-bold";
-    src: url("./font/Arimo-Bold.ttf") format("truetype");
+    src: url("./../font/Arimo-Bold.ttf") format("truetype");
 }
 
 @font-face {
     font-family: "arimo-regular";
-    src: url("./font/Arimo-Regular.ttf") format("truetype");
+    src: url("./../font/Arimo-Regular.ttf") format("truetype");
 }
 
 @font-face {
     font-family: "arimo-medium";
-    src: url("./font/Arimo-Medium.ttf") format("truetype");
+    src: url("./../font/Arimo-Medium.ttf") format("truetype");
 }
 
 @keyframes background-pan {
@@ -241,11 +241,11 @@ div.nav-tabs > button.nav-link.active {
     order: -1;
     margin-left: 0;
     margin-right:0.5em;
-    background-image: url("./Bootstrap/svg/caret-right-fill.svg");
+    background-image: url("./../Bootstrap/svg/caret-right-fill.svg");
 }
 
 .accordion-button:not(.collapsed-icon)::after {
-    background-image: url("./Bootstrap/svg/caret-up-fill.svg");
+    background-image: url("./../Bootstrap/svg/caret-up-fill.svg");
     transform: var(--bs-accordion-btn-icon-transform);
 }
 
@@ -253,11 +253,11 @@ div.nav-tabs > button.nav-link.active {
     order: -1;
     margin-left: 0;
     margin-right:0.5em;
-    background-image: url("./Bootstrap/svg/caret-right.svg");
+    background-image: url("./../Bootstrap/svg/caret-right.svg");
 }
 
 .accordion-button-sub:not(.collapsed-icon)::after {
-    background-image: url("./Bootstrap/svg/caret-up.svg");
+    background-image: url("./../Bootstrap/svg/caret-up.svg");
     transform: var(--bs-accordion-btn-icon-transform);
 }
 
@@ -495,15 +495,15 @@ li.context-item > span {
 }
 
 .play-icon {
-    background: url("./Bootstrap/svg/play-fill.svg");
+    background: url("./../Bootstrap/svg/play-fill.svg");
 }
 
 .trash-icon {
-    background: url("./Bootstrap/svg/trash3-fill.svg");
+    background: url("./../Bootstrap/svg/trash3-fill.svg");
 }
 
 .edit-icon {
-    background: url("./Bootstrap/svg/pencil-square.svg");
+    background: url("./../Bootstrap/svg/pencil-square.svg");
 }
 
 .target-border {
@@ -737,4 +737,11 @@ input:-internal-autofill-selected {
 #parseSlippi_times_table > table {
     border: solid 3px var(--bs-border-color);
     border-radius: 3px;
+}
+
+.pvstvbot-gif {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
 }

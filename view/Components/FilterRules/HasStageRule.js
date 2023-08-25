@@ -23,7 +23,7 @@ class HasStageRule extends RuleBase {
             dataListHTML = `${dataListHTML}
                 <li class="dropdown-item" value="${args.stageIDs[i]}">
                     <input type="checkbox">
-                    <img src="./img/st_${args.stageIDs[i]}.png" width="20" height="20">
+                    <img src="./../img/st_${args.stageIDs[i]}.png" width="20" height="20">
                     ${args.stageNames[i]}
                 </li>
             `;
@@ -91,9 +91,9 @@ class HasStageRule extends RuleBase {
         this.option.forEach(f => {
             imageDiv = `${imageDiv}
             <div class="char-box" value="${f}" data-toggle="tooltip_filterModal" data-placement="top" title="${Utility.getStageNameFromID(f)}">
-                <img class="gliphicon" src="./img/st_${f}.png" width="20" height="20">
+                <img class="gliphicon" src="./../img/st_${f}.png" width="20" height="20">
                 <svg class="x">
-                    <image href="./Bootstrap/svg/x.svg" heigth="20" width="20">
+                    <image href="./../Bootstrap/svg/x.svg" heigth="20" width="20">
                 </svg>
                 <input class="gliphicon-box" value="" id="form-${ruleNum}-input" disabled></input>
             </div>`;

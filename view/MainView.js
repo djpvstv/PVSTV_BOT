@@ -1,10 +1,10 @@
 const NavBarView = require("./NavBarView");
 const {EventEmitter} = require("events");
-const ProgressView = require("./Components/ProgressView");
-const {FindSlippiModal} = require("./Components/FindSlippiModal");
-const {ComboFilterModal} = require("./Components/ComboFilterModal");
-const SettingsModal = require("./Components/SettingsModal");
-const NotesModal = require("./Components/NotesModal");
+const ProgressModal = require("./Components/Modals/ProgressModal");
+const FindSlippiModal = require("./Components/Modals/FindSlippiModal");
+const ComboFilterModal = require("./Components/Modals/ComboFilterModal");
+const SettingsModal = require("./Components/Modals/SettingsModal");
+const NotesModal = require("./Components/Modals/NotesModal");
 
 class MainView extends EventEmitter {
 
@@ -33,7 +33,7 @@ class MainView extends EventEmitter {
     }
 
     createSpinners( controller, appState ) {
-        this.#Spinner = new ProgressView( controller.getProgressController(), appState );
+        this.#Spinner = new ProgressModal( controller.getProgressController(), appState );
         this.#SlippiPathSpinner = new FindSlippiModal( controller.getSlippiPathController(), appState );
         this.#ComboFilterModal = new ComboFilterModal( controller.getComboFilterController(), appState );
         this.#SettingsModal = new SettingsModal (controller.getSettingsController(), appState );

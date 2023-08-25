@@ -31,9 +31,9 @@ extern "C" {
 			void resetParseWork();
 			void resetComboWork();
 			void resetMoveWork();
-			void basicParseSlippiFromPaths(std::vector<std::string> paths);
+			void basicParseSlippiFromPaths(std::vector<std::wstring> paths);
 			std::string printBasicParseSlippiFromPaths();
-			void parseSlippiFromPaths(std::vector<std::string> paths, slip::TargetParams& t);
+			void parseSlippiFromPaths(std::vector<std::wstring> paths, slip::TargetParams& t);
 			std::string printSlippiCombosFromPaths();
 			std::string printSlippiMovesFromPaths();
 		private:
