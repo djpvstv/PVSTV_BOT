@@ -58,25 +58,25 @@ class FindComboView extends ParseViewBase {
                             <ul class="context-menu">
                                 <li class="context-item" id="${this.idMap.get("c1l1")}">
                                     <svg class="icon">
-                                        <image xlink:href="./Bootstrap/svg/play.svg" width="28" height="28" y="-2"/>
+                                        <image xlink:href="./../Bootstrap/svg/play.svg" width="28" height="28" y="-2"/>
                                     </svg>
                                     <span>Play this combo</span>
                                 </li>
                                 <li class="context-item" id="${this.idMap.get("c1l2")}">
                                     <svg class="icon">
-                                        <image xlink:href="./Bootstrap/svg/pencil-square.svg" width="20" height="20" x="4" y="2"/>
+                                        <image xlink:href="./../Bootstrap/svg/pencil-square.svg" width="20" height="20" x="4" y="2"/>
                                     </svg>
                                     <option value="1">Open notes</option>
                                 </li>
                                 <li class="context-item" id="${this.idMap.get("c1l3")}">
                                     <svg class="icon">
-                                        <image xlink:href="./Bootstrap/svg/x.svg" width="30" height="30" x="-2" y="-2"/>
+                                        <image xlink:href="./../Bootstrap/svg/x.svg" width="30" height="30" x="-2" y="-2"/>
                                     </svg>
                                     <option value="2">remove this combo</option>
                                 </li>
                                 <li class="context-item" id="${this.idMap.get("c1l4")}">
                                     <svg class="icon">
-                                        <image xlink:href="./Bootstrap/svg/arrow-counterclockwise.svg" width="28" height="28" y="-2"/>
+                                        <image xlink:href="./../Bootstrap/svg/arrow-counterclockwise.svg" width="28" height="28" y="-2"/>
                                     </svg>
                                     <option value="2">restore all combos</option>
                                 </li>
@@ -437,119 +437,119 @@ class FindComboView extends ParseViewBase {
                 <ul class="has-validation dropdown-menu dropdown-scroll" aria-labeledby="${this.idMap.get("i4b1")}" id="${this.idMap.get("i4")}"">
                     <li selected><h6 class="dropdown-header">Choose Character:</h6></li>
                     <li class="dropdown-item" value="0">
-                        <img src="./img/si_0.png" width="20" height="20">
+                        <img src="./../img/si_0.png" width="20" height="20">
                         Captain Falcon
                     </li>
                     <li class="dropdown-item" value="1">
-                        <img src="./img/si_1.png" width="20" height="20">
+                        <img src="./../img/si_1.png" width="20" height="20">
                         DK
                     </li>
                     <li class="dropdown-item" value="2">
-                        <img src="./img/si_2.png" width="20" height="20">
+                        <img src="./../img/si_2.png" width="20" height="20">
                         Fox
                     </li>
                     <li class="dropdown-item" value="3">
-                        <img src="./img/si_3.png" width="20" height="20">
+                        <img src="./../img/si_3.png" width="20" height="20">
                         Game and Watch
                     </li>
                     <li class="dropdown-item" value="4">
-                        <img src="./img/si_4.png" width="20" height="20">
+                        <img src="./../img/si_4.png" width="20" height="20">
                         Kirby
                     </li>
                     <li class="dropdown-item" value="5">
-                        <img src="./img/si_5.png" width="20" height="20">
+                        <img src="./../img/si_5.png" width="20" height="20">
                         Bowser
                     </li>
                     <li class="dropdown-item" value="6">
-                        <img src="./img/si_6.png" width="20" height="20">
+                        <img src="./../img/si_6.png" width="20" height="20">
                         Link
                     </li>
                     <li class="dropdown-item" value="7">
-                        <img src="./img/si_7.png" width="20" height="20">
+                        <img src="./../img/si_7.png" width="20" height="20">
                         Luigi
                     </li>
                     <li class="dropdown-item" value="8">
-                        <img src="./img/si_8.png" width="20" height="20">
+                        <img src="./../img/si_8.png" width="20" height="20">
                         Mario
                     </li>
                     <li class="dropdown-item" value="9">
-                        <img src="./img/si_9.png" width="20" height="20">
+                        <img src="./../img/si_9.png" width="20" height="20">
                         Marth
                     </li>
                     <li class="dropdown-item" value="10">
-                        <img src="./img/si_10.png" width="20" height="20">
+                        <img src="./../img/si_10.png" width="20" height="20">
                         Mewtwo
                     </li>
                     <li class="dropdown-item" value="11">
-                        <img src="./img/si_11.png" width="20" height="20">
+                        <img src="./../img/si_11.png" width="20" height="20">
                         Ness
                     </li>
                     <li class="dropdown-item" value="12">
-                        <img src="./img/si_12.png" width="20" height="20">
+                        <img src="./../img/si_12.png" width="20" height="20">
                         Peach
                     </li>
                     <li class="dropdown-item" value="13">
-                        <img src="./img/si_13.png" width="20" height="20">
+                        <img src="./../img/si_13.png" width="20" height="20">
                         Pikachu
                     </li>
                     <li class="dropdown-item" value="14">
-                        <img src="./img/si_14.png" width="20" height="20">
+                        <img src="./../img/si_14.png" width="20" height="20">
                         Ice Climbers
                     </li>
                     <li class="dropdown-item" value="15">
-                        <img src="./img/si_15.png" width="20" height="20">
+                        <img src="./../img/si_15.png" width="20" height="20">
                         Jigglypuff
                     </li>
                     <li class="dropdown-item" value="16">
-                        <img src="./img/si_16.png" width="20" height="20">
+                        <img src="./../img/si_16.png" width="20" height="20">
                         Samus
                     </li>
                     <li class="dropdown-item" value="17">
-                        <img src="./img/si_17.png" width="20" height="20">
+                        <img src="./../img/si_17.png" width="20" height="20">
                         Yoshi
                     </li>
                     <li class="dropdown-item" value="18">
-                        <img src="./img/si_18.png" width="20" height="20">
+                        <img src="./../img/si_18.png" width="20" height="20">
                         Zelda
                     </li>
                     <li class="dropdown-item" value="19">
-                        <img src="./img/si_19.png" width="20" height="20">
+                        <img src="./../img/si_19.png" width="20" height="20">
                         Sheik
                     </li>
                     <li class="dropdown-item" value="20">
-                        <img src="./img/si_20.png" width="20" height="20">
+                        <img src="./../img/si_20.png" width="20" height="20">
                         Falco
                     </li>
                     <li class="dropdown-item" value="21">
-                        <img src="./img/si_21.png" width="20" height="20">
+                        <img src="./../img/si_21.png" width="20" height="20">
                         Young Link
                     </li>
                     <li class="dropdown-item" value="22">
-                        <img src="./img/si_22.png" width="20" height="20">
+                        <img src="./../img/si_22.png" width="20" height="20">
                         Dr. Mario
                     </li>
                     <li class="dropdown-item" value="23">
-                        <img src="./img/si_23.png" width="20" height="20">    
+                        <img src="./../img/si_23.png" width="20" height="20">    
                         Roy
                     </li>
                     <li class="dropdown-item" value="24">
-                        <img src="./img/si_24.png" width="20" height="20">
+                        <img src="./../img/si_24.png" width="20" height="20">
                         Pichu
                     </li>
                     <li class="dropdown-item" value="25">
-                        <img src="./img/si_25.png" width="20" height="20">
+                        <img src="./../img/si_25.png" width="20" height="20">
                         Ganondorf
                     </li>
                     <li class="dropdown-item" value="26">
-                        <img src="./img/si_26.png" width="20" height="20">
+                        <img src="./../img/si_26.png" width="20" height="20">
                         Master Hand
                     </li>
                     <li class="dropdown-item" value="29">
-                        <img src="./img/si_29.png" width="20" height="20">
+                        <img src="./../img/si_29.png" width="20" height="20">
                         Gigabowser
                     </li>
                     <li class="dropdown-item" value="32">
-                        <img src="./img/si_32.png" width="20" height="20">
+                        <img src="./../img/si_32.png" width="20" height="20">
                         Popo
                     </li>
                 </ul>
@@ -561,7 +561,7 @@ class FindComboView extends ParseViewBase {
     getTargetColor (charID) {
         let dropDowns = `
         <li class="dropdown-item" value="0">
-            <img src="./img/si_${charID}.png" width="20" height="20">
+            <img src="./../img/si_${charID}.png" width="20" height="20">
             - 0
         </li>
         `;
@@ -571,7 +571,7 @@ class FindComboView extends ParseViewBase {
         while (i <= numAltCostumes) {
             dropDowns = `${dropDowns}
             <li class="dropdown-item" value="${i}">
-                <img src="./img/si_${charID}_${i}.png" width="20" height="20">
+                <img src="./../img/si_${charID}_${i}.png" width="20" height="20">
                 - ${String(i)}
             </li>
             `;

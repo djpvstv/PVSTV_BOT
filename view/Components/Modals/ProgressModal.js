@@ -1,6 +1,6 @@
-const bootstrap = require('../../Bootstrap/js/bootstrap.bundle.min');
+const bootstrap = require('../../../Bootstrap/js/bootstrap.bundle.min');
 
-class ProgressView {
+class ProgressModal {
 
     #controller = null;
     #modal = null;
@@ -66,6 +66,7 @@ class ProgressView {
                     <h1 class="modal-title fs-5" id="staticBackdropLabel">${this.#modalTitle}</h1>
                 </div>
                 <div class="modal-body">
+                    <img class="pvstvbot-gif" src="./../img/pvstvbot.gif" alt="pvstv gif" width="30px" height="auto"/>
                     <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="${percValue}" aria-valuemin="0" aria-valuemax="100" style="margin-top: 10;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: ${percValue}%">${percValue}%</div>
                     </div>
@@ -106,4 +107,4 @@ class ProgressView {
 
 }
 
-module.exports = ProgressView;
+module.exports = ProgressModal;

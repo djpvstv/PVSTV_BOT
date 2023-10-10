@@ -1,13 +1,14 @@
 {
-  "name": "pvstvbot.exe",
-  "version": "0.4",
-  "description": "The front end for clippi replacement",
-  "main": "main.js",
+  "name": "pvstvbot",
+  "version": "0.4.1",
+  "description": "The Sauce finder for Super Smash Bros Melee",
+  "main": "./main/main.js",
   "type": "commonjs",
   "target": "es6",
   "scripts": {
     "test": "test",
-    "start": "set NODE_ENV=development&& webpack && electron . --inspect-brk=9229",
+    "startP": "set NODE_ENV=production&& webpack&& electron .",
+    "start": "set NODE_ENV=development&& webpack&& electron . --inspect-brk=9229",
     "startF": "electron-forge start",
     "startProd": "set NODE_ENV=production&& webpack && electron .",
     "pack": "webpack",
@@ -16,7 +17,7 @@
     "packageF": "electron-forge package",
     "makeF": "electron-forge make"
   },
-  "author": "",
+  "author": "DJ PVSTV",
   "license": "ISC",
   "devDependencies": {
     "@electron-forge/cli": "^6.3.0",
@@ -28,6 +29,8 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "debug": "^4.3.4",
+    "electron-squirrel-startup": "^1.0.1",
     "nan": "^2.17.0",
     "node-addon-api": "*",
     "node-gyp": "^5.0.1",
@@ -36,5 +39,35 @@
   "engines": {
     "node": "^18.2.0"
   },
-  "gypfile": true
+  "gypfile": true,
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "icon": "img/noodles.ico",
+        "ignore": [
+          "webpack.config.js",
+          ".gitignore",
+          "view",
+          "controller",
+          "jQuery",
+          "MDB",
+          ".vscode",
+          "binding.gyp",
+          "test",
+          "src",
+          "Utility.js"
+        ]
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "setupIcon": "img/noodles.ico",
+            "loadingGif": "img/render.gif",
+            "name": "pvstvbot"
+          }
+        }
+      ]
+    }
+  }
 }

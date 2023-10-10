@@ -1,10 +1,15 @@
-require('v8-compile-cache');
-const { env } = require('node:process');
 const { app, BrowserWindow, ipcMain } = require('electron');
-if (require('electron-squirrel-startup')) app.quit();
+try {
+    if (require('electron-squirrel-startup')) app.quit();
+} catch (err) {
+    console.log(err);
+}
+
+const { env } = require('node:process');
+require('v8-compile-cache');
 const path = require('path');
 const { join } = require('path');
-const mainModulePath = path.join(__dirname, 'model', 'MainModel');
+const mainModulePath = path.join(__dirname, '..', 'model', 'MainModel');
 const MainModel = require(mainModulePath);
 
 // Communications from Controllers
@@ -31,9 +36,9 @@ const createWindow = async () => {
     });
 
     if (isDebug) { 
-        win.loadFile('indexDebug.html');
+        win.loadFile(path.join(__dirname, 'indexDebug.html'));
     } else {
-        win.loadFile('index.html');
+        win.loadFile(path.join(__dirname, 'index.html'));
     
     }
     win.setMenu(null);
@@ -41,7 +46,7 @@ const createWindow = async () => {
     if (isDebug) {
         win.webContents.openDevTools();
     }
-    const iconPath = join(__dirname, 'img', 'noodles.ico');
+    const iconPath = join(__dirname, '..', 'img', 'noodles.ico');
     const appVersion = app.getVersion();
     win.setIcon(iconPath);
     win.setTitle("PVSTVBOT.exe - v" + appVersion);

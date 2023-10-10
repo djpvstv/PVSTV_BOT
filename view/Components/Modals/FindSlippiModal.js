@@ -1,4 +1,4 @@
-const bootstrap = require('../../Bootstrap/js/bootstrap.bundle.min');
+const bootstrap = require('../../../Bootstrap/js/bootstrap.bundle.min');
 
 class FindSlippiModal {
 
@@ -123,4 +123,4 @@ class FindSlippiModal {
     }
 }
 
-module.exports = {FindSlippiModal};
+module.exports = FindSlippiModal;

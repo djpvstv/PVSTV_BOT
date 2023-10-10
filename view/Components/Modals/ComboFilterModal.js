@@ -1,7 +1,7 @@
 const { include } = require('node-addon-api');
-const bootstrapBundleMin = require('../../Bootstrap/js/bootstrap.bundle.min');
-const boostrap =require('../../Bootstrap/js/bootstrap.bundle.min');
-const Utility = require("../../Utility");
+const bootstrapBundleMin = require('../../../Bootstrap/js/bootstrap.bundle.min');
+const boostrap =require('../../../Bootstrap/js/bootstrap.bundle.min');
+const Utility = require("../../../Utility");
 
 class ComboFilterModal {
 
@@ -172,7 +172,7 @@ class ComboFilterModal {
         while (i < characterIDs.length) {
             dropdownHTML = `${dropdownHTML}
                 <li class="dropdown-item" value="${i}">
-                    <img src="./img/si_${i}.png" width="20" height="20">
+                    <img src="./../img/si_${i}.png" width="20" height="20">
                     ${characters[i]}
                 </li>
             `;
@@ -181,7 +181,7 @@ class ComboFilterModal {
 
         return `<div class="dropdown">
             <button class="btn dropdown-toggle target-dropdown w-100" value="${this.#currentCharTarget}" type="button" id="filterComboSlippiModal_input_targetCharacter_dropdownbutton" data-bs-toggle="dropdown" aria-expanded="false">
-                ${this.#currentCharTarget ? `<img src="./img/si_${this.#currentCharTarget}.png" width="20" height="20"> ${Utility.getCharacterNames()[this.#currentCharTarget]}` : 'Choose Character:'}
+                ${this.#currentCharTarget ? `<img src="./../img/si_${this.#currentCharTarget}.png" width="20" height="20"> ${Utility.getCharacterNames()[this.#currentCharTarget]}` : 'Choose Character:'}
             </button>
             <ul class="has-validation dropdown-menu dropdown-scroll" aria-labeledby="filterComboSlippiModal_input_targetCharacter_dropdownbutton" id="filterComboSlippiModali_input_targetCharacter" "="">
                 ${dropdownHTML}
@@ -222,7 +222,7 @@ class ComboFilterModal {
                     ${inputDiv}
                     <div id="rule${i}_remove" class="enabled-icon" value="${i-1}">
                         <svg class="add-rule-icon">
-                            <image xlink:href="./Bootstrap/svg/dash-circle.svg" width="34" height="34"/>
+                            <image xlink:href="./../Bootstrap/svg/dash-circle.svg" width="34" height="34"/>
                         </svg>
                     </div>
                 </div>
@@ -255,7 +255,7 @@ class ComboFilterModal {
                 <datalist type="datalistOptions" id="form-0-datalist"></datalist>
                 <div id="rule0_add" class="disabled-icon">
                     <svg class="add-rule-icon">
-                        <image xlink:href="./Bootstrap/svg/plus-circle.svg" width="34" height="34"/>
+                        <image xlink:href="./../Bootstrap/svg/plus-circle.svg" width="34" height="34"/>
                     </svg>
                 </div>
             </div>
@@ -587,4 +587,4 @@ class ComboFilterModal {
     
 }
 
-module.exports = {ComboFilterModal};
+module.exports = ComboFilterModal;

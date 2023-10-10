@@ -62,7 +62,7 @@ class StringRuleBase extends RuleBase {
             <div class="id-box-container" value="${f}">
                 <div class="id-box" data-toggle="tooltip_filterModal" data-placement="top" title="${Utility.getActionNameFromID(f, charTarget)}" id="form-${i}-input" disabled>${preFix}${f}</div>
                 <svg class="x">
-                    <image href="./Bootstrap/svg/x.svg" heigth="20" width="20">
+                    <image href="./../Bootstrap/svg/x.svg" heigth="20" width="20">
                 </svg>
             </div>`;
             j++;

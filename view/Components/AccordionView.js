@@ -199,7 +199,7 @@ class AccordionView {
                 const thisCharCount = allCharList.filter(c => c == character).length;
                 characterIcons = `${characterIcons}
                 <div>
-                    <img src="img/si_${character}.png" width="24" height="24"> (${thisCharCount})
+                    <img src="./../img/si_${character}.png" width="24" height="24"> (${thisCharCount})
                 </div>`;
             });
 
@@ -364,10 +364,10 @@ class AccordionView {
                 buttonDiv = `
                     <div class="d-gap justify-content-center">
                         <div id="${this.#importID}" class="btn btn-import" data-toggle="tooltip_accordion" data-placement="top" title="Import">
-                            <img src="./Bootstrap/svg/box-arrow-down.svg" class="import-export-button import-button">
+                            <img src="./../Bootstrap/svg/box-arrow-down.svg" class="import-export-button import-button">
                         </div>
                         <div id="${this.#exportID}" class="btn btn-export" data-toggle="tooltip_accordion" data-placement="top" title="Export">
-                            <img src="./Bootstrap/svg/box-arrow-up.svg" class="import-export-button">
+                            <img src="./../Bootstrap/svg/box-arrow-up.svg" class="import-export-button">
                         </div>
                         <button id="${this.#filterID}" type="button" class="btn btn-dark btn-filter">Filter</button>
                         <button id="${this.#playAllID}" type="button" class="btn btn-primary">Play All</button>
@@ -377,7 +377,7 @@ class AccordionView {
                 buttonDiv = `
                     <div class="d-gap justify-content-center">
                         <div id="${this.#importID}" class="btn btn-import" data-toggle="tooltip_accordion" data-placement="top" title="Import">
-                            <img src="./Bootstrap/svg/box-arrow-down.svg" class="import-export-button import-button">
+                            <img src="./../Bootstrap/svg/box-arrow-down.svg" class="import-export-button import-button">
                         </div>
                     </div>
                 `;
@@ -495,6 +495,7 @@ class AccordionView {
         const accordDiv = document.getElementById(parentAccordionID);
         let skeletonInternal = ``;
         let i = 0;
+        const bUpdateScrollbar = event.updateScrollbar;
         
         while (i < numCombos) {
             const combo = event.combos[i];
@@ -510,8 +511,8 @@ class AccordionView {
             const playerColor = combo.target_color;
             const opponentColor = combo.opponent_color;
 
-            const yesPng = `<img src="./img/si_26.png" width="20" height="20">`;
-            const noPng = `<img src="./img/no.png" width="20" height="20">`;
+            const yesPng = `<img src="./../img/si_26.png" width="20" height="20">`;
+            const noPng = `<img src="./../img/no.png" width="20" height="20">`;
 
             // Loop over moves
             let moveHTML = `
@@ -550,7 +551,7 @@ class AccordionView {
                         ${(combo.combo.opponentEndPercent - combo.combo.opponentStartPercent).toFixed(2)}
                     </div>
                     <div class="col col-md-2">
-                        ${parseFloat(combo.combo.playerStartPercent).toFixed(2)}
+                        ${parseFloat(combo.combo.opponentStartPercent).toFixed(2)}
                     </div>
                     <div class="col col-md-2">
                         ${(combo.combo.playerEndPercent - combo.combo.playerStartPercent).toFixed(2)}
@@ -655,15 +656,15 @@ class AccordionView {
                     <div class="accordion-item outer-accordion-item">
                         <h2 class="accordion-header outer-accordion-header" id="${moveHeaderID}">
                             <button id="${moveHeaderButtonID}" class="accordion-button collapsed collapsed-icon">
-                                <img src="./img/si_${playerColorString}.png" width="20" height="20">
+                                <img src="./../img/si_${playerColorString}.png" width="20" height="20">
                                 <p class="p-move">${playerTag} combos</p>
-                                <img src="./img/si_${opponentColorString}.png" width="20" height="20">
+                                <img src="./../img/si_${opponentColorString}.png" width="20" height="20">
                                 <p class="p-move">${opponentTag} on ${utility.getStageNameFromID(stageID)} (${combo.combo.moves.length} moves)</p>
                                 <div id="${movePlayButtonID}" class="play-button-div" data-toggle="tooltip_accordion" data-placement="top" title="Play this combo">
-                                    <img src="./Bootstrap/svg/play-fill.svg" class="play-button-icon">
+                                    <img src="./../Bootstrap/svg/play-fill.svg" class="play-button-icon">
                                 </div>
                                 <div id="${moveMeatballsButtonID}" class="meatballs-div" data-toggle="tooltip_accordion" data-placement="top" title="Combo options">
-                                    <img src="./Bootstrap/svg/three-dots.svg" class="meatballs-icon">
+                                    <img src="./../Bootstrap/svg/three-dots.svg" class="meatballs-icon">
                                 </div>
                             </button>
                         </h2>
@@ -694,7 +695,9 @@ class AccordionView {
 
         this.createLimitedBootstrapObjects();
         this.createLimitedTooltipObjects();
-        document.getElementById(this.#outerAccordionID).scrollTop = 0;
+        if (bUpdateScrollbar) {
+            document.getElementById(this.#outerAccordionID).scrollTop = 0;
+        }
     }
 
     onlyUnique(value, index, array) {

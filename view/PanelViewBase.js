@@ -19,7 +19,7 @@ class ParseViewBase {
             <div class="invalid-feedback">
                 Please enter a directory with Slippi (.slp) replays.
             </div>
-            <img src="./Bootstrap/svg/gear.svg" class="gear-icon settings-icon" id=${settingsButtonID}>
+            <img src="./../Bootstrap/svg/gear.svg" class="gear-icon settings-icon" id=${settingsButtonID}>
             <div class="valid-feedback">
                 Valid directory
             </div>

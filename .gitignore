@@ -15,3 +15,6 @@ release/bundle.js
 release/bundle.js.LICENSE.txt
 test/testFiles/giantComboTestData.json
 out/
+img/render.gif
+PVSTVBOT-win-x64/
+test/Engine.test.js

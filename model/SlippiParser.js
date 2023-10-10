@@ -263,24 +263,25 @@ function processDirectoryForCombosByCharTagColor (files, dir, chunkSize, char, t
 }
 
 parentPort.on('message', (message) => {
+    parseFiles = message.files;
     switch (message.evt) {
         case 'processForParse':
-            processDirectoryForParse(message.files, message.dir, message.chunk);
+            processDirectoryForParse(parseFiles, message.dir, message.chunk);
             break;
         case 'processForComboTag':
-            processDirectoryForCombosByTag(message.files, message.dir, message.chunk, message.tag, message.frameLeniency);
+            processDirectoryForCombosByTag(parseFiles, message.dir, message.chunk, message.tag, message.frameLeniency);
             break;
         case 'processForComboChar':
-            processDirectoryForCombosByChar(message.files, message.dir, message.chunk, message.char, message.frameLeniency);
+            processDirectoryForCombosByChar(parseFiles, message.dir, message.chunk, message.char, message.frameLeniency);
             break;
         case 'processForComboCharColor':
-            processDirectoryForCombosByCharColor(message.files, message.dir, message.chunk, message.char, message.color, message.frameLeniency);
+            processDirectoryForCombosByCharColor(parseFiles, message.dir, message.chunk, message.char, message.color, message.frameLeniency);
             break;
         case 'processForComboCharTag':
-            processDirectoryForCombosByCharTag(message.files, message.dir, message.chunk, message.char, message.tag, message.frameLeniency);
+            processDirectoryForCombosByCharTag(parseFiles, message.dir, message.chunk, message.char, message.tag, message.frameLeniency);
             break;
         case 'processForComboCharTagColor':
-            processDirectoryForCombosByCharTagColor(message.files, message.dir, message.chunk, message.char, message.tag, message.color, message.frameLeniency);
+            processDirectoryForCombosByCharTagColor(parseFiles, message.dir, message.chunk, message.char, message.tag, message.color, message.frameLeniency);
             break;
         case 'isCancelled':
             parentPort.postMessage({

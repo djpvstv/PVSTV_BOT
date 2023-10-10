@@ -1,14 +1,18 @@
 #include <node_api.h>
 #include <string>
+#include <locale>
+#include <codecvt>
 #include <vector>
+#include <iostream>
 
 #include "slippidll.h"
 
 slippiapi::SLParser parser;
 
-std::vector<std::string> getStringVectorFromInput(napi_env env, napi_callback_info info, bool &isValid) {
+std::vector<std::wstring> getStringVectorFromInput(napi_env env, napi_callback_info info, bool &isValid) {
     // Create a vector of strings to store the result
-    std::vector<std::string> strings;
+    std::vector<std::wstring> strings;
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 
     // Get the arguments passed to the function
     size_t argc = 1;
@@ -41,18 +45,19 @@ std::vector<std::string> getStringVectorFromInput(napi_env env, napi_callback_in
         std::string str(str_length + 1, '\0');
         napi_get_value_string_utf8(env, element, &str[0], str_length + 1, nullptr);
 
-        strings.push_back(str);
+        strings.push_back(converter.from_bytes(str));
     }
 
     return strings;
 }
 
-std::vector<std::string> GetStringVector(napi_env env, napi_value arrayValue) {
-  std::vector<std::string> stringVector;
+std::vector<std::wstring> GetStringVector(napi_env env, napi_value arrayValue) {
+  std::vector<std::wstring> stringVector;
 
   // Get the length of the JavaScript array
   uint32_t length;
   napi_get_array_length(env, arrayValue, &length);
+  std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 
   // Iterate over the JavaScript array and extract string values
   for (uint32_t i = 0; i < length; i++) {
@@ -65,7 +70,7 @@ std::vector<std::string> GetStringVector(napi_env env, napi_value arrayValue) {
     std::string str(strLength, '\0');
     napi_get_value_string_utf8(env, element, &str[0], strLength + 1, nullptr);
 
-    stringVector.push_back(str);
+    stringVector.push_back(converter.from_bytes(str));
   }
 
   return stringVector;
@@ -95,6 +100,95 @@ std::string getStringFromInput(napi_env env, napi_callback_info info, bool &isVa
   napi_get_value_string_utf8(env, argv[1], &second_str[0], str_length + 1, nullptr);
 
   return second_str;
+}
+
+void logToConsole(napi_env env, napi_callback_info info, const std::string message) {
+    napi_status status;
+
+    // Convert the C string to a JavaScript string
+    napi_value logMessage;
+    std::cerr << " to log: " << message << std::endl;
+    status = napi_create_string_utf8(env, message.c_str(), NAPI_AUTO_LENGTH, &logMessage);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to create log message");
+    }
+
+    // Call console.log with the message
+    napi_value global;
+    status = napi_get_global(env, &global);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to get global object");
+    }
+
+    napi_value console;
+    status = napi_get_named_property(env, global, "console", &console);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to get console object");
+    }
+
+    napi_value logFunc;
+    status = napi_get_named_property(env, console, "log", &logFunc);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to get console.log function");
+    }
+
+    napi_value logArgs[] = { logMessage };
+    status = napi_call_function(env, global, logFunc, 1, logArgs, nullptr);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to call console.log");
+    }
+
+    // Return undefined or another value if needed
+    napi_value result;
+    status = napi_get_undefined(env, &result);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to get undefined value");
+    }
+}
+
+void wlogToConsole(napi_env env, napi_callback_info info, const std::wstring message) {
+    napi_status status;
+
+    // Convert the C string to a JavaScript string
+    napi_value logMessage;
+    std::wcerr << " to log: " << message << std::endl;
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+    status = napi_create_string_utf8(env, converter.to_bytes(message).c_str(), NAPI_AUTO_LENGTH, &logMessage);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to create log message");
+    }
+
+    // Call console.log with the message
+    napi_value global;
+    status = napi_get_global(env, &global);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to get global object");
+    }
+
+    napi_value console;
+    status = napi_get_named_property(env, global, "console", &console);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to get console object");
+    }
+
+    napi_value logFunc;
+    status = napi_get_named_property(env, console, "log", &logFunc);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to get console.log function");
+    }
+
+    napi_value logArgs[] = { logMessage };
+    status = napi_call_function(env, global, logFunc, 1, logArgs, nullptr);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to call console.log");
+    }
+
+    // Return undefined or another value if needed
+    napi_value result;
+    status = napi_get_undefined(env, &result);
+    if (status != napi_ok) {
+        napi_throw_error(env, nullptr, "Failed to get undefined value");
+    }
 }
 
 napi_value CreateStringArray(napi_env env, const std::vector<std::string>& strings) {
@@ -131,7 +225,7 @@ napi_value ResetComboWork(napi_env env, napi_callback_info info) {
 napi_value SimpleParse(napi_env env, napi_callback_info info) {
     // Process Input
     bool isValidInput = true;
-    std::vector<std::string> cppVec = getStringVectorFromInput(env, info, isValidInput);
+    std::vector<std::wstring> cppVec = getStringVectorFromInput(env, info, isValidInput);
 
     // Validate input
     if (!isValidInput) {
@@ -192,7 +286,7 @@ napi_value ComboParseByTag(napi_env env, napi_callback_info info) {
       return NULL;
     }
 
-    std::vector<std::string> cppVec = GetStringVector(env, argv[0]);
+    std::vector<std::wstring> cppVec = GetStringVector(env, argv[0]);
 
     napi_valuetype arg1_type;
     napi_typeof(env, argv[1], &arg1_type);
@@ -267,7 +361,7 @@ napi_value ComboParseByChar(napi_env env, napi_callback_info info) {
       return NULL;
     }
 
-    std::vector<std::string> cppVec = GetStringVector(env, argv[0]);
+    std::vector<std::wstring> cppVec = GetStringVector(env, argv[0]);
 
     // Ensure the second argument is an integer
     int32_t intValue;
@@ -334,7 +428,7 @@ napi_value ComboParseByCharColor(napi_env env, napi_callback_info info) {
       return NULL;
     }
 
-    std::vector<std::string> cppVec = GetStringVector(env, argv[0]);
+    std::vector<std::wstring> cppVec = GetStringVector(env, argv[0]);
 
     // Ensure the second argument is an integer
     int32_t charInt;
@@ -410,7 +504,7 @@ napi_value ComboParseByCharTag(napi_env env, napi_callback_info info) {
       return NULL;
     }
 
-    std::vector<std::string> cppVec = GetStringVector(env, argv[0]);
+    std::vector<std::wstring> cppVec = GetStringVector(env, argv[0]);
 
     // Ensure the second argument is an integer
     int32_t charInt;
@@ -495,7 +589,7 @@ napi_value ComboParseByCharTagColor(napi_env env, napi_callback_info info) {
       return NULL;
     }
 
-    std::vector<std::string> cppVec = GetStringVector(env, argv[0]);
+    std::vector<std::wstring> cppVec = GetStringVector(env, argv[0]);
 
     // Ensure the second argument is an integer
     int32_t charInt;

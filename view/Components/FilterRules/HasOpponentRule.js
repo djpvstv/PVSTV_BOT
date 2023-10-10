@@ -21,7 +21,7 @@ class HasOpponentRule extends RuleBase {
             dataListHTML = `${dataListHTML}
                 <li class="dropdown-item" value="${i}">
                     <input type="checkbox">
-                    <img src="./img/si_${args.charIDs[i]}.png" width="20" height="20">
+                    <img src="./../img/si_${args.charIDs[i]}.png" width="20" height="20">
                     ${args.charNames[i]}
                 </li>
             `;
@@ -89,9 +89,9 @@ class HasOpponentRule extends RuleBase {
         this.option.forEach(f => {
             imageDiv = `${imageDiv}
             <div class="char-box" value="${f}">
-                <img class="gliphicon" src="./img/si_${f}.png" width="20" height="20">
+                <img class="gliphicon" src="./../img/si_${f}.png" width="20" height="20">
                 <svg class="x">
-                    <image href="./Bootstrap/svg/x.svg" heigth="20" width="20">
+                    <image href="./../Bootstrap/svg/x.svg" heigth="20" width="20">
                 </svg>
                 <input class="gliphicon-box" value="" id="form-${ruleNum}-input" disabled></input>
             </div>`;
