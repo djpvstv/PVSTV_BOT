@@ -232,13 +232,15 @@ class MainModel {
 
         let evtName = "receiveSlippiPath";
         if (source === "settings") evtName = "receiveSlippiPathForSettings";
+        const eventArgs = {
+            success: success,
+            path: filename.filePaths[0]
+        };
         event.sender.send(evtName,{
             eventName: evtName,
-            args: {
-                success: success,
-                path: filename.filePaths[0]
-            }
+            args: eventArgs
         });
+        this.updateSlippiPath(event, eventArgs);
     }
 
     async browserForMeleeIsoPath (event, source) {
@@ -263,13 +265,15 @@ class MainModel {
 
         let evtName = "receiveSlippiPath";
         if (source === "settings") evtName = "receiveSlippiPathForSettings";
+        const eventArgs = {
+            success: success,
+            path: filename.filePaths[0]
+        };
         event.sender.send(evtName,{
             eventName: evtName,
-            args: {
-                success: success,
-                path: filename.filePaths[0]
-            }
+            args: eventArgs
         });
+        this.updateMeleeIsoPath(event, eventArgs);
     } 
 
     async updateSlippiPath (event, args) {
