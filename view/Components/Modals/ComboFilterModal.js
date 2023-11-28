@@ -283,7 +283,7 @@ class ComboFilterModal {
         // Minimum Number of Moves input
         document.getElementById('minNumMoves').addEventListener("change", (evt) => {
             const newVal = parseInt(evt.target.value);
-            if (newVal >= this.#currentRules.maxNumMoves) {
+            if (newVal > this.#currentRules.maxNumMoves) {
                 document.getElementById('minNumMoves').value = String(this.#currentRules.minNumMoves);
             } else {
                 this.#currentRules.minNumMoves = parseInt(evt.target.value);
@@ -293,7 +293,7 @@ class ComboFilterModal {
         // Maximum Number of Moves input
         document.getElementById('maxNumMoves').addEventListener("change", (evt) => {
             const newVal = parseInt(evt.target.value);
-            if (newVal <= this.#currentRules.minNumMoves) {
+            if (newVal < this.#currentRules.minNumMoves) {
                 document.getElementById('maxNumMoves').value = String(this.#currentRules.maxNumMoves);
             } else {
                 this.#currentRules.maxNumMoves = parseInt(evt.target.value);
