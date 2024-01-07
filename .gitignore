@@ -7,6 +7,7 @@ MDB/
 node_modules/
 logger.js
 test.js
+build/
 build/Release/v8engine.node
 build/binding.sln
 build/config.gypi
@@ -18,3 +19,4 @@ out/
 img/render.gif
 PVSTVBOT-win-x64/
 test/Engine.test.js
+CMakeFiles
