@@ -1,6 +1,6 @@
 {
   "name": "pvstvbot",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "The Sauce finder for Super Smash Bros Melee",
   "main": "./main/main.js",
   "type": "commonjs",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "electron-squirrel-startup": "^1.0.1",
+    "electron-squirrel-startup": "^1.0.0",
     "nan": "^2.17.0",
     "node-addon-api": "*",
     "node-gyp": "^5.0.1",

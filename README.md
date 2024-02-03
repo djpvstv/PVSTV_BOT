@@ -24,3 +24,21 @@ You can filter by move ID, e.g. "dash attack", "Side Special", by action ID, e.g
 You can also filter by specific action strings. I can look for "Grounded Raptor Boost" into "Down Air" into "Forward Aerial".
 
 You may also ensure that the combos must kill, or that the combo was clean (you didn't enter a disadvantaged state).
+
+### Build Instructions
+
+Ensure you have Node Package Manager installed an on path.
+First, in the root of the project  run `npm install
+
+To run in debug, I think an F5 should work.
+I've got a couple of tasks you can run after that. Run them in the syntax "npm run 'task'"
+
+"buildcpp" - Needed to build the shared library backend
+"pack" - Runs webpack to pack all the javascript all snugly
+
+"start" - Start
+"startF" - Start Electron Forge
+"startP" - Start packed JS code
+
+"package" - Package with Electron packager
+"packageF" - Package with Electron Forge
