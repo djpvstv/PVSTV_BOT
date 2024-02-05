@@ -8,6 +8,26 @@
 			"problemMatcher": [],
 			"label": "npm: pack",
 			"detail": "webpack"
+		},
+		{
+			"label": "Build C++ (for x64)",
+			"type": "shell",
+			"command": "./scripts/test.sh",
+			"windows": {
+				"command": "powershell",
+				"args": [
+					"-Command",
+					"Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\\.venv\\Scripts\\Activate; npm run buildcpp64"
+				]},
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new",
+				"showReuseMessage": true,
+				"clear": false
+			}
 		}
 	]
 }

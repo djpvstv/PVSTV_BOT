@@ -33,7 +33,8 @@ First, in the root of the project  run `npm install
 To run in debug, I think an F5 should work.
 I've got a couple of tasks you can run after that. Run them in the syntax "npm run 'task'"
 
-"buildcpp" - Needed to build the shared library backend
+"buildcpp64" - Needed to build the shared library backend (for x64)
+"buildcpp32" - Needed to build the shared library backend (for x32)
 "pack" - Runs webpack to pack all the javascript all snugly
 
 "start" - Start

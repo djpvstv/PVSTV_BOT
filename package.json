@@ -12,7 +12,9 @@
     "startF": "electron-forge start",
     "startProd": "set NODE_ENV=production&& webpack && electron .",
     "pack": "webpack",
-    "buildcpp": "node-gyp rebuild --target=24.0.0 --dist-url=https://electronjs.org/headers",
+    "cleancpp": "node-gyp clean",
+    "buildcpp64": "node-gyp rebuild --verbose --dist-url=https://electronjs.org/headers --arch=x64",
+    "buildcpp32": "node-gyp rebuild --verbose --dist-url=https://electronjs.org/headers --arch=ia32",
     "package": "set NODE_ENV=production&& webpack && electron-packager . --platform=win32 --arch=x64 PVSTVBOT --icon=img/noodles.ico --ignore webpack.config.js --ignore .gitignore --ignore view --ignore controller --ignore jQuery --ignore MDB --ignore .vscode --ignore binding.gyp --ignore test.js --ignore src --ignore Utility.js --overwrite",
     "packageF": "electron-forge package",
     "makeF": "electron-forge make"
@@ -32,12 +34,12 @@
     "debug": "^4.3.4",
     "electron-squirrel-startup": "^1.0.0",
     "nan": "^2.17.0",
-    "node-addon-api": "*",
-    "node-gyp": "^5.0.1",
+    "node-addon-api": "6.1.0",
+    "node-gyp": "5.1.1",
     "v8-compile-cache": "^2.3.0"
   },
   "engines": {
-    "node": "^18.2.0"
+    "node": "^18.3.0"
   },
   "gypfile": true,
   "config": {

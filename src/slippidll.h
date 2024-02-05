@@ -19,7 +19,7 @@
 #include "exports.h"
 
 // Include one slippi header that's required
-#include "ParserImplementation.h"
+#include "ParserInterface.hpp"
 
 extern "C" {
 	namespace slippiapi {
