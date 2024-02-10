@@ -26,6 +26,8 @@ namespace slip {
 		std::string printSlippiCombosFromPaths(void);
 		std::string printSlippiMovesFromPaths(void);
 
+		std::string scrapeComboTreeFromPaths(std::vector<std::wstring> paths, slip::TargetParams &t, slip::TreeSettings &ts);
+
 	private:
 		class ParserImpl;
 		std::shared_ptr<ParserImpl> m_ParserImpl;
