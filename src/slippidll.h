@@ -1,9 +1,13 @@
 #pragma once
 
-#ifdef SLIPPIDLL_EXPORTS
-#define SLIPPIDLL_API __declspec(dllexport)
+#ifdef _WIN32
+	#ifdef SLIPPIDLL_EXPORTS
+		#define SLIPPIDLL_API __declspec(dllexport)
+	#else
+		#define SLIPPIDLL_API __declspec(dllimport)
+	#endif
 #else
-#define SLIPPIDLL_API __declspec(dllimport)
+	#define SLIPPIDLL_API
 #endif
 
 // Standard Cpp includes
@@ -18,7 +22,7 @@
 // Slippi Structs I made
 #include "exports.h"
 
-// Include one slippi header that's required
+// slippc header I need
 #include "ParserInterface.hpp"
 
 extern "C" {
@@ -34,6 +38,7 @@ extern "C" {
 			void basicParseSlippiFromPaths(std::vector<std::wstring> paths);
 			std::string printBasicParseSlippiFromPaths();
 			void parseSlippiFromPaths(std::vector<std::wstring> paths, slip::TargetParams& t);
+			std::string scrapeComboTreeFromPaths(std::vector<std::wstring> paths, slip::TargetParams &t, slip::TreeSettings &ts);
 			std::string printSlippiCombosFromPaths();
 			std::string printSlippiMovesFromPaths();
 		private:
