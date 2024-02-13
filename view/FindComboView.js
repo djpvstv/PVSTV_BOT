@@ -12,8 +12,8 @@ class FindComboView extends ParseViewBase {
     #appState = null;
     #fileNum = 0;
 
-    constructor (controller, spinnerController, settingsController, panelDivID, appState) {
-        super(controller, spinnerController, settingsController);
+    constructor (controller, spinnerController, settingsController, multiTagController, panelDivID, appState) {
+        super(controller, spinnerController, settingsController, multiTagController);
         this.#appState = appState;
         this.#controller = controller.getFindComboController();
 
@@ -114,6 +114,7 @@ class FindComboView extends ParseViewBase {
         this.idMap.set("i2s5", "comboSlippi_input_targetType_tag_character_color");
         this.idMap.set("i3", "comboSlippi_input_targetTag");
         this.idMap.set("i3d1", "comboSlippi_input_targetTag_dataList");
+        this.idMap.set("i3b1", "comboSlippi_input_targetTag_multiTargetEdit");
         this.idMap.set("i4", "comboSlippi_input_targetCharacter");
         this.idMap.set("i4b1", "comboSlippi_input_targetCharacter_dropdownbutton");
         this.idMap.set("i5", "comboSlippi_input_targetColor");
@@ -157,7 +158,15 @@ class FindComboView extends ParseViewBase {
 
         // Tag
         if (flavor === 1 || flavor === 4 || flavor === 5) {
-            params.targetTag = this.getElementById("i3").value;
+            const inputDiv = this.getElementById("i3");
+            // Multi Tag Target
+            if (inputDiv.getAttribute("multiple-tags") === '') {
+                let catValue = inputDiv.value;
+                params.targetTag = catValue.split(',');
+            } else {
+            // Single Tag target
+                params.targetTag = inputDiv.value;
+            }
         }
 
         // Character
@@ -219,6 +228,12 @@ class FindComboView extends ParseViewBase {
 
         this.getElementById("sb1").addEventListener("click", async () => {
             this.settingsController.showSpinner();
+        });
+
+        this.getElementById("i3b1").addEventListener("click", async () => {
+            const params = this.getParamsForRequest();
+            params.foundTagHTML = this.getHTMLForFoundTagsDataList();
+            this.multiTagController.showSpinner(params);
         });
 
         this._addDropdownCallback();
@@ -396,8 +411,7 @@ class FindComboView extends ParseViewBase {
     
         `;
     }
-
-    getTargetTag () {
+    getHTMLForFoundTagsDataList () {
         let foundTagHTML = ``;
         const foundTags = this.#appState.getFoundTags();
         foundTags.forEach(tag => {
@@ -406,24 +420,44 @@ class FindComboView extends ParseViewBase {
                 <option value="${tag}">
             `;
         });
+    }
+
+    getTargetTag () {
+        const foundTagHTML = this.getHTMLForFoundTagsDataList();
 
         return `
         <div class="col-md">
-            <div class="form-group">
-            <div class="has-validation input-group-match-select">
-                <div class="form-floating">
-                    <input class="form-control" list="${this.idMap.get("i3d1")}" id="${this.idMap.get("i3")}" placeholder="tag" pattern="^[A-Z]{1,10}#\d{1,3}" required>
-                    <datalist type="datalistOptions" id="${this.idMap.get("i3d1")}">
-                        ${foundTagHTML}
-                    </datalist>
-                    <div class="invalid-feedback">
-                        Incorrect tag format
+            <div class="form-group d-flex align-items-center">
+                <div class="has-validation input-group-match-select flex-grow-1">
+                    <div class="form-floating">
+                        <input class="form-control" list="${this.idMap.get("i3d1")}" id="${this.idMap.get("i3")}" placeholder="tag" pattern="^[A-Z]{1,10}#\d{1,3}" required>
+                        <datalist type="datalistOptions" id="${this.idMap.get("i3d1")}">
+                            ${foundTagHTML}
+                        </datalist>
+                        <div class="invalid-feedback">
+                            Incorrect tag format
+                        </div>
+                        <label for="${this.idMap.get("i3")}">Tag</label>
                     </div>
-                    <label for="${this.idMap.get("i3")}">Tag</label>
                 </div>
-            </div>
+                <svg class="big-icon" id="${this.idMap.get("i3b1")}">
+                    <image xlink:href="./../Bootstrap/svg/plus-circle.svg" width="35" height="35" y="3"/>
+                </svg>
             </div>
         </div>`;
+    }
+
+    updateMultipleTargetTags (validTagList) {
+        const inputDiv = this.getElementById("i3");
+        if (validTagList.length > 1) {
+            inputDiv.setAttribute("disabled","");
+            inputDiv.setAttribute("multiple-tags","");
+            inputDiv.value = validTagList.join(',');
+        } else {
+            inputDiv.removeAttribute("disabled","");
+            inputDiv.removeAttribute("multiple-tags","");
+            inputDiv.value = validTagList[0];
+        }
     }
 
     getTargetCharacter () {

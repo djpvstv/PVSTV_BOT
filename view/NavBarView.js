@@ -1,5 +1,7 @@
-const ParsePanelView = require("./ParsePanelView");
-const ComboPanelView = require("./FindComboView");
+ const path = require("path");
+
+const ParsePanelView = require(path.join(__dirname, "ParsePanelView"));
+const ComboPanelView = require(path.join(__dirname, "FindComboView"));
 
 class NavBarView {
 
@@ -15,13 +17,13 @@ class NavBarView {
 
     #navBarListItemCount = 0;
 
-    constructor( controller, spinnerController, settingsController, appState ) {
+    constructor( controller, spinnerController, settingsController, multiTagController, appState ) {
         this.#controller = controller;
 
         this.createPageSkeleton();
 
-        this.#parseViewPanel = new ParsePanelView(controller, spinnerController, settingsController, this.#navPanelIDs[0], appState);
-        this.#comboViewPanel = new ComboPanelView(controller, spinnerController, settingsController, this.#navPanelIDs[1], appState);
+        this.#parseViewPanel = new ParsePanelView(controller, spinnerController, settingsController, multiTagController, this.#navPanelIDs[0], appState);
+        this.#comboViewPanel = new ComboPanelView(controller, spinnerController, settingsController, multiTagController, this.#navPanelIDs[1], appState);
 
         document.getElementById('nav_Find_Combos').addEventListener("show.bs.tab", (evt) => {
             this.#comboViewPanel.updateTagSelectionAutofills();

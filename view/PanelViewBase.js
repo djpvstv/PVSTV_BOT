@@ -2,10 +2,11 @@ class ParseViewBase {
 
     fileList = [];
 
-    constructor (controller, progressController, settingsController) {
+    constructor (controller, progressController, settingsController, multiTagController) {
         this.controller = controller;
         this.progressController = progressController;
         this.settingsController = settingsController;
+        this.multiTagController = multiTagController;
         this.idMap = new Map();
     }
 

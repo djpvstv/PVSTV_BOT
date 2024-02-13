@@ -1,9 +1,12 @@
-const NavBarController = require("./NavBarController");
-const ProgressController = require('./Components/ProgressController');
-const SlippiPathController = require('./Components/SlippiPathController');
-const ComboFilterController = require("./Components/ComboFilterController");
-const SettingsController = require("./Components/SettingsController");
-const NotesController = require("./Components/NotesController");
+const path = require("path");
+
+const NavBarController = require(path.join(__dirname, "NavBarController"));
+const ProgressController = require(path.join(__dirname, "Components", "ProgressController"));
+const SlippiPathController = require(path.join(__dirname, "Components", "SlippiPathController"));
+const ComboFilterController = require(path.join(__dirname, "Components", "ComboFilterController"));
+const SettingsController = require(path.join(__dirname, "Components", "SettingsController"));
+const NotesController = require(path.join(__dirname, "Components", "NotesController"));
+const MultiTagController = require(path.join(__dirname, "Components", "MultiTagController"));
 
 class MainController {
 
@@ -13,6 +16,7 @@ class MainController {
     #ComboFilterController = null;
     #SettingsController = null;
     #NotesController = null;
+    #MultiTagController = null;
     #ControllerList = [];
 
     constructor () {
@@ -22,6 +26,7 @@ class MainController {
         this.#ComboFilterController = new ComboFilterController();
         this.#SettingsController = new SettingsController();
         this.#NotesController = new NotesController();
+        this.#MultiTagController = new MultiTagController();
 
         this.#ControllerList.push(this.#NavBarController);
         this.#ControllerList.push(this.#ProgressController);
@@ -30,6 +35,7 @@ class MainController {
         this.#ControllerList.push(this.#ComboFilterController);
         this.#ControllerList.push(this.#SettingsController);
         this.#ControllerList.push(this.#NotesController);
+        this.#ControllerList.push(this.#MultiTagController);
     }
 
     // Getters
@@ -59,6 +65,10 @@ class MainController {
 
     getNotesController () {
         return this.#NotesController;
+    }
+
+    getMultiTagController () {
+        return this.#MultiTagController;
     }
 
 }
