@@ -13,6 +13,13 @@
 			"label": "Build C++ (for x64)",
 			"type": "shell",
 			"command": "./scripts/test.sh",
+			"linux": {
+				"command": "bash",
+				"args": [
+					"-c",
+					"chmod +x ./.venv/bin/activate; source ./.venv/bin/activate; npm run buildcpp64"
+				]
+			},
 			"windows": {
 				"command": "powershell",
 				"args": [

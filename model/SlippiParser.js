@@ -1,4 +1,6 @@
-const eng = require('./../build/Release/v8engine');
+const path = require('path');
+const { join } = require('path');
+const eng = require(path.join(__dirname,'..','build','Release','v8engine'));
 require('nan');
 
 const { parentPort, workerData } = require('worker_threads');
@@ -29,7 +31,12 @@ function processParseChunk(i, chunkSize, argFiles) {
         } else {
             // Finish loop
             const retData = eng.simplePrint();
-            let jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            let jsonStr;
+            if (process.platform === 'linux') {
+                jsonStr = retData.replaceAll("\\/", "/");
+            } else {
+                jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            }
             const data = {};
             data.eventName = "parseDirectoryComplete";
             data.args = jsonStr;
@@ -44,7 +51,11 @@ function processDirectoryForParse (files, dir, chunkSize) {
 
         const argFiles = [];
         files.forEach((file) => {
-            argFiles.push(dir + '\\\\' + file);
+            if (process.platform === 'linux') {
+                argFiles.push(path.join(dir, file));
+            } else {
+                argFiles.push(dir + '\\\\' + file);
+            }
         });
 
         processParseChunk(0, chunkSize, argFiles);
@@ -72,7 +83,12 @@ function processComboByTagChunk (i, chunkSize, argFiles, tag, frameLeniency) {
         } else {
             // Finish loop
             const retData = eng.comboPrint();
-            let jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            let jsonStr;
+            if (process.platform === 'linux') {
+                jsonStr = retData.replaceAll("\\/", "/");
+            } else {
+                jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            }
             const data = {};
             data.eventName = "findCombosComplete";
             data.args = jsonStr;
@@ -87,7 +103,11 @@ function processDirectoryForCombosByTag (files, dir, chunkSize, tag, frameLenien
 
         const argFiles = [];
         files.forEach((file) => {
-            argFiles.push(dir + '\\\\' + file);
+            if (process.platform === 'linux') {
+                argFiles.push(path.join(dir, file));
+            } else {
+                argFiles.push(dir + '\\\\' + file);
+            }
         });
 
         processComboByTagChunk(0, chunkSize, argFiles, tag, frameLeniency);
@@ -114,7 +134,12 @@ function processComboByCharChunk (i, chunkSize, argFiles, char, frameLeniency) {
         } else {
             // Finish loop
             const retData = eng.comboPrint();
-            let jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            let jsonStr;
+            if (process.platform === 'linux') {
+                jsonStr = retData.replaceAll("\\/", "/");
+            } else {
+                jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            }
             const data = {};
             data.eventName = "findCombosComplete";
             data.args = jsonStr;
@@ -129,7 +154,11 @@ function processDirectoryForCombosByChar (files, dir, chunkSize, char, frameLeni
 
         const argFiles = [];
         files.forEach((file) => {
-            argFiles.push(dir + '\\\\' + file);
+            if (process.platform === 'linux') {
+                argFiles.push(path.join(dir, file));
+            } else {
+                argFiles.push(dir + '\\\\' + file);
+            }
         });
 
         processComboByCharChunk(0, chunkSize, argFiles, char, frameLeniency);
@@ -156,7 +185,12 @@ function processComboByCharColorChunk (i, chunkSize, argFiles, char, color, fram
         } else {
             // Finish loop
             const retData = eng.comboPrint();
-            let jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            let jsonStr;
+            if (process.platform === 'linux') {
+                jsonStr = retData.replaceAll("\\/", "/");
+            } else {
+                jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            }
             const data = {};
             data.eventName = "findCombosComplete";
             data.args = jsonStr;
@@ -171,7 +205,11 @@ function processDirectoryForCombosByCharColor (files, dir, chunkSize, char, colo
 
         const argFiles = [];
         files.forEach((file) => {
-            argFiles.push(dir + '\\\\' + file);
+            if (process.platform === 'linux') {
+                argFiles.push(path.join(dir, file));
+            } else {
+                argFiles.push(dir + '\\\\' + file);
+            }
         });
 
         processComboByCharColorChunk(0, chunkSize, argFiles, char, color, frameLeniency);
@@ -198,7 +236,12 @@ function processComboByCharTagChunk (i, chunkSize, argFiles, char, tag, frameLen
         } else {
             // Finish loop
             const retData = eng.comboPrint();
-            let jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            let jsonStr;
+            if (process.platform === 'linux') {
+                jsonStr = retData.replaceAll("\\/", "/");
+            } else {
+                jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            }
             const data = {};
             data.eventName = "findCombosComplete";
             data.args = jsonStr;
@@ -213,7 +256,11 @@ function processDirectoryForCombosByCharTag (files, dir, chunkSize, char, tag, f
 
         const argFiles = [];
         files.forEach((file) => {
-            argFiles.push(dir + '\\\\' + file);
+            if (process.platform === 'linux') {
+                argFiles.push(path.join(dir, file));
+            } else {
+                argFiles.push(dir + '\\\\' + file);
+            }
         });
 
         processComboByCharTagChunk(0, chunkSize, argFiles, char, tag, frameLeniency);
@@ -240,7 +287,12 @@ function processComboByCharTagColorChunk (i, chunkSize, argFiles, char, tag, col
         } else {
             // Finish loop
             const retData = eng.comboPrint();
-            let jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            let jsonStr;
+            if (process.platform === 'linux') {
+                jsonStr = retData.replaceAll("\\/", "/");
+            } else {
+                jsonStr = retData.replaceAll(`\\\\\\\\`, `\\`);
+            }
             const data = {};
             data.eventName = "findCombosComplete";
             data.args = jsonStr;
@@ -255,7 +307,11 @@ function processDirectoryForCombosByCharTagColor (files, dir, chunkSize, char, t
 
         const argFiles = [];
         files.forEach((file) => {
-            argFiles.push(dir + '\\\\' + file);
+            if (process.platform === 'linux') {
+                argFiles.push(path.join(dir, file));
+            } else {
+                argFiles.push(dir + '\\\\' + file);
+            }
         });
 
         processComboByCharTagColorChunk(0, chunkSize, argFiles, char, tag, color, frameLeniency);

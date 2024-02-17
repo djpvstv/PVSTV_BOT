@@ -11,6 +11,7 @@ const path = require('path');
 const { join } = require('path');
 const mainModulePath = path.join(__dirname, '..', 'model', 'MainModel');
 const MainModel = require(mainModulePath);
+let model;
 
 // Communications from Controllers
 const createModel = (win) => {
@@ -42,16 +43,15 @@ const createWindow = async () => {
     
     }
     win.setMenu(null);
+    createModel(win);
 
     if (isDebug) {
         win.webContents.openDevTools();
     }
-    const iconPath = join(__dirname, '..', 'img', 'noodles.ico');
+    const iconPath = join(__dirname, '..', 'img', 'noodles.png');
     const appVersion = app.getVersion();
     win.setIcon(iconPath);
     win.setTitle("PVSTVBOT.exe - v" + appVersion);
-
-    createModel(win);
 }
 
 app.whenReady().then(async () => {

@@ -4,6 +4,7 @@ const mainModulePath = path.join(__dirname, "..", "model", "MainModel");
 const MainModel = require(mainModulePath);
 const fs = require('fs/promises');
 const comboTestDataJSONPath = path.join(__dirname, "testFiles", "comboTestData.json");
+const test = require("node:test");
 
 const model = new MainModel({});
 

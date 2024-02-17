@@ -1,9 +1,13 @@
 #pragma once
 
-#ifdef SLIPPIDLL_EXPORTS
-#define SLIPPIDLL_API __declspec(dllexport)
+#ifdef _WIN32
+	#ifdef SLIPPIDLL_EXPORTS
+		#define SLIPPIDLL_API __declspec(dllexport)
+	#else
+		#define SLIPPIDLL_API __declspec(dllimport)
+	#endif
 #else
-#define SLIPPIDLL_API __declspec(dllimport)
+	#define SLIPPIDLL_API
 #endif
 
 // Standard Cpp includes

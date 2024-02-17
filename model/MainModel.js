@@ -4,6 +4,7 @@ const { Worker } = require('node:worker_threads');
 const SlippiPlayer = require('./SlippiPlayer');
 
 const fs = require('fs/promises');
+const path = require('path');
 const { join } = require('path');
 const { isIP } = require('node:net');
 
@@ -125,7 +126,11 @@ class MainModel {
         // Check if SLIPPI path exists
         let updateAppData = false;
         if (appData.slippiPath.length === 0) {
-            appData.slippiPath = join(app.getPath("appData"), "Slippi Launcher", "playback", "Slippi Dolphin.exe");
+            if (process.platform === 'linux') {
+                appData.slippiPath = join(app.getPath("appData"), "Slippi Launcher", "playback", "Slippi_Playback-x86_64.AppImage");
+            } else {
+                appData.slippiPath = join(app.getPath("appData"), "Slippi Launcher", "playback", "Slippi Dolphin.exe");
+            }
         }
 
         try {
@@ -213,6 +218,13 @@ class MainModel {
 
     async browserForSlippiPath (event, source) {
         const appDataPath = app.getPath("appData");
+        let filter;
+        if (process.platform === 'linux') {
+            filter = {name: 'App Images', extensions: ['AppImage']};
+        } else {
+            filter = {name: 'Executables', extensions: ['exe']};
+        }
+
         const filename = await dialog.showOpenDialog({
             title: "Select Slippi executable",
             defaultPath: appDataPath,
@@ -220,7 +232,7 @@ class MainModel {
                 "openFile"
             ],
             filters: [
-                {name: 'Executables', extensions: ['exe']},
+                filter,
                 {name: 'All Files', extensions: ['*'] }
             ]
         });
@@ -995,7 +1007,7 @@ class MainModel {
     }
 
     createWorkerForTest () {
-        this.#worker = new Worker(__dirname + '\\SlippiParser.js',
+        this.#worker = new Worker(join(__dirname, 'SlippiParser.js'),
         {
             workerData: {
                 isCancelled: false
@@ -1005,7 +1017,7 @@ class MainModel {
     }
 
     createWorker () {
-        this.#worker = new Worker(__dirname + '\\SlippiParser.js',
+        this.#worker = new Worker(path.join(__dirname, 'SlippiParser.js'),
         {
             workerData: {
                 isCancelled: false
