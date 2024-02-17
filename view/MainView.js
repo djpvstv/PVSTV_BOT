@@ -1,10 +1,13 @@
-const NavBarView = require("./NavBarView");
+const path = require("path");
+
+const NavBarView = require(path.join(__dirname, "NavBarView"));
 const {EventEmitter} = require("events");
-const ProgressModal = require("./Components/Modals/ProgressModal");
-const FindSlippiModal = require("./Components/Modals/FindSlippiModal");
-const ComboFilterModal = require("./Components/Modals/ComboFilterModal");
-const SettingsModal = require("./Components/Modals/SettingsModal");
-const NotesModal = require("./Components/Modals/NotesModal");
+const ProgressModal = require(path.join(__dirname, "Components", "Modals", "ProgressModal"));
+const FindSlippiModal = require(path.join(__dirname, "Components", "Modals", "FindSlippiModal"));
+const ComboFilterModal = require(path.join(__dirname, "Components", "Modals", "ComboFilterModal"));
+const SettingsModal = require(path.join(__dirname, "Components", "Modals", "SettingsModal"));
+const NotesModal = require(path.join(__dirname, "Components", "Modals", "NotesModal"));
+const MultiTagModal = require(path.join(__dirname, "Components", "Modals", "MultiTagModal"));
 
 class MainView extends EventEmitter {
 
@@ -15,21 +18,22 @@ class MainView extends EventEmitter {
     #ComboFilterModal = null;
     #SettingsModal = null;
     #NotesModal = null;
+    #MultiTagModal = null;
     #controllers = null;
 
     constructor( controllers, appState ) {
         super();
         this.#appState = appState;
         this.#controllers = controllers;
-        this.createNavBar( controllers.getNavBarController(), controllers.getProgressController(), controllers.getSettingsController(), appState);
+        this.createNavBar( controllers.getNavBarController(), controllers.getProgressController(), controllers.getSettingsController(), controllers.getMultiTagController(), appState);
         this.createSpinners( controllers, appState );
         this.createEventListeners();
 
         controllers.getNavBarController().emitStartupEvent();
     }
 
-    createNavBar (controller, progressController, settingsController, appState ) {
-        this.#NavBar = new NavBarView( controller, progressController, settingsController, appState );
+    createNavBar (controller, progressController, settingsController, multiTagControlller, appState ) {
+        this.#NavBar = new NavBarView( controller, progressController, settingsController, multiTagControlller, appState );
     }
 
     createSpinners( controller, appState ) {
@@ -38,6 +42,7 @@ class MainView extends EventEmitter {
         this.#ComboFilterModal = new ComboFilterModal( controller.getComboFilterController(), appState );
         this.#SettingsModal = new SettingsModal (controller.getSettingsController(), appState );
         this.#NotesModal = new NotesModal (controller.getNotesController(), appState );
+        this.#MultiTagModal = new MultiTagModal (controller.getMultiTagController(), appState );
     }
 
     createEventListeners() {
@@ -154,6 +159,21 @@ class MainView extends EventEmitter {
                     case "hideNotesModal":
                         controller.on(eventName, (event) => {
                             this.#NotesModal.show(event.args);
+                        });
+                        break;
+                    case "showMultiTagModal":
+                        controller.on(eventName, (event) => {
+                            this.#MultiTagModal.show(event.args);
+                        });
+                        break;
+                    case "hideMultiTagModal":
+                        controller.on(eventName, (event) => {
+                            this.#MultiTagModal.show(event.args);
+                        });
+                        break;
+                    case "updateMultipleSearchTags":
+                        controller.on(eventName, (event) => {
+                            this.#NavBar.getComboViewPanel().updateMultipleTargetTags(event.validTagList);
                         });
                         break;
                     case "askForSlippiPath":

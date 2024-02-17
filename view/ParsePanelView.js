@@ -9,8 +9,8 @@ class ParsePanelView extends ParseViewBase {
     #dateTable = null;
     #foundPlayerAccordion = null;
 
-    constructor (controller, spinnerController, settingsController, panelDivID, appState) {
-        super(controller, spinnerController, settingsController);
+    constructor (controller, spinnerController, settingsController, multiTagController, panelDivID, appState) {
+        super(controller, spinnerController, settingsController, multiTagController);
         this.#appState = appState;
         // Add rows for 
         // 1. Input Directory

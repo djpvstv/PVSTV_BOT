@@ -1,6 +1,6 @@
 {
   "name": "pvstvbot",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "The Sauce finder for Super Smash Bros Melee",
   "main": "./main/main.js",
   "type": "commonjs",

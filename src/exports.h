@@ -44,6 +44,10 @@ namespace slip {
 		AnalysisType   analysisType;
 	};
 
+	struct TreeSettings {
+		std::vector<int> percentBins;
+	};
+
 	struct ComboMove {
 		bool isCreated = false;
 		int playerIndex = -1;

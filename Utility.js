@@ -397,6 +397,25 @@ class Utility {
         return [];
     }
 
+    static validateTargetTab (newTab, element) {
+        // Three uppercase letters (1-10), #, 1-3 numbers
+        const isValid = /^[A-Z]{1,10}#\d{1,3}$/.test(newTab.toUpperCase());
+
+        const inputDiv = element;
+        inputDiv.classList.remove("is-valid");
+        inputDiv.classList.remove("is-invalid");
+        
+        if (isValid) {
+            inputDiv.classList.add("is-valid");
+        } else {
+            inputDiv.classList.add("is-invalid");
+        }
+        if (newTab.length === 0) {
+            inputDiv.classList.remove("is-invalid");
+        }
+        return isValid;
+    }
+
 }
 
 module.exports = Utility;

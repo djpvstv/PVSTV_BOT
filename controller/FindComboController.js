@@ -188,22 +188,7 @@ class FindComboController extends EventEmitter {
 
     // Validation Methods 
     cb_validateTargetTab (newTab) {
-        // Three uppercase letters (1-10), #, 1-3 numbers
-        const isValid = /^[A-Z]{1,10}#\d{1,3}$/.test(newTab.toUpperCase());
-
-        const inputDiv = this.getElementById("i3");
-        inputDiv.classList.remove("is-valid");
-        inputDiv.classList.remove("is-invalid");
-        
-        if (isValid) {
-            inputDiv.classList.add("is-valid");
-        } else {
-            inputDiv.classList.add("is-invalid");
-        }
-        if (newTab.length === 0) {
-            inputDiv.classList.remove("is-invalid");
-        }
-        return isValid;
+        return Utility.validateTargetTab(newTab, this.getElementById("i3"));
     }
 
     cb_validateTargetChar (newChar) {
@@ -217,7 +202,11 @@ class FindComboController extends EventEmitter {
     validateAllWidgetsForBigButton () {
         const flavor = parseInt(this.getElementById("i2").value);
 
-        const isTagValid = this.getElementById("i3") ? /^[A-Z]{1,10}#\d{1,3}$/.test(this.getElementById("i3").value) : false;
+        let isTagValid = this.getElementById("i3") ? /^[A-Z]{1,10}#\d{1,3}$/.test(this.getElementById("i3").value) : false;
+        if (this.getElementById("i3").getAttribute("multiple-tags") === '') {
+            // Can't have invalid tags for multiple, validated in modal
+            isTagValid = true;
+        }
         const isDirInputValid = this.getElementById("i1").classList.contains("is-valid");
         const charValue = this.getElementById("i4b1") ? parseInt(this.getElementById("i4b1").value) : null;
         const isCharValid = this.getElementById("i4b1") ? charValue >= 0 && charValue < this.#charUpperLimit : false;
