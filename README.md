@@ -1,18 +1,49 @@
 # PVSTV_BOT
 Desktop Web-Based Application for Parsing Slippi Replays for Super Smash Bros. Melee
 
+## Demo
+![demo for app](./doc/pvstvDemo1.gif)
+
 ## Installing for Users
 
 Check out the releases on the release page: https://github.com/djpvstv/PVSTV_BOT/tags
 Click on the most recent release, and download the windows release (x64.7z)
 Extract the installer, then run it. You should be good to go!
 
-## Installing for Developers
 
-1. Ensure node is installed. Install if "node -v" returns nothing on your windows terminal. (Visual studio is a dependancy, I suggest 2019 Community)
-2. Ensure node package manager is installed. Install if "npm -v" returns nothing on your windows terminal.
-3. Ensure node version manager is installed. Install if "nvm -version" returns nothing on your windows terminal.
-4. Ensure you have python 2.7 installed.
-5. In the project main directory, run "npm install". If you encounter an error here, ping me.
-6. Rum "npm run buildcpp"
-7. The debugger "Debug Main Process" should exist, and starting will start the app.
+## Finding Combos
+The "Find Combos" tab allows you to find strings of combos within replay files.
+You can search for your replays by "Tag", "Character", "Character and Color", "Tag and Character", and "Tag, Character and Color". 
+
+### Settings
+The app allows you to specify the number of replays to process at a time, the number of frames allowed between when the opponent leaves a "downed" action state and enters the next one, and the number of frames to append and prepend to each individual combo.
+
+### Filtering
+The app allows a lot of options to narrow down what kind of combos you want to see. You can filter the full list of combos found and change the filter rules at any time, without searching through all the replays again.
+
+You can filter by move ID, e.g. "dash attack", "Side Special", by action ID, e.g. "Raptor Boost Aerial", "Low Forward Tilt", by opponent the combo is performed on, by stage, and by how much damage the combo does or what % it starts at.
+
+You can also filter by specific action strings. I can look for "Grounded Raptor Boost" into "Down Air" into "Forward Aerial".
+
+You may also ensure that the combos must kill, or that the combo was clean (you didn't enter a disadvantaged state).
+
+### Build Instructions
+
+REQUIRES PYTHON 3.10
+
+Ensure you have Node Package Manager installed an on path.
+First, in the root of the project  run `npm install
+
+To run in debug, I think an F5 should work.
+I've got a couple of tasks you can run after that. Run them in the syntax "npm run 'task'"
+
+"buildcpp64" - Needed to build the shared library backend (for x64)
+"buildcpp32" - Needed to build the shared library backend (for x32)
+"pack" - Runs webpack to pack all the javascript all snugly
+
+"start" - Start
+"startF" - Start Electron Forge
+"startP" - Start packed JS code
+
+"package" - Package with Electron packager
+"packageF" - Package with Electron Forge

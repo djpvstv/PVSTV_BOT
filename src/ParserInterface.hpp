@@ -18,11 +18,15 @@ namespace slip {
 		void resetWork(void);
 		void resetMoveWork(void);
 		void basicParseSlippiFromPaths(std::vector<std::string> paths);
+		void basicParseSlippiFromPaths(std::vector<std::wstring> paths);
 		std::string printBasicParseSlippiFromPaths(void);
 
+		void parseSlippiFromPaths(std::vector<std::wstring> paths, slip::TargetParams &t);
 		void parseSlippiFromPaths(std::vector<std::string> paths, slip::TargetParams& t);
 		std::string printSlippiCombosFromPaths(void);
 		std::string printSlippiMovesFromPaths(void);
+
+		std::string scrapeComboTreeFromPaths(std::vector<std::wstring> paths, slip::TargetParams &t, slip::TreeSettings &ts);
 
 	private:
 		class ParserImpl;

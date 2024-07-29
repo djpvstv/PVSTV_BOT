@@ -217,7 +217,11 @@ class FindComboController extends EventEmitter {
     validateAllWidgetsForBigButton () {
         const flavor = parseInt(this.getElementById("i2").value);
 
-        const isTagValid = this.getElementById("i3") ? /^[A-Z]{1,10}#\d{1,3}$/.test(this.getElementById("i3").value) : false;
+        let isTagValid = this.getElementById("i3") ? /^[A-Z]{1,10}#\d{1,3}$/.test(this.getElementById("i3").value) : false;
+        if (this.getElementById("i3") && this.getElementById("i3").getAttribute("multiple-tags") === '') {
+            // Can't have invalid tags for multiple, validated in modal
+            isTagValid = true;
+        }
         const isDirInputValid = this.getElementById("i1").classList.contains("is-valid");
         const charValue = this.getElementById("i4b1") ? parseInt(this.getElementById("i4b1").value) : null;
         const isCharValid = this.getElementById("i4b1") ? charValue >= 0 && charValue < this.#charUpperLimit : false;

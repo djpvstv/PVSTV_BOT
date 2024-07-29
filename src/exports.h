@@ -7,7 +7,7 @@
 
 namespace slip {
 
-	enum TargetType { TAG, CHAR, CHAR_COLOR, CHAR_TAG, CHAR_TAG_COLOR };
+	enum TargetType { TAG, TAGS, CHAR, CHAR_COLOR, CHAR_TAG, CHAR_TAGS, CHAR_TAG_COLOR, CHAR_TAGS_COLOR };
 
 	struct AnalysisType {
 		bool           countMoves = false;
@@ -27,6 +27,7 @@ namespace slip {
 	struct TargetParams {
 		TargetType     targetType = TargetType::TAG;
 		std::string    targetTag = "";
+		std::vector<std::string> targetTags = {};
 		std::string    name = "";
 		std::string    targetCharacter = "";
 		int            targetColor = -1;
@@ -42,6 +43,19 @@ namespace slip {
 		int            minMovesForCombo = 2;
 		int            minMovesForConvo = 2;
 		AnalysisType   analysisType;
+	};
+
+	struct FoundPlayerParams {
+		uint8_t char_id {40};
+		uint8_t char_color {6};
+		std::string player_tag = "";
+		int port {5};    // Index of player port out of 4
+		int port_a {5};  // Index of player port in analysis object (usually out of )
+		bool isOpponent {true};
+	};
+
+	struct TreeSettings {
+		std::vector<int> percentBins;
 	};
 
 	struct ComboMove {
