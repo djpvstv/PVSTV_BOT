@@ -1,5 +1,6 @@
 # PVSTV_BOT
 Desktop Web-Based Application for Parsing Slippi Replays for Super Smash Bros. Melee
+The C++ parsing engine source is available at gitlab.com/pvstv-sauce/pvstvbot
 
 ## Demo
 ![demo for app](./doc/pvstvDemo1.gif)
